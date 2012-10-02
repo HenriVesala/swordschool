@@ -1,4 +1,2 @@
-swordschool
-===========
-
-swordschool
+fraktio-blog
+============

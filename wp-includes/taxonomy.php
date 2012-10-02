@@ -1940,6 +1940,10 @@ function wp_get_object_terms($object_ids, $taxonomies, $args = array()) {
 	if ( !empty($orderby) )
 		$orderby = "ORDER BY $orderby";
 
+	$order = strtoupper( $order );
+	if ( '' !== $order && ! in_array( $order, array( 'ASC', 'DESC' ) ) )
+		$order = 'ASC';
+
 	$taxonomies = "'" . implode("', '", $taxonomies) . "'";
 	$object_ids = implode(', ', $object_ids);
 
@@ -2221,7 +2225,8 @@ function wp_set_object_terms($object_id, $terms, $taxonomy, $append = false) {
 			if ( in_array($tt_id, $final_tt_ids) )
 				$values[] = $wpdb->prepare( "(%d, %d, %d)", $object_id, $tt_id, ++$term_order);
 		if ( $values )
-			$wpdb->query("INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES " . join(',', $values) . " ON DUPLICATE KEY UPDATE term_order = VALUES(term_order)");
+			if ( false === $wpdb->query( "INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES " . join( ',', $values ) . " ON DUPLICATE KEY UPDATE term_order = VALUES(term_order)" ) )
+				return new WP_Error( 'db_insert_error', __( 'Could not insert term relationship into the database' ), $wpdb->last_error );
 	}
 
 	do_action('set_object_terms', $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids);

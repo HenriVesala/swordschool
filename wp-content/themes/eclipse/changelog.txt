@@ -1,0 +1,112 @@
+Eclipse Changelog
+
+****************************
+
+Version 1.0.23 (09-04-12)
+-Fixed responsive slider in IE and Firefox.
+
+Version 1.0.22 (08-27-12)
+-Logo url on / off option added.
+
+Version 1.0.21 (08-21-12)
+-Custom URL for logo.
+
+Version 1.0.20 (08-15-12)
+-wp_title() fix.
+-Made meta language dynamic.
+
+Version 1.0.19 (08-13-12)
+-Changed default slider links to wordpress.org.
+
+Version 1.0.18 (08-13-12)
+-Removed decimal point from sidebar.
+-Presstrends fox for object call.
+-Fixed classy options error line 583.
+-Theme check code cleanup.
+
+Version 1.0.17 (08-08-12)
+-Portfolio term change for caption.
+-Favicon (off by default).
+
+Version 1.0.16 (07-31-12)
+-Apple-touch icon off by default.
+
+Version 1.0.15 (07-24-12)
+-Upgrade bar adjustments.
+-Apple-touch icon.
+
+Version 1.0.14 (07-17-12)
+-Upgrade bar.
+
+Version 1.0.13 (07-11-12)
+-Fixed after footer not displaying.
+-Fixed iPad display issue.
+-Fixed German translation issue.
+
+Version 1.0.12 (07-09-12)
+-Removed lazy load.
+-Footer.php fix.
+
+Version 1.0.11 (07-06-12)
+-Twitter embed fix.
+-Sticky footer + sticky footer fix.
+
+Version 1.0.10 (07-03-12)
+-Fixed the issue of featured images not displaying on recent post element on blog page.
+
+Version 1.0.9 (06-28-12)
+-Added ec_namespace to all constants.
+
+Version 1.0.8 (06-22-12)
+-Added img auto height to Foundation.
+-Fixed validation markup for read more link.
+-Added wp-caption text.
+-Sidebar fix for IE.
+
+Version 1.0.7 (06-15-12)
+-Replaced wp_theme_data() (deprecated) with wp_get_theme() in opt-in PressTrends function, backwards compatible with 3.3 and below.
+-Changed one default slider image.
+
+Version 1.0.6 (06-13-12)
+-Fix for random "no tweets to display" message with Twitterbar. 
+-Fix for breadcrumbs related to single posts/media attachments. 
+-Style tweak for Portfolio Element.
+-Fixed Firefox sidebar bug. 
+
+Version 1.0.5 (06-10-12)
+-Fixed timezone bug with Twitterbar.
+-Removed height and width from comment textbox. 
+-Footer now fixed at bottom of browser.
+
+Version 1.0.4 (06-07-12)
+-Updated default images. 
+-Added Czech language files. 
+-Changed several theme function prefixes to 'eclipse' for consistency. 
+-Moved a core pagination function to core-functions.php.
+-CSS tweak for fallback menu. 
+-Set @replies on by default for Twitterbar. 
+
+Version 1.0.3 (06-02-12)
+-Removed width from search form causing responsive issues.
+-Tweaked slider navigation arrows for better viewing on iPads.
+
+Version 1.0.2 (06-02-12)
+-Added container around page content for responsive margins.
+-Replaced Lightbox with Slimbox.
+-Fixed floats not clearing properly.
+-Fixed debugging issue related to empty search results. 
+-Renamed "Chimps_Metabox" "Response_Metabox" to avoid confusion.
+-Removed unused color stylesheets and corresponding code. 
+
+Version 1.0.1 (05-23-12)
+-Removed Front Page template and options.
+-Removed Widgetized Box Element.
+-Added user opt-in PressTrends option.
+-Added Feature Slider Element.
+-Fixed Portfolio Element image captions and z-index.
+-Fixed typography option.
+-Added media attachment pagination links.
+-General style fixes.
+
+Version 1.0 (05-15-12)
+-Initial release.
