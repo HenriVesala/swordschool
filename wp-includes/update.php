@@ -155,14 +155,14 @@ function wp_update_plugins() {
 	// Check for update on a different schedule, depending on the page.
 	switch ( current_filter() ) {
 		case 'load-update-core.php' :
-			$timeout = 60; // 1 min
+			$timeout = MINUTE_IN_SECONDS;
 			break;
 		case 'load-plugins.php' :
 		case 'load-update.php' :
-			$timeout = 3600; // 1 hour
+			$timeout = HOUR_IN_SECONDS;
 			break;
 		default :
-			$timeout = 43200; // 12 hours
+			$timeout = 12 * HOUR_IN_SECONDS;
 	}
 
 	$time_not_changed = isset( $current->last_checked ) && $timeout > ( time() - $current->last_checked );
@@ -264,14 +264,14 @@ function wp_update_themes() {
 	// Check for update on a different schedule, depending on the page.
 	switch ( current_filter() ) {
 		case 'load-update-core.php' :
-			$timeout = 60; // 1 min
+			$timeout = MINUTE_IN_SECONDS;
 			break;
 		case 'load-themes.php' :
 		case 'load-update.php' :
-			$timeout = 3600; // 1 hour
+			$timeout = HOUR_IN_SECONDS;
 			break;
 		default :
-			$timeout = 43200; // 12 hours
+			$timeout = 12 * HOUR_IN_SECONDS;
 	}
 
 	$time_not_changed = isset( $last_update->last_checked ) && $timeout > ( time( ) - $last_update->last_checked );
@@ -352,17 +352,17 @@ function wp_get_update_data() {
 	}
 
 	$counts['total'] = $counts['plugins'] + $counts['themes'] + $counts['wordpress'];
-	$update_title = array();
+	$titles = array();
 	if ( $counts['wordpress'] )
-		$update_title[] = sprintf(__('%d WordPress Update'), $counts['wordpress']);
+		$titles['wordpress'] = sprintf( __( '%d WordPress Update'), $counts['wordpress'] );
 	if ( $counts['plugins'] )
-		$update_title[] = sprintf(_n('%d Plugin Update', '%d Plugin Updates', $counts['plugins']), $counts['plugins']);
+		$titles['plugins'] = sprintf( _n( '%d Plugin Update', '%d Plugin Updates', $counts['plugins'] ), $counts['plugins'] );
 	if ( $counts['themes'] )
-		$update_title[] = sprintf(_n('%d Theme Update', '%d Theme Updates', $counts['themes']), $counts['themes']);
+		$titles['themes'] = sprintf( _n( '%d Theme Update', '%d Theme Updates', $counts['themes'] ), $counts['themes'] );
 
-	$update_title = ! empty( $update_title ) ? esc_attr( implode( ', ', $update_title ) ) : '';
+	$update_title = $titles ? esc_attr( implode( ', ', $titles ) ) : '';
 
-	return array( 'counts' => $counts, 'title' => $update_title );
+	return apply_filters( 'wp_get_update_data', array( 'counts' => $counts, 'title' => $update_title ), $titles );
 }
 
 function _maybe_update_core() {
@@ -371,7 +371,7 @@ function _maybe_update_core() {
 	$current = get_site_transient( 'update_core' );
 
 	if ( isset( $current->last_checked ) &&
-		43200 > ( time() - $current->last_checked ) &&
+		12 * HOUR_IN_SECONDS > ( time() - $current->last_checked ) &&
 		isset( $current->version_checked ) &&
 		$current->version_checked == $wp_version )
 		return;
@@ -390,7 +390,7 @@ function _maybe_update_core() {
  */
 function _maybe_update_plugins() {
 	$current = get_site_transient( 'update_plugins' );
-	if ( isset( $current->last_checked ) && 43200 > ( time() - $current->last_checked ) )
+	if ( isset( $current->last_checked ) && 12 * HOUR_IN_SECONDS > ( time() - $current->last_checked ) )
 		return;
 	wp_update_plugins();
 }
@@ -406,7 +406,7 @@ function _maybe_update_plugins() {
  */
 function _maybe_update_themes( ) {
 	$current = get_site_transient( 'update_themes' );
-	if ( isset( $current->last_checked ) && 43200 > ( time( ) - $current->last_checked ) )
+	if ( isset( $current->last_checked ) && 12 * HOUR_IN_SECONDS > ( time( ) - $current->last_checked ) )
 		return;
 
 	wp_update_themes();

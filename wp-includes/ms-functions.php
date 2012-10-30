@@ -182,7 +182,7 @@ function add_user_to_blog( $blog_id, $user_id, $role ) {
 
 	if ( ! $user ) {
 		restore_current_blog();
-		return new WP_Error('user_does_not_exist', __('That user does not exist.'));
+		return new WP_Error( 'user_does_not_exist', __( 'The requested user does not exist.' ) );
 	}
 
 	if ( !get_user_meta($user_id, 'primary_blog', true) ) {
@@ -332,27 +332,27 @@ function get_blog_permalink( $blog_id, $post_id ) {
  *
  * @param string $domain
  * @param string $path Optional. Not required for subdomain installations.
- * @return int
+ * @return int 0 if no blog found, otherwise the ID of the matching blog
  */
 function get_blog_id_from_url( $domain, $path = '/' ) {
 	global $wpdb;
 
-	$domain = strtolower( $wpdb->escape( $domain ) );
-	$path = strtolower( $wpdb->escape( $path ) );
+	$domain = strtolower( $domain );
+	$path = strtolower( $path );
 	$id = wp_cache_get( md5( $domain . $path ), 'blog-id-cache' );
 
-	if ( $id == -1 ) { // blog does not exist
+	if ( $id == -1 ) // blog does not exist
 		return 0;
-	} elseif ( $id ) {
-		return (int)$id;
-	}
+	elseif ( $id )
+		return (int) $id;
 
-	$id = $wpdb->get_var( "SELECT blog_id FROM $wpdb->blogs WHERE domain = '$domain' and path = '$path' /* get_blog_id_from_url */" );
+	$id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s and path = %s /* get_blog_id_from_url */", $domain, $path ) );
 
-	if ( !$id ) {
+	if ( ! $id ) {
 		wp_cache_set( md5( $domain . $path ), -1, 'blog-id-cache' );
-		return false;
+		return 0;
 	}
+
 	wp_cache_set( md5( $domain . $path ), $id, 'blog-id-cache' );
 
 	return $id;
@@ -462,7 +462,7 @@ function wpmu_validate_user_signup($user_name, $user_email) {
 		$errors->add('user_name', __('Sorry, usernames must have letters too!'));
 
 	if ( !is_email( $user_email ) )
-		$errors->add('user_email', __( 'Please enter a correct email address.' ) );
+		$errors->add('user_email', __( 'Please enter a valid email address.' ) );
 
 	$limited_email_domains = get_site_option( 'limited_email_domains' );
 	if ( is_array( $limited_email_domains ) && empty( $limited_email_domains ) == false ) {
@@ -473,11 +473,11 @@ function wpmu_validate_user_signup($user_name, $user_email) {
 
 	// Check if the username has been used already.
 	if ( username_exists($user_name) )
-		$errors->add('user_name', __('Sorry, that username already exists!'));
+		$errors->add( 'user_name', __( 'Sorry, that username already exists!' ) );
 
 	// Check if the email address has been used already.
 	if ( email_exists($user_email) )
-		$errors->add('user_email', __('Sorry, that email address is already used!'));
+		$errors->add( 'user_email', __( 'Sorry, that email address is already used!' ) );
 
 	// Has someone already signed up for this username?
 	$signup = $wpdb->get_row( $wpdb->prepare("SELECT * FROM $wpdb->signups WHERE user_login = %s", $user_name) );
@@ -486,7 +486,7 @@ function wpmu_validate_user_signup($user_name, $user_email) {
 		$now = current_time( 'timestamp', true );
 		$diff = $now - $registered_at;
 		// If registered more than two days ago, cancel registration and let this signup go through.
-		if ( $diff > 172800 )
+		if ( $diff > 2 * DAY_IN_SECONDS )
 			$wpdb->delete( $wpdb->signups, array( 'user_login' => $user_name ) );
 		else
 			$errors->add('user_name', __('That username is currently reserved but may be available in a couple of days.'));
@@ -499,7 +499,7 @@ function wpmu_validate_user_signup($user_name, $user_email) {
 	if ( $signup != null ) {
 		$diff = current_time( 'timestamp', true ) - mysql2date('U', $signup->registered);
 		// If registered more than two days ago, cancel registration and let this signup go through.
-		if ( $diff > 172800 )
+		if ( $diff > 2 * DAY_IN_SECONDS )
 			$wpdb->delete( $wpdb->signups, array( 'user_email' => $user_email ) );
 		else
 			$errors->add('user_email', __('That email address has already been used. Please check your inbox for an activation email. It will become available in a couple of days if you do nothing.'));
@@ -553,7 +553,7 @@ function wpmu_validate_blog_signup($blogname, $blog_title, $user = '') {
 		$errors->add('blogname', __( 'Please enter a site name.' ) );
 
 	if ( preg_match( '/[^a-z0-9]+/', $blogname ) )
-		$errors->add('blogname', __( 'Only lowercase letters and numbers allowed.' ) );
+		$errors->add('blogname', __( 'Only lowercase letters (a-z) and numbers are allowed.' ) );
 
 	if ( in_array( $blogname, $illegal_names ) == true )
 		$errors->add('blogname',  __( 'That name is not allowed.' ) );
@@ -589,8 +589,8 @@ function wpmu_validate_blog_signup($blogname, $blog_title, $user = '') {
 		$mydomain = "$domain";
 		$path = $base.$blogname.'/';
 	}
-	if ( domain_exists($mydomain, $path) )
-		$errors->add('blogname', __('Sorry, that site already exists!'));
+	if ( domain_exists($mydomain, $path, $current_site->id) )
+		$errors->add( 'blogname', __( 'Sorry, that site already exists!' ) );
 
 	if ( username_exists( $blogname ) ) {
 		if ( is_object( $user ) == false || ( is_object($user) && ( $user->user_login != $blogname ) ) )
@@ -602,13 +602,13 @@ function wpmu_validate_blog_signup($blogname, $blog_title, $user = '') {
 	if ( ! empty($signup) ) {
 		$diff = current_time( 'timestamp', true ) - mysql2date('U', $signup->registered);
 		// If registered more than two days ago, cancel registration and let this signup go through.
-		if ( $diff > 172800 )
+		if ( $diff > 2 * DAY_IN_SECONDS )
 			$wpdb->delete( $wpdb->signups, array( 'domain' => $mydomain , 'path' => $path ) );
 		else
 			$errors->add('blogname', __('That site is currently reserved but may be available in a couple days.'));
 	}
 
-	$result = array('domain' => $mydomain, 'path' => $path, 'blogname' => $blogname, 'blog_title' => $blog_title, 'errors' => $errors);
+	$result = array('domain' => $mydomain, 'path' => $path, 'blogname' => $blogname, 'blog_title' => $blog_title, 'user' => $user, 'errors' => $errors);
 	return apply_filters('wpmu_validate_blog_signup', $result);
 }
 
@@ -956,7 +956,7 @@ function wpmu_create_blog($domain, $path, $title, $user_id, $meta = '', $site_id
 
 	// Check if the domain has been used already. We should return an error message.
 	if ( domain_exists($domain, $path, $site_id) )
-		return new WP_Error('blog_taken', __('Site already exists.'));
+		return new WP_Error( 'blog_taken', __( 'Sorry, that site already exists!' ) );
 
 	if ( !defined('WP_INSTALLING') )
 		define( 'WP_INSTALLING', true );
@@ -1075,7 +1075,8 @@ Disable these notifications: %3s'), $user->user_login, $_SERVER['REMOTE_ADDR'], 
  */
 function domain_exists($domain, $path, $site_id = 1) {
 	global $wpdb;
-	return $wpdb->get_var( $wpdb->prepare("SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = %s AND site_id = %d", $domain, $path, $site_id) );
+	$result = $wpdb->get_var( $wpdb->prepare("SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = %s AND site_id = %d", $domain, $path, $site_id) );
+	return apply_filters( 'domain_exists', $result, $domain, $path, $site_id );
 }
 
 /**
@@ -1120,20 +1121,19 @@ function insert_blog($domain, $path, $site_id) {
  * @param string $blog_title The title of the new site.
  */
 function install_blog($blog_id, $blog_title = '') {
-	global $wpdb, $table_prefix, $wp_roles;
-	$wpdb->suppress_errors();
+	global $wpdb, $wp_roles, $current_site;
 
 	// Cast for security
 	$blog_id = (int) $blog_id;
 
 	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
-	if ( $wpdb->get_results("SELECT ID FROM $wpdb->posts") )
-		die(__('<h1>Already Installed</h1><p>You appear to have already installed WordPress. To reinstall please clear your old database tables first.</p>') . '</body></html>');
+	$wpdb->suppress_errors();
+	if ( $wpdb->get_results( "DESCRIBE {$wpdb->posts}" ) )
+		die( __( '<h1>Already Installed</h1><p>You appear to have already installed WordPress. To reinstall please clear your old database tables first.</p>' ) . '</body></html>' );
+	$wpdb->suppress_errors( false );
 
-	$wpdb->suppress_errors(false);
-
-	$url = get_blogaddress_by_id($blog_id);
+	$url = get_blogaddress_by_id( $blog_id );
 
 	// Set everything up
 	make_db_current_silent( 'blog' );
@@ -1142,21 +1142,22 @@ function install_blog($blog_id, $blog_title = '') {
 	$wp_roles->_init();
 
 	$url = untrailingslashit( $url );
-	// fix url.
-	update_option('siteurl', $url);
-	update_option('home', $url);
-	update_option('fileupload_url', $url . "/files" );
-	update_option('upload_path', UPLOADBLOGSDIR . "/$blog_id/files");
-	update_option('blogname', stripslashes( $blog_title ) );
-	update_option('admin_email', '');
-	$wpdb->update( $wpdb->options, array('option_value' => ''), array('option_name' => 'admin_email') );
+
+	update_option( 'siteurl', $url );
+	update_option( 'home', $url );
+
+	if ( get_site_option( 'ms_files_rewriting' ) )
+		update_option( 'upload_path', UPLOADBLOGSDIR . "/$blog_id/files" );
+	else
+		update_option( 'upload_path', get_blog_option( $current_site->blog_id, 'upload_path' ) );
+
+	update_option( 'blogname', stripslashes( $blog_title ) );
+	update_option( 'admin_email', '' );
 
 	// remove all perms
-	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => $table_prefix.'user_level' ) );
-
-	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => $table_prefix.'capabilities' ) );
-
-	$wpdb->suppress_errors( false );
+	$table_prefix = $wpdb->get_blog_prefix();
+	delete_metadata( 'user', 0, $table_prefix . 'user_level',   null, true ); // delete all
+	delete_metadata( 'user', 0, $table_prefix . 'capabilities', null, true ); // delete all
 }
 
 /**
@@ -1408,7 +1409,7 @@ function get_dirsize( $directory ) {
 
 	$dirsize[ $directory ][ 'size' ] = recurse_dirsize( $directory );
 
-	set_transient( 'dirsize_cache', $dirsize, 3600 );
+	set_transient( 'dirsize_cache', $dirsize, HOUR_IN_SECONDS );
 	return $dirsize[ $directory ][ 'size' ];
 }
 
@@ -1628,7 +1629,7 @@ function signup_nonce_check( $result ) {
 		return $result;
 
 	if ( wp_create_nonce('signup_form_' . $_POST[ 'signup_form_id' ]) != $_POST['_signup_form'] )
-		wp_die( __('Please try again!') );
+		wp_die( __( 'Please try again.' ) );
 
 	return $result;
 }
@@ -1876,7 +1877,7 @@ function force_ssl_content( $force = '' ) {
 
 /**
  * Formats a URL to use https.
- * 
+ *
  * Useful as a filter.
  *
  * @since 2.8.5

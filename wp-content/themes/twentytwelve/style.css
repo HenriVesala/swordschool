@@ -3,8 +3,8 @@ Theme Name: Twenty Twelve
 Theme URI: http://wordpress.org/extend/themes/twentytwelve
 Author: the WordPress team
 Author URI: http://wordpress.org/
-Description: The 2012 theme for WordPress is a fully responsive theme that looks great on any device. Features include a homepage template with a its own widgets, an optional display font, styling for post formats on both index and single views, and an optional no-sidebar page template. Make it yours with a custom menu, header image, and background.
-Version: 0.9
+Description: The 2012 theme for WordPress is a fully responsive theme that looks great on any device. Features include a front page template with its own widgets, an optional display font, styling for post formats on both index and single views, and an optional no-sidebar page template. Make it yours with a custom menu, header image, and background.
+Version: 1.0
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: light, gray, white, one-column, two-columns, right-sidebar, flexible-width, custom-background, custom-header, custom-menu, editor-style, featured-images, flexible-header, full-width-template, microformats, post-formats, rtl-language-support, sticky-post, theme-options, translation-ready
@@ -31,7 +31,7 @@ $line-height: 24;
 * Set a font-size and then set a line-height based on the font-size
 	font-size: 16px
 	font-size: 1.142857143rem; (16 / $rembase)
-	line-height: 1.846153846; ($line-height / 16)
+	line-height: 1.5; ($line-height / 16)
 
 ---------- Vertical spacing
 
@@ -151,17 +151,26 @@ sup {
 sub {
 	bottom: -0.25em;
 }
+small {
+	font-size: smaller;
+}
 img {
 	border: 0;
 	-ms-interpolation-mode: bicubic;
 }
 
 /* Clearing floats */
-.clear:after {
+.clear:after,
+.wrapper:after,
+.format-status .entry-header:after {
 	clear: both;
 }
 .clear:before,
-.clear:after {
+.clear:after,
+.wrapper:before,
+.wrapper:after,
+.format-status .entry-header:before,
+.format-status .entry-header:after {
 	display: table;
 	content: "";
 }
@@ -186,7 +195,8 @@ img {
 
 /* Shared Post Format styling */
 article.format-quote footer.entry-meta,
-article.format-link footer.entry-meta {
+article.format-link footer.entry-meta,
+article.format-status footer.entry-meta {
 	font-size: 11px;
 	font-size: 0.785714286rem;
 	line-height: 2.181818182;
@@ -317,7 +327,7 @@ video {
 .comment-content img,
 .widget img,
 img.header-image,
-#author-avatar img,
+.author-avatar img,
 img.wp-post-image {
 	/* Add fancy borders to all WordPress-added images but not things like badges and icons and the like */
 	border-radius: 3px;
@@ -403,7 +413,7 @@ img.wp-smiley,
 	margin-bottom: 24px;
 	margin-bottom: 1.714285714rem;
 }
-#author-info {
+.author-info {
 	border-top: 1px solid #ededed;
 	margin: 24px 0;
 	margin: 1.714285714rem 0;
@@ -411,18 +421,18 @@ img.wp-smiley,
 	padding-top: 1.714285714rem;
 	overflow: hidden;
 }
-#author-description p {
+.author-description p {
 	color: #777;
 	font-size: 13px;
 	font-size: 0.928571429rem;
 	line-height: 1.846153846;
 }
-.author.archive #author-info {
+.author.archive .author-info {
 	border-top: 0;
 	margin: 0 0 48px;
 	margin: 0 0 3.428571429rem;
 }
-.author.archive #author-avatar {
+.author.archive .author-avatar {
 	margin-top: 0;
 }
 
@@ -453,17 +463,29 @@ a:hover {
 }
 
 /* Assistive text */
-.skip-link,
-.screen-reader-text,
-.assistive-text {
+.assistive-text,
+.site .screen-reader-text {
 	position: absolute !important;
 	clip: rect(1px, 1px, 1px, 1px);
 }
+.main-navigation .assistive-text:hover,
+.main-navigation .assistive-text:active,
+.main-navigation .assistive-text:focus {
+	background: #fff;
+	border: 2px solid #333;
+	border-radius: 3px;
+	clip: auto !important;
+	color: #000;
+	display: block;
+	font-size: 12px;
+	padding: 12px;
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	z-index: 100000; /* Above WP toolbar */
+}
 
 /* Page structure */
-.wrapper {
-	overflow: hidden;
-}
 .site {
 	padding: 0 24px;
 	padding: 0 1.714285714rem;
@@ -550,13 +572,10 @@ section[role="banner"] {
 
 /* Sidebar */
 .widget-area .widget {
-	overflow: hidden;
-	-moz-hyphens: auto;
-	-ms-word-break: break-all;
+	word-wrap: break-word;
 	-webkit-hyphens: auto;
+	-moz-hyphens: auto;
 	hyphens: auto;
-	word-break: break-all;
-	word-break: break-word;
 	margin-bottom: 48px;
 	margin-bottom: 3.428571429rem;
 }
@@ -571,11 +590,27 @@ section[role="banner"] {
 	font-size: 0.928571429rem;
 	line-height: 1.846153846;
 }
+.widget-area .widget p {
+	margin-bottom: 24px;
+	margin-bottom: 1.714285714rem;
+}
+.widget-area .textwidget ul {
+	list-style: disc outside;
+	margin: 0 0 24px;
+	margin: 0 0 1.714285714rem;
+}
+.widget-area .textwidget li {
+	margin-left: 36px;
+	margin-left: 2.571428571rem;
+}
 .widget-area .widget a {
 	color: #777;
 }
 .widget-area .widget a:hover {
 	color: #21759b;
+}
+.widget-area #s {
+	width: 53.66666666666%; /* define a width to avoid dropping a wider submit button */
 }
 
 /* Footer */
@@ -593,7 +628,6 @@ footer[role="contentinfo"] {
 	margin-right: auto;
 	padding: 24px 0;
 	padding: 1.714285714rem 0;
-	overflow: hidden;
 }
 footer[role="contentinfo"] a {
 	color: #686868;
@@ -720,8 +754,6 @@ article.sticky .featured-post {
 	margin: 0 0 24px;
 	margin: 0 0 1.714285714rem;
 	line-height: 1.714285714;
-	text-align: justify;
-	text-justify: distribute;
 }
 .entry-content ol,
 .comment-content ol,
@@ -751,14 +783,20 @@ article.sticky .featured-post {
 }
 .entry-content li,
 .comment-content li {
-	margin: 0 0 0 24px;
-	margin: 0 0 0 1.714285714rem;
+	margin: 0 0 0 36px;
+	margin: 0 0 0 2.571428571rem;
 }
 .entry-content blockquote,
 .comment-content blockquote {
+	margin-bottom: 24px;
+	margin-bottom: 1.714285714rem;
 	padding: 24px;
 	padding: 1.714285714rem;
 	font-style: italic;
+}
+.entry-content blockquote p:last-child,
+.comment-content blockquote p:last-child {
+	margin-bottom: 0;
 }
 .entry-content code,
 .comment-content code {
@@ -880,9 +918,8 @@ footer.entry-meta {
 	line-height: 1.846153846;
 	color: #777;
 }
-footer .edit-link {
-	margin: 24px 0;
-	margin: 1.714285714rem 0;
+.single-author .entry-meta .by-author {
+	display: none;
 }
 
 
@@ -910,8 +947,10 @@ footer .edit-link {
 /* =Single image attachment view
 -------------------------------------------------------------- */
 
-.image-attachment div.attachment {
+.article.attachment {
 	overflow: hidden;
+}
+.image-attachment div.attachment {
 	text-align: center;
 }
 .image-attachment div.attachment p {
@@ -945,18 +984,19 @@ article.format-aside h1 a:hover {
 }
 article.format-aside .aside {
 	padding: 24px 24px 0;
-	padding: 1.714285714rem 1.714285714rem 0;
+	padding: 1.714285714rem;
 	background: #d2e0f9;
 	border-left: 22px solid #a8bfe8;
 }
 article.format-aside p {
-	margin: 0;
-	padding-bottom: 24px;
-	padding-bottom: 1.714285714rem;
 	font-size: 13px;
 	font-size: 0.928571429rem;
 	line-height: 1.846153846;
 	color: #4a5466;
+}
+article.format-aside blockquote:last-child,
+article.format-aside p:last-child {
+	margin-bottom: 0;
 }
 
 
@@ -1023,6 +1063,40 @@ article.format-quote .entry-content blockquote {
 	background: #efefef;
 }
 
+/* Status posts */
+.format-status .entry-header {
+	margin-bottom: 24px;
+	margin-bottom: 1.714285714rem;
+}
+.format-status .entry-header header {
+	display: inline-block;
+}
+.format-status .entry-header h1 {
+	font-size: 15px;
+	font-size: 1.071428571rem;
+	font-weight: normal;
+	line-height: 1.6;
+	margin: 0;
+}
+.format-status .entry-header h2 {
+	font-size: 12px;
+	font-size: 0.857142857rem;
+	font-weight: normal;
+	line-height: 2;
+	margin: 0;
+}
+.format-status .entry-header header a {
+	color: #777;
+}
+.format-status .entry-header header a:hover {
+	color: #21759b;
+}
+.format-status .entry-header img {
+	float: left;
+	margin-right: 21px;
+	margin-right: 1.5rem;
+}
+
 
 /* =Comments
 -------------------------------------------------------------- */
@@ -1038,7 +1112,6 @@ article.format-quote .entry-content blockquote {
 .comments-area article {
 	margin: 24px 0;
 	margin: 1.714285714rem 0;
-	overflow: hidden;
 }
 .comments-area article header {
 	margin: 0 0 48px;
@@ -1103,11 +1176,6 @@ article.format-quote .entry-content blockquote {
 	border-radius: 3px;
 	border: 1px solid #007cbd;
 }
-.comments-area article p {
-	margin: 24px 0;
-	margin: 1.714285714rem 0;
-	line-height: 1.714285714;
-}
 .comments-area li.bypostauthor cite span {
 	position: absolute;
 	margin-left: 5px;
@@ -1160,7 +1228,6 @@ a.comment-reply-link:hover {
 #respond form p {
 	margin: 11px 0;
 	margin: 0.785714286rem 0;
-	overflow: hidden;
 }
 #respond form p.logged-in-as {
 	margin-bottom: 24px;
@@ -1172,12 +1239,14 @@ a.comment-reply-link:hover {
 }
 #respond form input[type="text"],
 #respond form textarea {
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 	font-size: 12px;
 	font-size: 0.857142857rem;
 	line-height: 1.714285714;
 	padding: 10px;
 	padding: 0.714285714rem;
-	width: 96%;
+	width: 100%;
 }
 #respond form p.form-allowed-tags {
 	margin: 0;
@@ -1189,26 +1258,20 @@ a.comment-reply-link:hover {
 .required {
 	color: red;
 }
-label ~ span.required {
-	display: block;
-	float: left;
-	margin: -18px 0 0 -16px;
-	margin: -1.285714286rem 0 0 -1.142857143rem;
-}
 
 
-/* =Homepage template
+/* =Front page template
 -------------------------------------------------------------- */
 
 .entry-page-image {
 	margin-bottom: 14px;
 	margin-bottom: 1rem;
 }
-.template-home .site-content article {
+.template-front-page .site-content article {
 	border: 0;
 	margin-bottom: 0;
 }
-.template-home .widget-area {
+.template-front-page .widget-area {
 	clear: both;
 	float: none;
 	width: auto;
@@ -1216,7 +1279,7 @@ label ~ span.required {
 	padding-top: 1.714285714rem;
 	border-top: 1px solid #ededed;
 }
-.template-home .widget-area .widget li {
+.template-front-page .widget-area .widget li {
 	margin: 8px 0 0;
 	margin: 0.571428571rem 0 0;
 	font-size: 13px;
@@ -1225,13 +1288,13 @@ label ~ span.required {
 	list-style-type: square;
 	list-style-position: inside;
 }
-.template-home .widget-area .widget li a {
+.template-front-page .widget-area .widget li a {
 	color: #777;
 }
-.template-home .widget-area .widget li a:hover {
+.template-front-page .widget-area .widget li a:hover {
 	color: #21759b;
 }
-.template-home .widget-area .widget_text img {
+.template-front-page .widget-area .widget_text img {
 	float: left;
 	margin: 8px 24px 8px 0;
 	margin: 0.571428571rem 1.714285714rem 0.571428571rem 0;
@@ -1305,17 +1368,12 @@ img#wpstats {
 
 /* Minimum width of 600 pixels. */
 @media screen and (min-width: 600px) {
-	.entry-content p,
-	.entry-summary p {
-		text-align: inherit;
-		text-justify: auto;
-	}
-	#author-avatar {
+	.author-avatar {
 		float: left;
 		margin-top: 8px;
 		margin-top: 0.571428571rem;
 	}
-	#author-description {
+	.author-description {
 		float: right;
 		width: 80%;
 	}
@@ -1329,7 +1387,7 @@ img#wpstats {
 		float: left;
 		width: 65.104166667%;
 	}
-	body.template-home .site-content,
+	body.template-front-page .site-content,
 	body.single-attachment .site-content,
 	body.full-width .site-content {
 		width: 100%;
@@ -1352,8 +1410,6 @@ img#wpstats {
 		border-bottom: 1px solid #ededed;
 		border-top: 1px solid #ededed;
 		display: inline-block !important;
-		font-size: 12px;
-		font-size: 0.857142857rem;
 		text-align: left;
 		width: 100%;
 	}
@@ -1405,8 +1461,8 @@ img#wpstats {
 		line-height: 2.181818182;
 		padding: 8px 10px;
 		padding: 0.571428571rem 0.714285714rem;
-		width: 120px;
-		width: 8.571428571rem;
+		width: 180px;
+		width: 12.85714286rem;
 	}
 	.main-navigation li ul li a:hover {
 		background: #e3e3e3;
@@ -1432,11 +1488,11 @@ img#wpstats {
 	#respond form textarea.blog-textarea {
 		width: 79.666666667%;
 	}
-	.template-home .site-content,
-	.template-home article {
+	.template-front-page .site-content,
+	.template-front-page article {
 		overflow: hidden;
 	}
-	.template-home.has-post-thumbnail article {
+	.template-front-page.has-post-thumbnail article {
 		float: left;
 		width: 47.916666667%;
 	}
@@ -1445,25 +1501,25 @@ img#wpstats {
 		margin-bottom: 0;
 		width: 47.916666667%;
 	}
-	.template-home .widget-area .widget,
-	.template-home .widget-area.two .home-widgets {
+	.template-front-page .widget-area .widget,
+	.template-front-page.two-sidebars .widget-area .front-widgets {
 		float: left;
 		width: 51.875%;
 		margin-bottom: 24px;
 		margin-bottom: 1.714285714rem;
 	}
-	.template-home .widget-area .widget:nth-child(odd) {
+	.template-front-page .widget-area .widget:nth-child(odd) {
 		clear: right;
 	}
-	.template-home .widget-area .widget:nth-child(even),
-	.template-home .widget-area.two .home-widgets + .home-widgets {
+	.template-front-page .widget-area .widget:nth-child(even),
+	.template-front-page.two-sidebars .widget-area .front-widgets + .front-widgets {
 		float: right;
 		width: 39.0625%;
 		margin: 0 0 24px;
 		margin: 0 0 1.714285714rem;
 	}
-	.template-home .widget-area.two .widget,
-	.template-home .widget-area.two .widget:nth-child(even) {
+	.template-front-page.two-sidebars .widget,
+	.template-front-page.two-sidebars .widget:nth-child(even) {
 		float: none;
 		width: auto;
 	}
@@ -1513,7 +1569,7 @@ img#wpstats {
 	}
 	.entry-content img,
 	.comment-content img,
-	#author-avatar img,
+	.author-avatar img,
 	img.wp-post-image {
 		border-radius: 0;
 		box-shadow: none;
@@ -1539,7 +1595,7 @@ img#wpstats {
 		font-size: 10pt;
 		text-align: left;
 	}
-	#author-avatar,
+	.author-avatar,
 	#colophon,
 	#respond,
 	.commentlist .comment-edit-link,
@@ -1556,11 +1612,6 @@ img#wpstats {
 	.wrapper {
 		border-top: none;
 		box-shadow: none;
-	}
-	.site-content {
-		float: left;
-		margin: 0;
-		width: 100%;
 	}
 	.site-content {
 		margin: 0;
@@ -1587,7 +1638,7 @@ img#wpstats {
 		color: #444;
 		font-size: 10pt;
 	}
-	#author-description {
+	.author-description {
 		float: none;
 		width: auto;
 	}
@@ -1609,36 +1660,4 @@ img#wpstats {
 		margin-left: 50px;
 		margin-left: 3.57142857rem;
 	}
-}
-
-
-/* =IE 7 and 8
------------------------------------------------ */
-
-.ie .skip-link,
-.ie .screen-reader-text,
-.ie .assistive-text {
-	clip: rect(1px 1px 1px 1px); /* IE7 */
-}
-.ie .site {
-	margin: 48px auto;
-	max-width: 960px;
-}
-.ie .site-content {
-	float: left;
-	width: 65.104166667%;
-}
-.ie .full-width .site-content {
-	float: none;
-	width: 100%;
-}
-.ie .widget-area {
-	float: right;
-	width: 26.041666667%;
-}
-.ie img.size-full,
-.ie img.size-large,
-.ie img.header-image,
-.ie img.wp-post-image {
-	width: auto; /* Prevent stretching of full-size and large-size images with height and width attributes in IE8 */
 }

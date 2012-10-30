@@ -12,17 +12,17 @@ class WP_Users_List_Table extends WP_List_Table {
 	var $site_id;
 	var $is_site_users;
 
-	function __construct() {
-		$screen = get_current_screen();
-		$this->is_site_users = 'site-users-network' == $screen->id;
+	function __construct( $args = array() ) {
+		parent::__construct( array(
+			'singular' => 'user',
+			'plural'   => 'users',
+			'screen'   => isset( $args['screen'] ) ? $args['screen'] : null,
+		) );
+
+		$this->is_site_users = 'site-users-network' == $this->screen->id;
 
 		if ( $this->is_site_users )
 			$this->site_id = isset( $_REQUEST['id'] ) ? intval( $_REQUEST['id'] ) : 0;
-
-		parent::__construct( array(
-			'singular' => 'user',
-			'plural'   => 'users'
-		) );
 	}
 
 	function ajax_user_can() {
@@ -35,7 +35,7 @@ class WP_Users_List_Table extends WP_List_Table {
 	function prepare_items() {
 		global $role, $usersearch;
 
-		$usersearch = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : '';
+		$usersearch = isset( $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
 
 		$role = isset( $_REQUEST['role'] ) ? $_REQUEST['role'] : '';
 
@@ -145,7 +145,7 @@ class WP_Users_List_Table extends WP_List_Table {
 			<option value=''><?php _e( 'Change role to&hellip;' ) ?></option>
 			<?php wp_dropdown_roles(); ?>
 		</select>
-		<?php submit_button( __( 'Change' ), 'secondary', 'changeit', false ); ?>
+		<?php submit_button( __( 'Change' ), 'small', 'changeit', false ); ?>
 	</div>
 <?php
 	}

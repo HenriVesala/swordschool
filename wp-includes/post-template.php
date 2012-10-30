@@ -26,8 +26,7 @@ function the_ID() {
  * @return int
  */
 function get_the_ID() {
-	global $post;
-	return $post->ID;
+	return get_post()->ID;
 }
 
 /**
@@ -97,24 +96,25 @@ function the_title_attribute( $args = '' ) {
  *
  * @since 0.71
  *
- * @param int $id Optional. Post ID.
+ * @param mixed $post Optional. Post ID or object.
  * @return string
  */
-function get_the_title( $id = 0 ) {
-	$post = get_post($id);
+function get_the_title( $post = 0 ) {
+	$post = get_post( $post );
 
-	$title = isset($post->post_title) ? $post->post_title : '';
-	$id = isset($post->ID) ? $post->ID : (int) $id;
+	$title = isset( $post->post_title ) ? $post->post_title : '';
+	$id = isset( $post->ID ) ? $post->ID : 0;
 
-	if ( !is_admin() ) {
-		if ( !empty($post->post_password) ) {
-			$protected_title_format = apply_filters('protected_title_format', __('Protected: %s'));
-			$title = sprintf($protected_title_format, $title);
-		} else if ( isset($post->post_status) && 'private' == $post->post_status ) {
-			$private_title_format = apply_filters('private_title_format', __('Private: %s'));
-			$title = sprintf($private_title_format, $title);
+	if ( ! is_admin() ) {
+		if ( ! empty( $post->post_password ) ) {
+			$protected_title_format = apply_filters( 'protected_title_format', __( 'Protected: %s' ) );
+			$title = sprintf( $protected_title_format, $title );
+		} else if ( isset( $post->post_status ) && 'private' == $post->post_status ) {
+			$private_title_format = apply_filters( 'private_title_format', __( 'Private: %s' ) );
+			$title = sprintf( $private_title_format, $title );
 		}
 	}
+
 	return apply_filters( 'the_title', $title, $id );
 }
 
@@ -177,8 +177,10 @@ function the_content($more_link_text = null, $stripteaser = false) {
  * @param bool $stripteaser Optional. Strip teaser content before the more text. Default is false.
  * @return string
  */
-function get_the_content($more_link_text = null, $stripteaser = false) {
-	global $post, $more, $page, $pages, $multipage, $preview;
+function get_the_content( $more_link_text = null, $stripteaser = false ) {
+	global $more, $page, $pages, $multipage, $preview;
+
+	$post = get_post();
 
 	if ( null === $more_link_text )
 		$more_link_text = __( '(more...)' );
@@ -187,7 +189,7 @@ function get_the_content($more_link_text = null, $stripteaser = false) {
 	$hasTeaser = false;
 
 	// If post password required and it doesn't match the cookie.
-	if ( post_password_required($post) )
+	if ( post_password_required() )
 		return get_the_password_form();
 
 	if ( $page > count($pages) ) // if the requested page doesn't exist
@@ -231,7 +233,7 @@ function get_the_content($more_link_text = null, $stripteaser = false) {
  * @since 3.1.0
  * @access private
  * @param array $match Match array from preg_replace_callback
- * @returns string
+ * @return string
  */
 function _convert_urlencoded_to_entities( $match ) {
 	return '&#' . base_convert( $match[1], 16, 10 ) . ';';
@@ -259,8 +261,9 @@ function get_the_excerpt( $deprecated = '' ) {
 	if ( !empty( $deprecated ) )
 		_deprecated_argument( __FUNCTION__, '2.3' );
 
-	global $post;
-	if ( post_password_required($post) ) {
+	$post = get_post();
+
+	if ( post_password_required() ) {
 		return __( 'There is no excerpt because this is a protected post.' );
 	}
 
@@ -319,7 +322,8 @@ function get_post_class( $class = '', $post_id = null ) {
 		return $classes;
 
 	$classes[] = 'post-' . $post->ID;
-	$classes[] = $post->post_type;
+	if ( ! is_admin() )
+		$classes[] = $post->post_type;
 	$classes[] = 'type-' . $post->post_type;
 	$classes[] = 'status-' . $post->post_status;
 
@@ -496,8 +500,10 @@ function get_body_class( $class = '' ) {
 	if ( is_user_logged_in() )
 		$classes[] = 'logged-in';
 
-	if ( is_admin_bar_showing() )
+	if ( is_admin_bar_showing() ) {
 		$classes[] = 'admin-bar';
+		$classes[] = 'no-customize-support';
+	}
 
 	if ( get_theme_mod( 'background_color' ) || get_background_image() )
 		$classes[] = 'custom-background';
@@ -676,7 +682,8 @@ function wp_link_pages($args = '') {
  * @return string Link.
  */
 function _wp_link_page( $i ) {
-	global $post, $wp_rewrite;
+	global $wp_rewrite;
+	$post = get_post();
 
 	if ( 1 == $i ) {
 		$url = get_permalink();
@@ -865,6 +872,7 @@ function wp_list_pages($args = '') {
  * @since 2.7.0
  *
  * @param array|string $args
+ * @return string html menu
  */
 function wp_page_menu( $args = array() ) {
 	$defaults = array('sort_column' => 'menu_order, post_title', 'menu_class' => 'menu', 'echo' => true, 'link_before' => '', 'link_after' => '');
@@ -929,7 +937,7 @@ function walk_page_tree($pages, $depth, $current_page, $r) {
 		$walker = $r['walker'];
 
 	$args = array($pages, $depth, $r, $current_page);
-	return call_user_func_array(array(&$walker, 'walk'), $args);
+	return call_user_func_array(array($walker, 'walk'), $args);
 }
 
 /**
@@ -946,7 +954,7 @@ function walk_page_dropdown_tree() {
 	else
 		$walker = $args[2]['walker'];
 
-	return call_user_func_array(array(&$walker, 'walk'), $args);
+	return call_user_func_array(array($walker, 'walk'), $args);
 }
 
 /**
@@ -978,6 +986,7 @@ class Walker_Page extends Walker {
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
 	 * @param int $depth Depth of page. Used for padding.
+	 * @param array $args
 	 */
 	function start_lvl( &$output, $depth = 0, $args = array() ) {
 		$indent = str_repeat("\t", $depth);
@@ -990,6 +999,7 @@ class Walker_Page extends Walker {
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
 	 * @param int $depth Depth of page. Used for padding.
+	 * @param array $args
 	 */
 	function end_lvl( &$output, $depth = 0, $args = array() ) {
 		$indent = str_repeat("\t", $depth);
@@ -1047,6 +1057,7 @@ class Walker_Page extends Walker {
 	 * @param string $output Passed by reference. Used to append additional content.
 	 * @param object $page Page data object. Not used.
 	 * @param int $depth Depth of page. Not Used.
+	 * @param array $args
 	 */
 	function end_el( &$output, $page, $depth = 0, $args = array() ) {
 		$output .= "</li>\n";
@@ -1085,6 +1096,7 @@ class Walker_PageDropdown extends Walker {
 	 * @param object $page Page data object.
 	 * @param int $depth Depth of page in reference to parent pages. Used for padding.
 	 * @param array $args Uses 'selected' argument for selected page to set selected HTML attribute for option element.
+	 * @param int $id
 	 */
 	function start_el(&$output, $page, $depth, $args, $id = 0) {
 		$pad = str_repeat('&nbsp;', $depth * 3);
@@ -1133,7 +1145,7 @@ function the_attachment_link( $id = 0, $fullsize = false, $deprecated = false, $
  * @param string $size Optional, default is 'thumbnail'. Size of image, either array or string.
  * @param bool $permalink Optional, default is false. Whether to add permalink to image.
  * @param bool $icon Optional, default is false. Whether to include icon.
- * @param string $text Optional, default is false. If string, then will be link text.
+ * @param string|bool $text Optional, default is false. If string, then will be link text.
  * @return string HTML content.
  */
 function wp_get_attachment_link( $id = 0, $size = 'thumbnail', $permalink = false, $icon = false, $text = false ) {
@@ -1171,7 +1183,7 @@ function wp_get_attachment_link( $id = 0, $size = 'thumbnail', $permalink = fals
  * @return string
  */
 function prepend_attachment($content) {
-	global $post;
+	$post = get_post();
 
 	if ( empty($post->post_type) || $post->post_type != 'attachment' )
 		return $content;
@@ -1198,7 +1210,7 @@ function prepend_attachment($content) {
  * @return string HTML content for password form for password protected post.
  */
 function get_the_password_form() {
-	global $post;
+	$post = get_post();
 	$label = 'pwbox-' . ( empty($post->ID) ? rand() : $post->ID );
 	$output = '<form action="' . esc_url( site_url( 'wp-login.php?action=postpass', 'login_post' ) ) . '" method="post">
 	<p>' . __("This post is password protected. To view it please enter your password below:") . '</p>
@@ -1244,7 +1256,7 @@ function is_page_template( $template = '' ) {
  *
  * @since 3.4.0
  *
- * @param int $id The page ID to check. Defaults to the current post, when used in the loop.
+ * @param int $post_id The page ID to check. Defaults to the current post, when used in the loop.
  * @return string|bool Page template filename. Returns an empty string when the default page template
  * 	is in use. Returns false if the post is not a page.
  */

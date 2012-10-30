@@ -3014,7 +3014,7 @@ class SimplePie
 				}
 			}
 			$item = null;
-			if ($do_sort)
+			if ($do_sort && isset($urls[0]))
 			{
 				usort($items, array(get_class($urls[0]), 'sort_items'));
 			}

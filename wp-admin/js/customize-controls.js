@@ -109,27 +109,16 @@
 	api.ColorControl = api.Control.extend({
 		ready: function() {
 			var control = this,
-				rhex, spot, input, text, update;
+				picker = this.container.find('.color-picker-hex');
 
-			rhex   = /^#([A-Fa-f0-9]{3}){0,2}$/;
-			spot   = this.container.find('.dropdown-content');
-			input  = new api.Element( this.container.find('.color-picker-hex') );
-			update = function( color ) {
-				spot.css( 'background', color );
-				control.farbtastic.setColor( color );
-			};
-
-			this.farbtastic = $.farbtastic( this.container.find('.farbtastic-placeholder'), control.setting.set );
-
-			// Only pass through values that are valid hexes/empty.
-			input.sync( this.setting ).validate = function( to ) {
-				return rhex.test( to ) ? to : null;
-			};
-
-			this.setting.bind( update );
-			update( this.setting() );
-
-			this.dropdownInit();
+			picker.val( control.setting() ).wpColorPicker({
+				change: function( event, options ) {
+					control.setting.set( picker.wpColorPicker('color') );
+ 				},
+ 				clear: function() {
+ 					control.setting.set( false );
+ 				}
+			});
 		}
 	});
 
@@ -168,7 +157,7 @@
 			this.removerVisibility( this.setting.get() );
 		},
 		success: function( attachment ) {
-			this.setting.set( attachment.url );
+			this.setting.set( attachment.get('url') );
 		},
 		removerVisibility: function( to ) {
 			this.remover.toggle( to != this.params.removed );
@@ -272,9 +261,10 @@
 			if ( this.tabs.uploaded && this.tabs.uploaded.target.length ) {
 				this.tabs.uploaded.both.removeClass('hidden');
 
+				// @todo: Do NOT store this on the attachment model. That is bad.
 				attachment.element = $( '<a href="#" class="thumbnail"></a>' )
-					.data( 'customizeImageValue', attachment.url )
-					.append( '<img src="' +  attachment.url+ '" />' )
+					.data( 'customizeImageValue', attachment.get('url') )
+					.append( '<img src="' +  attachment.get('url')+ '" />' )
 					.appendTo( this.tabs.uploaded.target );
 			}
 		},
@@ -945,16 +935,16 @@
 				api.ImageControl.prototype.success.call( control, attachment );
 
 				data = {
-					attachment_id: attachment.id,
-					url:           attachment.url,
-					thumbnail_url: attachment.url,
-					height:        attachment.meta.height,
-					width:         attachment.meta.width
+					attachment_id: attachment.get('id'),
+					url:           attachment.get('url'),
+					thumbnail_url: attachment.get('url'),
+					height:        attachment.get('height'),
+					width:         attachment.get('width')
 				};
 
 				attachment.element.data( 'customizeHeaderImageData', data );
 				control.settings.data.set( data );
-			}
+			};
 		});
 
 		api.trigger( 'ready' );

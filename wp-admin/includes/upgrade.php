@@ -218,7 +218,7 @@ As a new WordPress user, you should go to <a href=\"%s\">your dashboard</a> to d
 	update_option( 'widget_archives', array ( 2 => array ( 'title' => '', 'count' => 0, 'dropdown' => 0 ), '_multiwidget' => 1 ) );
 	update_option( 'widget_categories', array ( 2 => array ( 'title' => '', 'count' => 0, 'hierarchical' => 0, 'dropdown' => 0 ), '_multiwidget' => 1 ) );
 	update_option( 'widget_meta', array ( 2 => array ( 'title' => '' ), '_multiwidget' => 1 ) );
-	update_option( 'sidebars_widgets', array ( 'wp_inactive_widgets' => array ( ), 'sidebar-1' => array ( 0 => 'search-2', 1 => 'recent-posts-2', 2 => 'recent-comments-2', 3 => 'archives-2', 4 => 'categories-2', 5 => 'meta-2', ), 'sidebar-2' => array ( ), 'sidebar-3' => array ( ), 'sidebar-4' => array ( ), 'sidebar-5' => array ( ), 'array_version' => 3 ) );
+	update_option( 'sidebars_widgets', array ( 'wp_inactive_widgets' => array ( ), 'sidebar-1' => array ( 0 => 'search-2', 1 => 'recent-posts-2', 2 => 'recent-comments-2', 3 => 'archives-2', 4 => 'categories-2', 5 => 'meta-2', ), 'sidebar-2' => array ( ), 'sidebar-3' => array ( ), 'array_version' => 3 ) );
 
 	if ( ! is_multisite() )
 		update_user_meta( $user_id, 'show_welcome_panel', 1 );
@@ -399,7 +399,7 @@ function upgrade_all() {
 	if ( $wp_current_db_version < 20080 )
 		upgrade_340();
 
-	if ( $wp_current_db_version < 21501 )
+	if ( $wp_current_db_version < 21811 )
 		upgrade_350();
 
 	maybe_disable_link_manager();
@@ -511,11 +511,11 @@ function upgrade_110() {
 	$time_difference = $all_options->time_difference;
 
 		$server_time = time()+date('Z');
-	$weblogger_time = $server_time + $time_difference*3600;
+	$weblogger_time = $server_time + $time_difference * HOUR_IN_SECONDS;
 	$gmt_time = time();
 
-	$diff_gmt_server = ($gmt_time - $server_time) / 3600;
-	$diff_weblogger_server = ($weblogger_time - $server_time) / 3600;
+	$diff_gmt_server = ($gmt_time - $server_time) / HOUR_IN_SECONDS;
+	$diff_weblogger_server = ($weblogger_time - $server_time) / HOUR_IN_SECONDS;
 	$diff_gmt_weblogger = $diff_gmt_server - $diff_weblogger_server;
 	$gmt_offset = -$diff_gmt_weblogger;
 
@@ -994,11 +994,6 @@ function upgrade_260() {
 
 	if ( $wp_current_db_version < 8000 )
 		populate_roles_260();
-
-	if ( $wp_current_db_version < 8201 ) {
-		update_option('enable_app', 1);
-		update_option('enable_xmlrpc', 1);
-	}
 }
 
 /**
@@ -1196,6 +1191,19 @@ function upgrade_350() {
 
 	if ( $wp_current_db_version < 21501 && $wpdb->get_var( "SELECT link_id FROM $wpdb->links LIMIT 1" ) )
 		update_option( 'link_manager_enabled', 1 ); // Previously set to 0 by populate_options()
+
+	if ( $wp_current_db_version < 21811 && is_main_site() && ! defined( 'DO_NOT_UPGRADE_GLOBAL_TABLES' ) ) {
+		$meta_keys = array();
+		foreach ( array_merge( get_post_types(), get_taxonomies() ) as $name ) {
+			if ( false !== strpos( $name, '-' ) )
+			$meta_keys[] = 'edit_' . str_replace( '-', '_', $name ) . '_per_page';
+		}
+		if ( $meta_keys ) {
+			$meta_keys = implode( "', '", $meta_keys );
+			$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key IN ('$meta_keys')" );
+		}
+	}
+
 }
 
 /**
@@ -1263,6 +1271,10 @@ function upgrade_network() {
 			delete_site_option( 'allowed_themes' );
 		}
 	}
+
+	// 3.5
+	if ( $wp_current_db_version < 21823 )
+		update_site_option( 'ms_files_rewriting', '1' );
 }
 
 // The functions we use to actually do stuff

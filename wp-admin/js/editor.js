@@ -49,10 +49,8 @@ var switchEditors = {
 			if ( ed && ed.isHidden() )
 				return false;
 
-			if ( ed ) {
-				txtarea_el.style.height = ed.getContentAreaContainer().offsetHeight + 20 + 'px';
+			if ( ed )
 				ed.hide();
-			}
 
 			dom.removeClass(wrap_id, 'tmce-active');
 			dom.addClass(wrap_id, 'html-active');
@@ -140,7 +138,7 @@ var switchEditors = {
 
 	_wp_Autop : function(pee) {
 		var preserve_linebreaks = false, preserve_br = false,
-			blocklist = 'table|thead|tfoot|tbody|tr|td|th|caption|col|colgroup|div|dl|dd|dt|ul|ol|li|pre|select|form|blockquote|address|math|p|h[1-6]|fieldset|legend|hr|noscript|menu|samp|header|footer|article|section|hgroup|nav|aside|details|summary';
+			blocklist = 'table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|select|option|form|map|area|blockquote|address|math|style|p|h[1-6]|hr|fieldset|noscript|samp|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary';
 
 		if ( pee.indexOf('<object') != -1 ) {
 			pee = pee.replace(/<object[\s\S]+?<\/object>/g, function(a){

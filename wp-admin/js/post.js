@@ -185,7 +185,7 @@ commentsBox = {
 
 		this.st += num;
 		this.total = total;
-		$('#commentsdiv img.waiting').show();
+		$('#commentsdiv .spinner').show();
 
 		data = {
 			'action' : 'get-comments',
@@ -200,7 +200,7 @@ commentsBox = {
 			function(r) {
 				r = wpAjax.parseAjaxResponse(r);
 				$('#commentsdiv .widefat').show();
-				$('#commentsdiv img.waiting').hide();
+				$('#commentsdiv .spinner').hide();
 
 				if ( 'object' == typeof r && r.responses[0] ) {
 					$('#the-comment-list').append( r.responses[0].data );
@@ -299,6 +299,13 @@ jQuery(document).ready( function($) {
 
 		// Ajax Cat
 		$('#new' + taxonomy).one( 'focus', function() { $(this).val( '' ).removeClass( 'form-input-tip' ) } );
+
+		$('#new' + taxonomy).keypress( function(event){
+			if( 13 === event.keyCode ) {
+				 event.preventDefault();
+				 $('#' + taxonomy + '-add-submit').click();
+			}
+		});
 		$('#' + taxonomy + '-add-submit').click( function(){ $('#new' + taxonomy).focus(); });
 
 		syncChecks = function() {
@@ -342,7 +349,7 @@ jQuery(document).ready( function($) {
 			return false;
 		});
 
-		$('#' + taxonomy + 'checklist li.popular-category :checkbox, #' + taxonomy + 'checklist-pop :checkbox').live( 'click', function(){
+		$('#' + taxonomy + 'checklist li.popular-category input[type="checkbox"], #' + taxonomy + 'checklist-pop input[type="checkbox"]').live( 'click', function(){
 			var t = $(this), c = t.is(':checked'), id = t.val();
 			if ( id && t.parents('#taxonomy-'+taxonomy).length )
 				$('#in-' + taxonomy + '-' + id + ', #in-popular-' + taxonomy + '-' + id).prop( 'checked', c );
@@ -552,71 +559,6 @@ jQuery(document).ready( function($) {
 		});
 	} // end submitdiv
 
-	// permalink
-	if ( $('#edit-slug-box').length ) {
-		editPermalink = function(post_id) {
-			var i, c = 0, e = $('#editable-post-name'), revert_e = e.html(), real_slug = $('#post_name'), revert_slug = real_slug.val(), b = $('#edit-slug-buttons'), revert_b = b.html(), full = $('#editable-post-name-full').html();
-
-			$('#view-post-btn').hide();
-			b.html('<a href="#" class="save button">'+postL10n.ok+'</a> <a class="cancel" href="#">'+postL10n.cancel+'</a>');
-			b.children('.save').click(function() {
-				var new_slug = e.children('input').val();
-				if ( new_slug == $('#editable-post-name-full').text() ) {
-					return $('.cancel', '#edit-slug-buttons').click();
-				}
-				$.post(ajaxurl, {
-					action: 'sample-permalink',
-					post_id: post_id,
-					new_slug: new_slug,
-					new_title: $('#title').val(),
-					samplepermalinknonce: $('#samplepermalinknonce').val()
-				}, function(data) {
-					$('#edit-slug-box').html(data);
-					b.html(revert_b);
-					real_slug.val(new_slug);
-					makeSlugeditClickable();
-					$('#view-post-btn').show();
-				});
-				return false;
-			});
-
-			$('.cancel', '#edit-slug-buttons').click(function() {
-				$('#view-post-btn').show();
-				e.html(revert_e);
-				b.html(revert_b);
-				real_slug.val(revert_slug);
-				return false;
-			});
-
-			for ( i = 0; i < full.length; ++i ) {
-				if ( '%' == full.charAt(i) )
-					c++;
-			}
-
-			slug_value = ( c > full.length / 4 ) ? '' : full;
-			e.html('<input type="text" id="new-post-slug" value="'+slug_value+'" />').children('input').keypress(function(e){
-				var key = e.keyCode || 0;
-				// on enter, just save the new slug, don't save the post
-				if ( 13 == key ) {
-					b.children('.save').click();
-					return false;
-				}
-				if ( 27 == key ) {
-					b.children('.cancel').click();
-					return false;
-				}
-				real_slug.val(this.value);
-			}).focus();
-		}
-
-		makeSlugeditClickable = function() {
-			$('#editable-post-name').click(function() {
-				$('#edit-slug-buttons').children('.edit-slug').click();
-			});
-		}
-		makeSlugeditClickable();
-	}
-
 	// word count
 	if ( typeof(wpWordCount) != 'undefined' ) {
 		$(document).triggerHandler('wpcountwords', [ co.val() ]);
@@ -660,4 +602,84 @@ jQuery(document).ready( function($) {
 	}
 
 	wptitlehint();
+
+	// resizable textarea#content
+	(function() {
+		var textarea = $('textarea#content'), offset = null, el;
+
+		function dragging(e) {
+			textarea.height( Math.max(50, offset + e.pageY) + 'px' );
+			return false;
+		}
+
+		function endDrag(e) {
+			var height = $('#wp-content-editor-container').height();
+
+			textarea.focus();
+			$(document).unbind('mousemove', dragging).unbind('mouseup', endDrag);
+
+			if ( height > 83 ) {
+				height -= 33; // compensate for toolbars, padding...
+				setUserSetting( 'ed_size', height );
+			}
+		}
+
+		textarea.css('resize', 'none');
+		el = $('<div id="content-resize-handle"><br></div>');
+		$('#wp-content-wrap').append(el);
+		el.on('mousedown', function(e) {
+			offset = textarea.height() - e.pageY;
+			textarea.blur();
+			$(document).mousemove(dragging).mouseup(endDrag);
+			return false;
+		});
+	})();
+
+	if ( typeof(tinymce) != 'undefined' ) {
+		tinymce.onAddEditor.add(function(mce, ed){
+			if ( ed.id != 'content' )
+				return;
+
+			// resize TinyMCE to match the textarea height when switching Text -> Visual
+			ed.onLoadContent.add( function(ed, o) {
+				var ifr_height, height = parseInt( $('#content').css('height'), 10 ),
+					tb_height = $('#content_tbl tr.mceFirst').height();
+
+				if ( height && !isNaN(height) && tb_height ) {
+					ifr_height = (height - tb_height) + 12; // compensate for padding in the textarea
+
+					$('#content_tbl').css('height', '' );
+					$('#content_ifr').css('height', ifr_height + 'px' );
+					setUserSetting( 'ed_size', height );
+				}
+			});
+
+			// resize the textarea to match TinyMCE's height when switching Visual -> Text
+			ed.onSaveContent.add( function(ed, o) {
+				var height = $('#content_tbl').height();
+
+				if ( height && height > 83 ) {
+					height -= 33;
+
+					$('#content').css( 'height', height + 'px' );
+					setUserSetting( 'ed_size', height );
+				}
+			});
+
+			// save on resizing TinyMCE
+			ed.onPostRender.add(function() {
+				$('#content_resize').on('mousedown.wp-mce-resize', function(e){
+					$(document).on('mouseup.wp-mce-resize', function(e){
+						var height = $('#wp-content-editor-container').height();
+
+						height -= 33;
+						if ( height > 50 && height != getUserSetting( 'ed_size' ) )
+							setUserSetting( 'ed_size', height );
+
+						$(document).off('mouseup.wp-mce-resize');
+					});
+				});
+			});
+		});
+	}
 });

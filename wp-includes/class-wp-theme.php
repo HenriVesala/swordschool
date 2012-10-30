@@ -41,6 +41,7 @@ final class WP_Theme implements ArrayAccess {
 		'default'      => 'WordPress Default',
 		'twentyten'    => 'Twenty Ten',
 		'twentyeleven' => 'Twenty Eleven',
+		'twentytwelve' => 'Twenty Twelve',
 	);
 
 	/**
@@ -794,7 +795,7 @@ final class WP_Theme implements ArrayAccess {
 	 * @return string URL to the stylesheet directory.
 	 */
 	public function get_stylesheet_directory_uri() {
-		return $this->get_theme_root_uri() . '/' . $this->stylesheet;
+		return $this->get_theme_root_uri() . '/' . str_replace( '%2F', '/', rawurlencode( $this->stylesheet ) );
 	}
 
 	/**
@@ -814,7 +815,7 @@ final class WP_Theme implements ArrayAccess {
 		else
 			$theme_root_uri = $this->get_theme_root_uri();
 
-		return $theme_root_uri . '/' . $this->template;
+		return $theme_root_uri . '/' . str_replace( '%2F', '/', rawurlencode( $this->template ) );
 	}
 
 	/**

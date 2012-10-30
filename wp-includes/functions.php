@@ -59,10 +59,10 @@ function mysql2date( $format, $date, $translate = true ) {
 function current_time( $type, $gmt = 0 ) {
 	switch ( $type ) {
 		case 'mysql':
-			return ( $gmt ) ? gmdate( 'Y-m-d H:i:s' ) : gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
+			return ( $gmt ) ? gmdate( 'Y-m-d H:i:s' ) : gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) );
 			break;
 		case 'timestamp':
-			return ( $gmt ) ? time() : time() + ( get_option( 'gmt_offset' ) * 3600 );
+			return ( $gmt ) ? time() : time() + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS );
 			break;
 	}
 }
@@ -214,8 +214,8 @@ function get_weekstartend( $mysqlstring, $start_of_week = '' ) {
 	if ( $weekday < $start_of_week )
 		$weekday += 7;
 
-	$start = $day - 86400 * ( $weekday - $start_of_week ); // The most recent week start day on or before $day
-	$end = $start + 604799; // $start + 7 days - 1 second
+	$start = $day - DAY_IN_SECONDS * ( $weekday - $start_of_week ); // The most recent week start day on or before $day
+	$end = $start + 7 * DAY_IN_SECONDS - 1; // $start + 7 days - 1 second
 	return compact( 'start', 'end' );
 }
 
@@ -655,9 +655,12 @@ function add_query_arg() {
 	else
 		$frag = '';
 
-	if ( preg_match( '|^https?://|i', $uri, $matches ) ) {
-		$protocol = $matches[0];
-		$uri = substr( $uri, strlen( $protocol ) );
+	if ( 0 === stripos( 'http://', $uri ) ) {
+		$protocol = 'http://';
+		$uri = substr( $uri, 7 );
+	} elseif ( 0 === stripos( 'https://', $uri ) ) {
+		$protocol = 'https://';
+		$uri = substr( $uri, 8 );
 	} else {
 		$protocol = '';
 	}
@@ -671,7 +674,7 @@ function add_query_arg() {
 			$base = $parts[0] . '?';
 			$query = $parts[1];
 		}
-	} elseif ( !empty( $protocol ) || strpos( $uri, '=' ) === false ) {
+	} elseif ( $protocol || strpos( $uri, '=' ) === false ) {
 		$base = $uri . '?';
 		$query = '';
 	} else {
@@ -688,7 +691,7 @@ function add_query_arg() {
 		$qs[ $args[0] ] = $args[1];
 	}
 
-	foreach ( (array) $qs as $k => $v ) {
+	foreach ( $qs as $k => $v ) {
 		if ( $v === false )
 			unset( $qs[$k] );
 	}
@@ -931,7 +934,7 @@ function nocache_headers() {
  * @since 2.1.0
  */
 function cache_javascript_headers() {
-	$expiresOffset = 864000; // 10 days
+	$expiresOffset = 10 * DAY_IN_SECONDS;
 	header( "Content-Type: text/javascript; charset=" . get_bloginfo( 'charset' ) );
 	header( "Vary: Accept-Encoding" ); // Handle proxies
 	header( "Expires: " . gmdate( "D, d M Y H:i:s", time() + $expiresOffset ) . " GMT" );
@@ -1292,8 +1295,20 @@ function wp_get_original_referer() {
  * @return bool Whether the path was created. True if path already exists.
  */
 function wp_mkdir_p( $target ) {
+	$wrapper = null;
+
+	// strip the protocol
+	if( wp_is_stream( $target ) ) {
+		list( $wrapper, $target ) = explode( '://', $target, 2 );
+	}
+
 	// from php.net/mkdir user contributed notes
 	$target = str_replace( '//', '/', $target );
+
+	// put the wrapper back on the target
+	if( $wrapper !== null ) {
+		$target = $wrapper . '://' . $target;
+	}
 
 	// safe mode fails with a trailing slash under certain PHP versions.
 	$target = rtrim($target, '/'); // Use rtrim() instead of untrailingslashit to avoid formatting.php dependency.
@@ -1364,9 +1379,13 @@ function path_join( $base, $path ) {
 
 /**
  * Determines a writable directory for temporary files.
- * Function's preference is to WP_CONTENT_DIR followed by the return value of <code>sys_get_temp_dir()</code>, before finally defaulting to /tmp/
+ * Function's preference is the return value of <code>sys_get_temp_dir()</code>,
+ * followed by your PHP temporary upload directory, followed by WP_CONTENT_DIR,
+ * before finally defaulting to /tmp/
  *
- * In the event that this function does not find a writable location, It may be overridden by the <code>WP_TEMP_DIR</code> constant in your <code>wp-config.php</code> file.
+ * In the event that this function does not find a writable location,
+ * It may be overridden by the <code>WP_TEMP_DIR</code> constant in
+ * your <code>wp-config.php</code> file.
  *
  * @since 2.5.0
  *
@@ -1380,22 +1399,55 @@ function get_temp_dir() {
 	if ( $temp )
 		return trailingslashit($temp);
 
-	$temp = WP_CONTENT_DIR . '/';
-	if ( is_dir($temp) && @is_writable($temp) )
-		return $temp;
+	$is_win = ( 'WIN' === strtoupper( substr( PHP_OS, 0, 3 ) ) );
 
-	if  ( function_exists('sys_get_temp_dir') ) {
+	if ( function_exists('sys_get_temp_dir') ) {
 		$temp = sys_get_temp_dir();
-		if ( @is_writable($temp) )
-			return trailingslashit($temp);
+		if ( @is_dir( $temp ) && ( $is_win ? win_is_writable( $temp ) : @is_writable( $temp ) ) ) {
+			return trailingslashit( $temp );
+		}
 	}
 
 	$temp = ini_get('upload_tmp_dir');
-	if ( is_dir($temp) && @is_writable($temp) )
+	if ( is_dir( $temp ) && ( $is_win ? win_is_writable( $temp ) : @is_writable( $temp ) ) )
 		return trailingslashit($temp);
+
+	$temp = WP_CONTENT_DIR . '/';
+	if ( is_dir( $temp ) && ( $is_win ? win_is_writable( $temp ) : @is_writable( $temp ) ) )
+		return $temp;
 
 	$temp = '/tmp/';
 	return $temp;
+}
+
+/**
+ * Workaround for Windows bug in is_writable() function
+ *
+ * @since 2.8.0
+ *
+ * @param string $path
+ * @return bool
+ */
+function win_is_writable( $path ) {
+	/* will work in despite of Windows ACLs bug
+	 * NOTE: use a trailing slash for folders!!!
+	 * see http://bugs.php.net/bug.php?id=27609
+	 * see http://bugs.php.net/bug.php?id=30931
+	 */
+
+	if ( $path[strlen( $path ) - 1] == '/' ) // recursively return a temporary file path
+		return win_is_writable( $path . uniqid( mt_rand() ) . '.tmp');
+	else if ( is_dir( $path ) )
+		return win_is_writable( $path . '/' . uniqid( mt_rand() ) . '.tmp' );
+	// check tmp file for read/write capabilities
+	$should_delete_tmp_file = !file_exists( $path );
+	$f = @fopen( $path, 'a' );
+	if ( $f === false )
+		return false;
+	fclose( $f );
+	if ( $should_delete_tmp_file )
+		unlink( $path );
+	return true;
 }
 
 /**
@@ -1432,21 +1484,16 @@ function get_temp_dir() {
  * @return array See above for description.
  */
 function wp_upload_dir( $time = null ) {
-	global $_wp_switched;
 	$siteurl = get_option( 'siteurl' );
-	$upload_path = get_option( 'upload_path' );
-	$upload_path = trim($upload_path);
-	$main_override = is_multisite() && defined( 'MULTISITE' ) && is_main_site();
-	if ( empty($upload_path) ) {
+	$upload_path = trim( get_option( 'upload_path' ) );
+
+	if ( empty( $upload_path ) || 'wp-content/uploads' == $upload_path ) {
 		$dir = WP_CONTENT_DIR . '/uploads';
+	} elseif ( 0 !== strpos( $upload_path, ABSPATH ) ) {
+		// $dir is absolute, $upload_path is (maybe) relative to ABSPATH
+		$dir = path_join( ABSPATH, $upload_path );
 	} else {
 		$dir = $upload_path;
-		if ( 'wp-content/uploads' == $upload_path ) {
-			$dir = WP_CONTENT_DIR . '/uploads';
-		} elseif ( 0 !== strpos($dir, ABSPATH) ) {
-			// $dir is absolute, $upload_path is (maybe) relative to ABSPATH
-			$dir = path_join( ABSPATH, $dir );
-		}
 	}
 
 	if ( !$url = get_option( 'upload_url_path' ) ) {
@@ -1456,19 +1503,47 @@ function wp_upload_dir( $time = null ) {
 			$url = trailingslashit( $siteurl ) . $upload_path;
 	}
 
-	if ( defined('UPLOADS') && ! $main_override && ! $_wp_switched ) {
+	// Obey the value of UPLOADS. This happens as long as ms-files rewriting is disabled.
+	// We also sometimes obey UPLOADS when rewriting is enabled -- see the next block.
+	if ( defined( 'UPLOADS' ) && ! ( is_multisite() && get_site_option( 'ms_files_rewriting' ) ) ) {
 		$dir = ABSPATH . UPLOADS;
 		$url = trailingslashit( $siteurl ) . UPLOADS;
 	}
 
-	if ( is_multisite() && ! $main_override && ! $_wp_switched  ) {
-		if ( defined( 'BLOGUPLOADDIR' ) )
-			$dir = untrailingslashit(BLOGUPLOADDIR);
-		$url = str_replace( UPLOADS, 'files', $url );
+	// If multisite (and if not the main site in a post-MU network)
+	if ( is_multisite() && ! ( is_main_site() && defined( 'MULTISITE' ) ) ) {
+
+		if ( ! get_site_option( 'ms_files_rewriting' ) ) {
+			// If ms-files rewriting is disabled (networks created post-3.5), it is fairly straightforward:
+			// Append sites/%d if we're not on the main site (for post-MU networks). (The extra directory
+			// prevents a four-digit ID from conflicting with a year-based directory for the main site.
+			// But if a MU-era network has disabled ms-files rewriting manually, they don't need the extra
+			// directory, as they never had wp-content/uploads for the main site.)
+
+			if ( defined( 'MULTISITE' ) )
+				$ms_dir = '/sites/' . get_current_blog_id();
+			else
+				$ms_dir = '/' . get_current_blog_id();
+
+			$dir .= $ms_dir;
+			$url .= $ms_dir;
+
+		} elseif ( defined( 'UPLOADS' ) && ! ms_is_switched() ) {
+			// Handle the old-form ms-files.php rewriting if the network still has that enabled.
+			// When ms-files rewriting is enabled, then we only listen to UPLOADS when:
+			//   1) we are not on the main site in a post-MU network,
+			//      as wp-content/uploads is used there, and
+			//   2) we are not switched, as ms_upload_constants() hardcodes
+			//      these constants to reflect the original blog ID.
+
+			if ( defined( 'BLOGUPLOADDIR' ) )
+				$dir = untrailingslashit( BLOGUPLOADDIR );
+			$url = str_replace( UPLOADS, 'files', $url );
+		}
 	}
 
-	$bdir = $dir;
-	$burl = $url;
+	$basedir = $dir;
+	$baseurl = $url;
 
 	$subdir = '';
 	if ( get_option( 'uploads_use_yearmonth_folders' ) ) {
@@ -1483,12 +1558,20 @@ function wp_upload_dir( $time = null ) {
 	$dir .= $subdir;
 	$url .= $subdir;
 
-	$uploads = apply_filters( 'upload_dir', array( 'path' => $dir, 'url' => $url, 'subdir' => $subdir, 'basedir' => $bdir, 'baseurl' => $burl, 'error' => false ) );
+	$uploads = apply_filters( 'upload_dir',
+		array(
+			'path'    => $dir,
+			'url'     => $url,
+			'subdir'  => $subdir,
+			'basedir' => $basedir,
+			'baseurl' => $baseurl,
+			'error'   => false,
+		) );
 
 	// Make sure we have an uploads dir
 	if ( ! wp_mkdir_p( $uploads['path'] ) ) {
 		$message = sprintf( __( 'Unable to create directory %s. Is its parent directory writable by the server?' ), $uploads['path'] );
-		return array( 'error' => $message );
+		$uploads['error'] = $message;
 	}
 
 	return $uploads;
@@ -1910,8 +1993,6 @@ function wp_die( $message = '', $title = '', $args = array() ) {
 		$function = apply_filters( 'wp_die_ajax_handler', '_ajax_wp_die_handler' );
 	elseif ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
 		$function = apply_filters( 'wp_die_xmlrpc_handler', '_xmlrpc_wp_die_handler' );
-	elseif ( defined( 'APP_REQUEST' ) && APP_REQUEST )
-		$function = apply_filters( 'wp_die_app_handler', '_scalar_wp_die_handler' );
 	else
 		$function = apply_filters( 'wp_die_handler', '_default_wp_die_handler' );
 
@@ -2539,6 +2620,10 @@ function wp_maybe_load_widgets() {
  */
 function wp_widgets_add_menu() {
 	global $submenu;
+
+	if ( ! current_theme_supports( 'widgets' ) )
+		return;
+
 	$submenu['themes.php'][7] = array( __( 'Widgets' ), 'edit_theme_options', 'widgets.php' );
 	ksort( $submenu['themes.php'], SORT_NUMERIC );
 }
@@ -2981,10 +3066,12 @@ function force_ssl_admin( $force = null ) {
  * @return string
  */
 function wp_guess_url() {
-	if ( defined('WP_SITEURL') && '' != WP_SITEURL )
+	if ( defined('WP_SITEURL') && '' != WP_SITEURL ) {
 		$url = WP_SITEURL;
-	else
-		$url = set_url_scheme( preg_replace( '#/(wp-admin/.*|wp-login.php)#i', '', 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ) );
+	} else {
+		$schema = is_ssl() ? 'https://' : 'http://'; // set_url_scheme() is not defined yet
+		$url = preg_replace( '#/(wp-admin/.*|wp-login.php)#i', '', $schema . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+	}
 
 	return rtrim($url, '/');
 }
@@ -3044,13 +3131,13 @@ function wp_suspend_cache_invalidation($suspend = true) {
  * @return bool True if not multisite or $blog_id is main site
  */
 function is_main_site( $blog_id = '' ) {
-	global $current_site, $current_blog;
+	global $current_site;
 
-	if ( !is_multisite() )
+	if ( ! is_multisite() )
 		return true;
 
-	if ( !$blog_id )
-		$blog_id = $current_blog->blog_id;
+	if ( ! $blog_id )
+		$blog_id = get_current_blog_id();
 
 	return $blog_id == $current_site->blog_id;
 }
@@ -3098,7 +3185,7 @@ function wp_timezone_override_offset() {
 	if ( false === $timezone_object || false === $datetime_object ) {
 		return false;
 	}
-	return round( timezone_offset_get( $timezone_object, $datetime_object ) / 3600, 2 );
+	return round( timezone_offset_get( $timezone_object, $datetime_object ) / HOUR_IN_SECONDS, 2 );
 }
 
 /**
@@ -3298,7 +3385,7 @@ function _cleanup_header_comment($str) {
 function wp_scheduled_delete() {
 	global $wpdb;
 
-	$delete_timestamp = time() - (60*60*24*EMPTY_TRASH_DAYS);
+	$delete_timestamp = time() - ( DAY_IN_SECONDS * EMPTY_TRASH_DAYS );
 
 	$posts_to_delete = $wpdb->get_results($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_trash_meta_time' AND meta_value < '%d'", $delete_timestamp), ARRAY_A);
 
@@ -3587,7 +3674,7 @@ function wp_allowed_protocols() {
 	static $protocols;
 
 	if ( empty( $protocols ) ) {
-		$protocols = array( 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'svn', 'tel', 'fax' );
+		$protocols = array( 'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher', 'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'svn', 'tel', 'fax', 'xmpp' );
 		$protocols = apply_filters( 'kses_allowed_protocols', $protocols );
 	}
 
@@ -3684,3 +3771,26 @@ function _device_can_upload() {
 	return true;
 }
 
+/**
+ * Test if a given path is a stream URL
+ *
+ * @param string $path The resource path or URL
+ * @return bool True if the path is a stream URL
+ */
+function wp_is_stream( $path ) {
+	$wrappers = stream_get_wrappers();
+	$wrappers_re = '(' . join('|', $wrappers) . ')';
+
+	return preg_match( "!^$wrappers_re://!", $path ) === 1;
+}
+
+/**
+ * Test if the supplied date is valid for the Gregorian calendar
+ *
+ * @since 3.5.0
+ *
+ * @return bool true|false
+ */
+function wp_checkdate( $month, $day, $year, $source_date ) {
+	return apply_filters( 'wp_checkdate', checkdate( $month, $day, $year ), $source_date );
+}

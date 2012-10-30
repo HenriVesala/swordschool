@@ -86,7 +86,7 @@ function set_query_var($var, $value) {
  * @param string $query
  * @return array List of posts
  */
-function &query_posts($query) {
+function query_posts($query) {
 	unset($GLOBALS['wp_query']);
 	$GLOBALS['wp_query'] = new WP_Query();
 	return $GLOBALS['wp_query']->query($query);
@@ -128,7 +128,7 @@ function wp_reset_postdata() {
  */
 
 /**
- * Is the query for an archive page?
+ * Is the query for an existing archive page?
  *
  * Month, Year, Category, Author, Post Type archive...
  *
@@ -150,7 +150,7 @@ function is_archive() {
 }
 
 /**
- * Is the query for a post type archive page?
+ * Is the query for an existing post type archive page?
  *
  * @see WP_Query::is_post_type_archive()
  * @since 3.1.0
@@ -171,7 +171,7 @@ function is_post_type_archive( $post_types = '' ) {
 }
 
 /**
- * Is the query for an attachment page?
+ * Is the query for an existing attachment page?
  *
  * @see WP_Query::is_attachment()
  * @since 2.0.0
@@ -191,7 +191,7 @@ function is_attachment() {
 }
 
 /**
- * Is the query for an author archive page?
+ * Is the query for an existing author archive page?
  *
  * If the $author parameter is specified, this function will additionally
  * check if the query is for one of the authors specified.
@@ -215,7 +215,7 @@ function is_author( $author = '' ) {
 }
 
 /**
- * Is the query for a category archive page?
+ * Is the query for an existing category archive page?
  *
  * If the $category parameter is specified, this function will additionally
  * check if the query is for one of the categories specified.
@@ -239,7 +239,7 @@ function is_category( $category = '' ) {
 }
 
 /**
- * Is the query for a tag archive page?
+ * Is the query for an existing tag archive page?
  *
  * If the $tag parameter is specified, this function will additionally
  * check if the query is for one of the tags specified.
@@ -263,7 +263,7 @@ function is_tag( $slug = '' ) {
 }
 
 /**
- * Is the query for a taxonomy archive page?
+ * Is the query for an existing taxonomy archive page?
  *
  * If the $taxonomy parameter is specified, this function will additionally
  * check if the query is for that specific $taxonomy.
@@ -312,7 +312,7 @@ function is_comments_popup() {
 }
 
 /**
- * Is the query for a date archive?
+ * Is the query for an existing date archive?
  *
  * @see WP_Query::is_date()
  * @since 1.5.0
@@ -332,7 +332,7 @@ function is_date() {
 }
 
 /**
- * Is the query for a day archive?
+ * Is the query for an existing day archive?
  *
  * @see WP_Query::is_day()
  * @since 1.5.0
@@ -452,7 +452,7 @@ function is_home() {
 }
 
 /**
- * Is the query for a month archive?
+ * Is the query for an existing month archive?
  *
  * @see WP_Query::is_month()
  * @since 1.5.0
@@ -472,7 +472,7 @@ function is_month() {
 }
 
 /**
- * Is the query for a single page?
+ * Is the query for an existing single page?
  *
  * If the $page parameter is specified, this function will additionally
  * check if the query is for one of the pages specified.
@@ -579,7 +579,7 @@ function is_search() {
 }
 
 /**
- * Is the query for a single post?
+ * Is the query for an existing single post?
  *
  * Works for any post type, except attachments and pages
  *
@@ -608,7 +608,7 @@ function is_single( $post = '' ) {
 }
 
 /**
- * Is the query for a single post of any post type (post, attachment, page, ... )?
+ * Is the query for an existing single post of any post type (post, attachment, page, ... )?
  *
  * If the $post_types parameter is specified, this function will additionally
  * check if the query is for one of the Posts Types specified.
@@ -675,7 +675,7 @@ function is_trackback() {
 }
 
 /**
- * Is the query for a specific year?
+ * Is the query for an existing year archive?
  *
  * @see WP_Query::is_year()
  * @since 1.5.0
@@ -979,7 +979,9 @@ class WP_Query {
 	var $comment;
 
 	/**
-	 * Amount of posts if limit clause was not used.
+	 * The amount of found posts for the current query.
+	 *
+	 * If limit clause was not used, equals $post_count.
 	 *
 	 * @since 2.1.0
 	 * @access public
@@ -1398,6 +1400,7 @@ class WP_Query {
 			, 's'
 			, 'sentence'
 			, 'fields'
+			, 'menu_order'
 		);
 
 		foreach ( $keys as $key ) {
@@ -1452,6 +1455,7 @@ class WP_Query {
 		if ( '' !== $qv['hour'] ) $qv['hour'] = absint($qv['hour']);
 		if ( '' !== $qv['minute'] ) $qv['minute'] = absint($qv['minute']);
 		if ( '' !== $qv['second'] ) $qv['second'] = absint($qv['second']);
+		if ( '' !== $qv['menu_order'] ) $qv['menu_order'] = absint($qv['menu_order']);
 
 		// Compat. Map subpost to attachment.
 		if ( '' != $qv['subpost'] )
@@ -1785,13 +1789,13 @@ class WP_Query {
 		// Tag stuff
 		if ( '' != $q['tag'] && !$this->is_singular && $this->query_vars_changed ) {
 			if ( strpos($q['tag'], ',') !== false ) {
-				$tags = preg_split('/[,\s]+/', $q['tag']);
+				$tags = preg_split('/[,\r\n\t ]+/', $q['tag']);
 				foreach ( (array) $tags as $tag ) {
 					$tag = sanitize_term_field('slug', $tag, 0, 'post_tag', 'db');
 					$q['tag_slug__in'][] = $tag;
 				}
-			} else if ( preg_match('/[+\s]+/', $q['tag']) || !empty($q['cat']) ) {
-				$tags = preg_split('/[+\s]+/', $q['tag']);
+			} else if ( preg_match('/[+\r\n\t ]+/', $q['tag']) || !empty($q['cat']) ) {
+				$tags = preg_split('/[+\r\n\t ]+/', $q['tag']);
 				foreach ( (array) $tags as $tag ) {
 					$tag = sanitize_term_field('slug', $tag, 0, 'post_tag', 'db');
 					$q['tag_slug__and'][] = $tag;
@@ -1914,7 +1918,7 @@ class WP_Query {
 	 *
 	 * @return array List of posts.
 	 */
-	function &get_posts() {
+	function get_posts() {
 		global $wpdb, $user_ID, $_wp_using_ext_object_cache;
 
 		$this->parse_query();
@@ -2039,6 +2043,9 @@ class WP_Query {
 			default:
 				$fields = "$wpdb->posts.*";
 		}
+
+		if ( '' !== $q['menu_order'] )
+			$where .= " AND $wpdb->posts.menu_order = " . $q['menu_order'];
 
 		// If a month is specified in the querystring, load that month
 		if ( $q['m'] ) {
@@ -2215,7 +2222,16 @@ class WP_Query {
 
 		if ( $this->is_tax ) {
 			if ( empty($post_type) ) {
-				$post_type = 'any';
+				// Do a fully inclusive search for currently registered post types of queried taxonomies
+				$post_type = array();
+				$taxonomies = wp_list_pluck( $this->tax_query->queries, 'taxonomy' );
+				foreach ( get_post_types( array( 'exclude_from_search' => false ) ) as $pt ) {
+					if ( array_intersect( $taxonomies, get_object_taxonomies( $pt ) ) )
+						$post_type[] = $pt;
+				}
+				if ( ! $post_type )
+					$post_type = 'any';
+
 				$post_status_join = true;
 			} elseif ( in_array('attachment', (array) $post_type) ) {
 				$post_status_join = true;
@@ -2326,6 +2342,8 @@ class WP_Query {
 			$orderby = "$wpdb->posts.post_date " . $q['order'];
 		} elseif ( 'none' == $q['orderby'] ) {
 			$orderby = '';
+		} elseif ( $q['orderby'] == 'post__in' && ! empty( $post__in ) ) {
+			$orderby = "FIELD( {$wpdb->posts}.ID, $post__in )";
 		} else {
 			// Used to filter values
 			$allowed_keys = array('name', 'author', 'date', 'title', 'modified', 'menu_order', 'parent', 'ID', 'rand', 'comment_count');
@@ -2614,13 +2632,17 @@ class WP_Query {
 		}
 
 		if ( 'ids' == $q['fields'] ) {
-			$this->posts = $wpdb->get_col($this->request);
+			$this->posts = $wpdb->get_col( $this->request );
+			$this->post_count = count( $this->posts );
+			$this->set_found_posts( $q, $limits );
 
 			return $this->posts;
 		}
 
 		if ( 'id=>parent' == $q['fields'] ) {
-			$this->posts = $wpdb->get_results($this->request);
+			$this->posts = $wpdb->get_results( $this->request );
+			$this->post_count = count( $this->posts );
+			$this->set_found_posts( $q, $limits );
 
 			$r = array();
 			foreach ( $this->posts as $post )
@@ -2642,12 +2664,11 @@ class WP_Query {
 			$ids = $wpdb->get_col( $this->request );
 
 			if ( $ids ) {
+				$this->posts = $ids;
 				$this->set_found_posts( $q, $limits );
 				_prime_post_caches( $ids, $q['update_post_term_cache'], $q['update_post_meta_cache'] );
-				$this->posts = $ids;
 			} else {
 				$this->posts = array();
-				$this->found_posts = $this->max_num_pages = 0;
 			}
 		} else {
 			$this->posts = $wpdb->get_results( $this->request );
@@ -2655,7 +2676,8 @@ class WP_Query {
 		}
 
 		// Convert to WP_Post objects
-		$this->posts = array_map( 'get_post', $this->posts );
+		if ( $this->posts )
+			$this->posts = array_map( 'get_post', $this->posts );
 
 		// Raw results filter. Prior to status checks.
 		if ( !$q['suppress_filters'] )
@@ -2750,12 +2772,12 @@ class WP_Query {
 		if ( !$q['suppress_filters'] )
 			$this->posts = apply_filters_ref_array('the_posts', array( $this->posts, &$this ) );
 
-		$this->post_count = count($this->posts);
+		$this->post_count = count( $this->posts );
 
-		// Always sanitize
-		foreach ( $this->posts as $i => $post ) {
-			$this->posts[$i] = sanitize_post( $post, 'raw' );
-		}
+		// Ensure that any posts added/modified via one of the filters above are
+		// of the type WP_Post and are filtered.
+		if ( $this->posts )
+			$this->posts = array_map( 'get_post', $this->posts );
 
 		if ( $q['cache_results'] )
 			update_post_caches($this->posts, $post_type, $q['update_post_term_cache'], $q['update_post_meta_cache']);
@@ -2767,16 +2789,28 @@ class WP_Query {
 		return $this->posts;
 	}
 
+	/**
+	 * Set up the amount of found posts and the number of pages (if limit clause was used)
+	 * for the current query.
+	 *
+	 * @since 3.5.0
+	 * @access private
+	 */
 	function set_found_posts( $q, $limits ) {
 		global $wpdb;
 
-		if ( $q['no_found_rows'] || empty( $limits ) )
+		if ( $q['no_found_rows'] || ! $this->posts )
 			return;
 
-		$this->found_posts = $wpdb->get_var( apply_filters_ref_array( 'found_posts_query', array( 'SELECT FOUND_ROWS()', &$this ) ) );
+		if ( ! empty( $limits ) )
+			$this->found_posts = $wpdb->get_var( apply_filters_ref_array( 'found_posts_query', array( 'SELECT FOUND_ROWS()', &$this ) ) );
+		else
+			$this->found_posts = count( $this->posts );
+
 		$this->found_posts = apply_filters_ref_array( 'found_posts', array( $this->found_posts, &$this ) );
 
-		$this->max_num_pages = ceil( $this->found_posts / $q['posts_per_page'] );
+		if ( ! empty( $limits ) )
+			$this->max_num_pages = ceil( $this->found_posts / $q['posts_per_page'] );
 	}
 
 	/**
@@ -2929,7 +2963,7 @@ class WP_Query {
 	 * @param string $query URL query string.
 	 * @return array List of posts.
 	 */
-	function &query( $query ) {
+	function query( $query ) {
 		$this->init();
 		$this->query = $this->query_vars = wp_parse_args( $query );
 		return $this->get_posts();
@@ -3024,7 +3058,7 @@ class WP_Query {
 	}
 
 	/**
- 	 * Is the query for an archive page?
+ 	 * Is the query for an existing archive page?
  	 *
  	 * Month, Year, Category, Author, Post Type archive...
 	 *
@@ -3037,7 +3071,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a post type archive page?
+	 * Is the query for an existing post type archive page?
 	 *
 	 * @since 3.1.0
 	 *
@@ -3054,7 +3088,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for an attachment page?
+	 * Is the query for an existing attachment page?
 	 *
 	 * @since 3.1.0
 	 *
@@ -3065,7 +3099,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for an author archive page?
+	 * Is the query for an existing author archive page?
 	 *
 	 * If the $author parameter is specified, this function will additionally
 	 * check if the query is for one of the authors specified.
@@ -3097,7 +3131,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a category archive page?
+	 * Is the query for an existing category archive page?
 	 *
 	 * If the $category parameter is specified, this function will additionally
 	 * check if the query is for one of the categories specified.
@@ -3129,7 +3163,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a tag archive page?
+	 * Is the query for an existing tag archive page?
 	 *
 	 * If the $tag parameter is specified, this function will additionally
 	 * check if the query is for one of the tags specified.
@@ -3157,7 +3191,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a taxonomy archive page?
+	 * Is the query for an existing taxonomy archive page?
 	 *
 	 * If the $taxonomy parameter is specified, this function will additionally
 	 * check if the query is for that specific $taxonomy.
@@ -3185,8 +3219,13 @@ class WP_Query {
 		$tax_array = array_intersect( array_keys( $wp_taxonomies ), (array) $taxonomy );
 		$term_array = (array) $term;
 
-		if ( empty( $term ) ) // Only a Taxonomy provided
-			return isset( $queried_object->taxonomy ) && count( $tax_array ) && in_array( $queried_object->taxonomy, $tax_array );
+		// Check that the taxonomy matches.
+		if ( ! ( isset( $queried_object->taxonomy ) && count( $tax_array ) && in_array( $queried_object->taxonomy, $tax_array ) ) )
+			return false;
+
+		// Only a Taxonomy provided.
+		if ( empty( $term ) )
+			return true;
 
 		return isset( $queried_object->term_id ) &&
 			count( array_intersect(
@@ -3207,7 +3246,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a date archive?
+	 * Is the query for an existing date archive?
 	 *
 	 * @since 3.1.0
 	 *
@@ -3218,7 +3257,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a day archive?
+	 * Is the query for an existing day archive?
 	 *
 	 * @since 3.1.0
 	 *
@@ -3305,7 +3344,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a month archive?
+	 * Is the query for an existing month archive?
 	 *
 	 * @since 3.1.0
 	 *
@@ -3316,7 +3355,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a single page?
+	 * Is the query for an existing single page?
 	 *
 	 * If the $page parameter is specified, this function will additionally
 	 * check if the query is for one of the pages specified.
@@ -3395,7 +3434,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a single post?
+	 * Is the query for an existing single post?
 	 *
 	 * Works for any post type, except attachments and pages
 	 *
@@ -3432,7 +3471,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a single post of any post type (post, attachment, page, ... )?
+	 * Is the query for an existing single post of any post type (post, attachment, page, ... )?
 	 *
 	 * If the $post_types parameter is specified, this function will additionally
 	 * check if the query is for one of the Posts Types specified.
@@ -3477,7 +3516,7 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for a specific year?
+	 * Is the query for an existing year archive?
 	 *
 	 * @since 3.1.0
 	 *

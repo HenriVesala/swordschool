@@ -62,7 +62,7 @@ function _wp_translate_postdata( $update = false, $post_data = null ) {
 			} else {
 				return new WP_Error( 'edit_others_posts', $update ?
 					__( 'You are not allowed to edit posts as this user.' ) :
-					__( 'You are not allowed to post as this user.' )
+					__( 'You are not allowed to create posts as this user.' )
 				);
 			}
 		}
@@ -123,6 +123,10 @@ function _wp_translate_postdata( $update = false, $post_data = null ) {
 		$mn = ($mn > 59 ) ? $mn -60 : $mn;
 		$ss = ($ss > 59 ) ? $ss -60 : $ss;
 		$post_data['post_date'] = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $aa, $mm, $jj, $hh, $mn, $ss );
+		$valid_date = wp_checkdate( $mm, $jj, $aa, $post_data['post_date'] );
+		if ( !$valid_date ) {
+			return new WP_Error( 'invalid_date', __( 'Whoops, the provided date is invalid.' ) );
+		}
 		$post_data['post_date_gmt'] = get_gmt_from_date( $post_data['post_date'] );
 	}
 
@@ -158,16 +162,6 @@ function edit_post( $post_data = null ) {
 			wp_die( __('You are not allowed to edit this post.' ));
 	}
 
-	// Autosave shouldn't save too soon after a real save
-	if ( 'autosave' == $post_data['action'] ) {
-		$post = get_post( $post_ID );
-		$now = time();
-		$then = strtotime($post->post_date_gmt . ' +0000');
-		$delta = AUTOSAVE_INTERVAL / 2;
-		if ( ($now - $then) < $delta )
-			return $post_ID;
-	}
-
 	$post_data = _wp_translate_postdata( true, $post_data );
 	if ( is_wp_error($post_data) )
 		wp_die( $post_data->get_error_message() );
@@ -198,6 +192,14 @@ function edit_post( $post_data = null ) {
 			set_post_format( $post_ID, false );
 	}
 
+	// Featured Images
+	if ( isset( $post_data['thumbnail_id'] ) ) {
+		if ( '-1' == $post_data['thumbnail_id'] )
+			delete_post_thumbnail( $post_ID );
+		else
+			set_post_thumbnail( $post_ID, $post_data['thumbnail_id'] );
+	}
+
 	// Meta Stuff
 	if ( isset($post_data['meta']) && $post_data['meta'] ) {
 		foreach ( $post_data['meta'] as $key => $value ) {
@@ -220,6 +222,16 @@ function edit_post( $post_data = null ) {
 			if ( is_protected_meta( $meta->meta_key, 'post' ) || ! current_user_can( 'delete_post_meta', $post_ID, $meta->meta_key ) )
 				continue;
 			delete_meta( $key );
+		}
+	}
+
+	// Attachment stuff
+	if ( 'attachment' == $post_data['post_type'] && isset( $post_data['_wp_attachment_image_alt'] ) ) {
+		$image_alt = get_post_meta( $post_ID, '_wp_attachment_image_alt', true );
+		if ( $image_alt != stripslashes( $post_data['_wp_attachment_image_alt'] ) ) {
+			$image_alt = wp_strip_all_tags( stripslashes( $post_data['_wp_attachment_image_alt'] ), true );
+			// update_meta expects slashed
+			update_post_meta( $post_ID, '_wp_attachment_image_alt', addslashes( $image_alt ) );
 		}
 	}
 
@@ -448,19 +460,6 @@ function get_default_post_to_edit( $post_type = 'post', $create_in_db = false ) 
 	$post->post_name = '';
 
 	return $post;
-}
-
-/**
- * Get the default page information to use.
- *
- * @since 2.5.0
- *
- * @return WP_Post Post object containing all the default post data as attributes
- */
-function get_default_page_to_edit() {
-	$page = get_default_post_to_edit();
-	$page->post_type = 'page';
-	return $page;
 }
 
 /**
@@ -1048,24 +1047,28 @@ function get_sample_permalink($id, $title = null, $name = null) {
 }
 
 /**
- * sample permalink html
- *
- * intended to be used for the inplace editor of the permalink post slug on in the post (and page?) editor.
+ * Returns the HTML of the sample permalink slug editor.
  *
  * @since 2.5.0
  *
  * @param int|object $id Post ID or post object.
- * @param string $new_title (optional) New title
- * @param string $new_slug (optional) New slug
- * @return string intended to be used for the inplace editor of the permalink post slug on in the post (and page?) editor.
+ * @param string $new_title Optional. New title.
+ * @param string $new_slug Optional. New slug.
+ * @param string|WP_Screen $screen Optional. Screen where the editor is being shown.
+ * @return string The HTML of the sample permalink slug editor.
  */
-function get_sample_permalink_html( $id, $new_title = null, $new_slug = null ) {
+function get_sample_permalink_html( $id, $new_title = null, $new_slug = null, $screen = null ) {
 	global $wpdb;
 	$post = get_post($id);
 
 	list($permalink, $post_name) = get_sample_permalink($post->ID, $new_title, $new_slug);
 
-	if ( 'publish' == $post->post_status ) {
+	if ( isset( $screen ) )
+		$screen = convert_to_screen( $screen );
+	else
+		$screen = get_current_screen();
+
+	if ( 'publish' == get_post_status( $post ) ) {
 		$ptype = get_post_type_object($post->post_type);
 		$view_post = $ptype->labels->view_item;
 		$title = __('Click to edit this part of the permalink');
@@ -1074,11 +1077,13 @@ function get_sample_permalink_html( $id, $new_title = null, $new_slug = null ) {
 	}
 
 	if ( false === strpos($permalink, '%postname%') && false === strpos($permalink, '%pagename%') ) {
+		if ( 'options-reading' == $screen->id )
+			return '';
 		$return = '<strong>' . __('Permalink:') . "</strong>\n" . '<span id="sample-permalink" tabindex="-1">' . $permalink . "</span>\n";
 		if ( '' == get_option( 'permalink_structure' ) && current_user_can( 'manage_options' ) && !( 'page' == get_option('show_on_front') && $id == get_option('page_on_front') ) )
-			$return .= '<span id="change-permalinks"><a href="options-permalink.php" class="button" target="_blank">' . __('Change Permalinks') . "</a></span>\n";
+			$return .= '<span id="change-permalinks"><a href="options-permalink.php" class="button button-small" target="_blank">' . __('Change Permalinks') . "</a></span>\n";
 		if ( isset($view_post) )
-			$return .= "<span id='view-post-btn'><a href='$permalink' class='button'>$view_post</a></span>\n";
+			$return .= "<span id='view-post-btn'><a href='$permalink' class='button button-small'>$view_post</a></span>\n";
 
 		$return = apply_filters('get_sample_permalink_html', $return, $id, $new_title, $new_slug);
 
@@ -1102,13 +1107,13 @@ function get_sample_permalink_html( $id, $new_title = null, $new_slug = null ) {
 	$post_name_html = '<span id="editable-post-name" title="' . $title . '">' . $post_name_abridged . '</span>';
 	$display_link = str_replace(array('%pagename%','%postname%'), $post_name_html, $permalink);
 	$view_link = str_replace(array('%pagename%','%postname%'), $post_name, $permalink);
-	$return =  '<strong>' . __('Permalink:') . "</strong>\n";
+	$return  = ( 'options-reading' == $screen->id ) ? __( 'Located at' ) . "\n" : '<strong>' . __( 'Permalink:' ) . "</strong>\n";
 	$return .= '<span id="sample-permalink" tabindex="-1">' . $display_link . "</span>\n";
 	$return .= '&lrm;'; // Fix bi-directional text display defect in RTL languages.
-	$return .= '<span id="edit-slug-buttons"><a href="#post_name" class="edit-slug button hide-if-no-js" onclick="editPermalink(' . $id . '); return false;">' . __('Edit') . "</a></span>\n";
+	$return .= '<span id="edit-slug-buttons"><a href="#post_name" class="edit-slug button button-small hide-if-no-js" onclick="editPermalink(' . $id . '); return false;">' . __('Edit') . "</a></span>\n";
 	$return .= '<span id="editable-post-name-full">' . $post_name . "</span>\n";
-	if ( isset($view_post) )
-		$return .= "<span id='view-post-btn'><a href='$view_link' class='button'>$view_post</a></span>\n";
+	if ( isset( $view_post ) && 'options-reading' != $screen->id )
+		$return .= "<span id='view-post-btn'><a href='$view_link' class='button button-small'>$view_post</a></span>\n";
 
 	$return = apply_filters('get_sample_permalink_html', $return, $id, $new_title, $new_slug);
 
@@ -1121,16 +1126,15 @@ function get_sample_permalink_html( $id, $new_title = null, $new_slug = null ) {
  * @since 2.9.0
  *
  * @param int $thumbnail_id ID of the attachment used for thumbnail
- * @param int $post_id ID of the post associated with the thumbnail, defaults to global $post_ID
+ * @param mixed $post The post ID or object associated with the thumbnail, defaults to global $post.
  * @return string html
  */
-function _wp_post_thumbnail_html( $thumbnail_id = null, $post_id = null ) {
-	global $content_width, $_wp_additional_image_sizes, $post_ID;
+function _wp_post_thumbnail_html( $thumbnail_id = null, $post = null ) {
+	global $content_width, $_wp_additional_image_sizes;
 
-	if ( empty( $post_id ) )
-		$post_id = $post_ID;
+	$post = get_post( $post );
 
-	$upload_iframe_src = esc_url( get_upload_iframe_src('image', $post_id) );
+	$upload_iframe_src = esc_url( get_upload_iframe_src('image', $post->ID ) );
 	$set_thumbnail_link = '<p class="hide-if-no-js"><a title="' . esc_attr__( 'Set featured image' ) . '" href="%s" id="set-post-thumbnail" class="thickbox">%s</a></p>';
 	$content = sprintf( $set_thumbnail_link, $upload_iframe_src, esc_html__( 'Set featured image' ) );
 
@@ -1142,14 +1146,14 @@ function _wp_post_thumbnail_html( $thumbnail_id = null, $post_id = null ) {
 		else
 			$thumbnail_html = wp_get_attachment_image( $thumbnail_id, 'post-thumbnail' );
 		if ( !empty( $thumbnail_html ) ) {
-			$ajax_nonce = wp_create_nonce( "set_post_thumbnail-$post_id" );
+			$ajax_nonce = wp_create_nonce( 'set_post_thumbnail-' . $post->ID );
 			$content = sprintf( $set_thumbnail_link, $upload_iframe_src, $thumbnail_html );
 			$content .= '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail" onclick="WPRemoveThumbnail(\'' . $ajax_nonce . '\');return false;">' . esc_html__( 'Remove featured image' ) . '</a></p>';
 		}
 		$content_width = $old_content_width;
 	}
 
-	return apply_filters( 'admin_post_thumbnail_html', $content, $post_id );
+	return apply_filters( 'admin_post_thumbnail_html', $content, $post->ID );
 }
 
 /**
@@ -1207,8 +1211,7 @@ function wp_set_post_lock( $post_id ) {
  * @return none
  */
 function _admin_notice_post_locked() {
-	global $post;
-
+	$post = get_post();
 	$lock = explode( ':', get_post_meta( $post->ID, '_edit_lock', true ) );
 	$user = isset( $lock[1] ) ? $lock[1] : get_post_meta( $post->ID, '_edit_last', true );
 	$last_user = get_userdata( $user );
@@ -1325,3 +1328,118 @@ function post_preview() {
 
 	return $url;
 }
+
+/**
+ * Creates new pages to be set as a front page or a page for posts in Reading Settings.
+ *
+ * @todo Make sure we are doing adequate sanitization on success, and cleanup/reset on failure.
+ *
+ * @since 3.5.0
+ * @access private
+ */
+function _show_on_front_reading_settings( $show_on_front_value ) {
+	// If we're not saving the Reading Settings screen, don't intercept.
+	if ( ! $_POST || ! strpos( wp_get_referer(), 'options-reading.php' ) )
+		return $show_on_front_value;
+
+	if ( 'posts' == $show_on_front_value ) {
+		update_option( 'page_on_front', 0 );
+		update_option( 'page_for_posts', 0 );
+		return $show_on_front_value;
+	}
+
+	// If a new front page was meant to be created, go forth and create it.
+	if ( 'new' == $_POST['page_on_front'] ) {
+
+		// If the user can't create pages, revert.
+		if ( ! current_user_can( 'create_posts', 'page' ) ) {
+			// If an existing page is set, keep things as is, rather than reverting to showing posts.
+			if ( get_option( 'page_on_front' ) ) {
+				$show_on_front_value = 'page';
+			} else {
+				$show_on_front_value = 'posts';
+				update_option( 'page_on_front', 0 );
+				update_option( 'page_for_posts', 0 );
+			}
+			add_settings_error( 'page_on_front', 'create_pages', __( 'You are not allowed to create pages on this site.' ) );
+			return $show_on_front_value;
+		}
+
+		$existing_page = get_page_by_title( stripslashes( $_POST['page_on_front_title'] ) );
+
+		// If page already exists and it's public, there's no need to create a new page.
+		if ( $existing_page && 'publish' == $existing_page->post_status ) {
+			$page_id = $existing_page->ID;
+		} else {
+			$page_id = wp_insert_post( array(
+				'post_title' => $_POST['page_on_front_title'],
+				'post_type' => 'page',
+				'post_status' => 'publish',
+				'comment_status' => 'closed',
+				'ping_status' => 'closed',
+				// @todo Create some sort of a 'context' in postmeta so we know we created a page through these means.
+				//       Consider then showing that context in the list table as a good-first-step.
+			) );
+		}
+
+		if ( $page_id ) {
+			update_option( 'page_on_front', $page_id );
+		// If we can't save it, revert.
+		} elseif ( get_option( 'page_on_front' ) ) {
+			// If an existing page is set, keep things as is, rather than reverting to showing posts.
+			$show_on_front_value = 'page';
+		} else {
+			$show_on_front_value = 'posts';
+			update_option( 'page_on_front', 0 );
+			update_option( 'page_for_posts', 0 );
+			return $show_on_front_value;
+		}
+	} elseif ( $_POST['page_on_front'] ) {
+		update_option( 'page_on_front', $_POST['page_on_front'] );
+	} else {
+		// They didn't select a page at all. Sad face.
+		$show_on_front_value = 'posts';
+		update_option( 'page_on_front', 0 );
+		update_option( 'page_for_posts', 0 );
+		add_settings_error( 'page_on_front', 'no_page_selected', __( 'You must select a page to set a static front page.' ) );
+		return $show_on_front_value;
+	}
+
+	// If a page for posts was meant to be specified, update/create it.
+	if ( ! isset( $_POST['page_for_posts'] ) ) {
+		update_option( 'page_for_posts', 0 );
+		return $show_on_front_value;
+	}
+
+	$page_for_posts = (int) $_POST['page_for_posts'];
+
+	if ( ! $page_for_posts || ! $page = get_post( $page_for_posts, ARRAY_A ) ) {
+		update_option( 'page_for_posts', 0 );
+		return $show_on_front_value;
+	}
+
+	if ( 'page' != $page['post_type'] || ! current_user_can( 'edit_post', $page_for_posts ) ) {
+		update_option( 'page_for_posts', 0 );
+		return $show_on_front_value;
+	}
+
+	if ( 'publish' != $page['post_status'] && ! current_user_can( 'publish_post', $page_for_posts ) ) {
+		update_option( 'page_for_posts', 0 );
+		return $show_on_front_value;
+	}
+
+	$args = add_magic_quotes( $page );
+	$args['post_title']  = $_POST['page_for_posts_title'];
+	$args['post_name']   = $_POST['post_name'];
+	$args['post_status'] = 'publish';
+	if ( 'auto-draft' == $page['post_status'] ) {
+		$args['comment_status'] = 'closed';
+		$args['ping_status'] = 'closed';
+	}
+
+	$page_id = wp_insert_post( $args );
+	update_option( 'page_for_posts', $page_id );
+
+	return $show_on_front_value;
+}
+add_filter( 'sanitize_option_show_on_front', '_show_on_front_reading_settings' );

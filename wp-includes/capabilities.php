@@ -725,7 +725,7 @@ class WP_User {
 
 		//Filter out caps that are not role names and assign to $this->roles
 		if ( is_array( $this->caps ) )
-			$this->roles = array_filter( array_keys( $this->caps ), array( &$wp_roles, 'is_role' ) );
+			$this->roles = array_filter( array_keys( $this->caps ), array( $wp_roles, 'is_role' ) );
 
 		//Build $allcaps from role caps, overlay user's $caps
 		$this->allcaps = array();
@@ -786,7 +786,7 @@ class WP_User {
 		foreach ( (array) $this->roles as $oldrole )
 			unset( $this->caps[$oldrole] );
 
-		if ( 1 == count( $this->roles ) && $role == $this->roles[0] )
+		if ( 1 == count( $this->roles ) && $role == current( $this->roles ) )
 			return;
 
 		if ( !empty( $role ) ) {
@@ -868,7 +868,7 @@ class WP_User {
 	 * @param string $cap Capability name.
 	 */
 	function remove_cap( $cap ) {
-		if ( empty( $this->caps[$cap] ) )
+		if ( ! isset( $this->caps[$cap] ) )
 			return;
 		unset( $this->caps[$cap] );
 		update_user_meta( $this->ID, $this->cap_key, $this->caps );
@@ -1046,6 +1046,14 @@ function map_meta_cap( $cap, $user_id ) {
 				$caps[] = $post_type->cap->delete_private_posts;
 		}
 		break;
+	// current_user_can( 'create_posts', $post_type )
+	case 'create_posts':
+		$post_type = isset( $args[0] ) ? $args[0] : 'post';
+		$post_type_object = get_post_type_object( $post_type );
+
+		$caps[] = $post_type_object->cap->create_posts;
+
+		break;
 		// edit_post breaks down to edit_posts, edit_published_posts, or
 		// edit_others_posts
 	case 'edit_post':
@@ -1134,6 +1142,12 @@ function map_meta_cap( $cap, $user_id ) {
 			$caps[] = $post_type->cap->read_private_posts;
 		else
 			$caps = map_meta_cap( 'edit_post', $user_id, $post->ID );
+		break;
+	case 'publish_post':
+		$post = get_post( $args[0] );
+		$post_type = get_post_type_object( $post->post_type );
+
+		$caps[] = $post_type->cap->publish_posts;
 		break;
 	case 'edit_post_meta':
 	case 'delete_post_meta':
@@ -1317,7 +1331,7 @@ function author_can( $post, $capability ) {
 	$args = array_slice( func_get_args(), 2 );
 	$args = array_merge( array( $capability ), $args );
 
-	return call_user_func_array( array( &$author, 'has_cap' ), $args );
+	return call_user_func_array( array( $author, 'has_cap' ), $args );
 }
 
 /**
@@ -1339,7 +1353,7 @@ function user_can( $user, $capability ) {
 	$args = array_slice( func_get_args(), 2 );
 	$args = array_merge( array( $capability ), $args );
 
-	return call_user_func_array( array( &$user, 'has_cap' ), $args );
+	return call_user_func_array( array( $user, 'has_cap' ), $args );
 }
 
 /**

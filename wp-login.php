@@ -39,7 +39,7 @@ if ( force_ssl_admin() && ! is_ssl() ) {
  * @param WP_Error $wp_error Optional. WordPress Error Object
  */
 function login_header($title = 'Log In', $message = '', $wp_error = '') {
-	global $error, $interim_login, $current_site;
+	global $error, $interim_login, $current_site, $action;
 
 	// Don't index any of these forms
 	add_action( 'login_head', 'wp_no_robots' );
@@ -86,9 +86,15 @@ function login_header($title = 'Log In', $message = '', $wp_error = '') {
 	if ( $interim_login )
 		$login_header_url = '#';
 
+	$classes = array( 'login-action-' . $action );
+	if ( wp_is_mobile() )
+		$classes[] = 'mobile';
+	if ( is_rtl() )
+		$classes[] = 'rtl';
+	$classes = apply_filters( 'login_body_class', $classes, $action );
 	?>
 	</head>
-	<body class="login<?php if ( wp_is_mobile() ) echo ' mobile'; ?>">
+	<body class="login <?php echo esc_attr( implode( ' ', $classes ) ); ?>">
 	<div id="login">
 		<h1><a href="<?php echo esc_url( $login_header_url ); ?>" title="<?php echo esc_attr( $login_header_title ); ?>"><?php bloginfo( 'name' ); ?></a></h1>
 	<?php
@@ -309,7 +315,7 @@ function register_new_user( $user_login, $user_email ) {
 		$errors->add( 'invalid_username', __( '<strong>ERROR</strong>: This username is invalid because it uses illegal characters. Please enter a valid username.' ) );
 		$sanitized_user_login = '';
 	} elseif ( username_exists( $sanitized_user_login ) ) {
-		$errors->add( 'username_exists', __( '<strong>ERROR</strong>: This username is already registered, please choose another one.' ) );
+		$errors->add( 'username_exists', __( '<strong>ERROR</strong>: This username is already registered. Please choose another one.' ) );
 	}
 
 	// Check the e-mail address
@@ -390,7 +396,7 @@ case 'postpass' :
 	}
 
 	// 10 days
-	setcookie( 'wp-postpass_' . COOKIEHASH, $wp_hasher->HashPassword( stripslashes( $_POST['post_password'] ) ), time() + 864000, COOKIEPATH );
+	setcookie( 'wp-postpass_' . COOKIEHASH, $wp_hasher->HashPassword( stripslashes( $_POST['post_password'] ) ), time() + 10 * DAY_IN_SECONDS, COOKIEPATH );
 
 	wp_safe_redirect( wp_get_referer() );
 	exit();
@@ -459,11 +465,14 @@ case 'rp' :
 		exit;
 	}
 
-	$errors = '';
+	$errors = new WP_Error();
 
-	if ( isset($_POST['pass1']) && $_POST['pass1'] != $_POST['pass2'] ) {
-		$errors = new WP_Error('password_reset_mismatch', __('The passwords do not match.'));
-	} elseif ( isset($_POST['pass1']) && !empty($_POST['pass1']) ) {
+	if ( isset($_POST['pass1']) && $_POST['pass1'] != $_POST['pass2'] )
+		$errors->add( 'password_reset_mismatch', __( 'The passwords do not match.' ) );
+
+	do_action( 'validate_password_reset', $errors, $user );
+
+	if ( ( ! $errors->get_error_code() ) && isset( $_POST['pass1'] ) && !empty( $_POST['pass1'] ) ) {
 		reset_password($user, $_POST['pass1']);
 		login_header( __( 'Password Reset' ), '<p class="message reset-pass">' . __( 'Your password has been reset.' ) . ' <a href="' . esc_url( wp_login_url() ) . '">' . __( 'Log in' ) . '</a></p>' );
 		login_footer();
@@ -509,7 +518,7 @@ break;
 case 'register' :
 	if ( is_multisite() ) {
 		// Multisite uses wp-signup.php
-		wp_redirect( apply_filters( 'wp_signup_location', site_url('wp-signup.php') ) );
+		wp_redirect( apply_filters( 'wp_signup_location', network_site_url('wp-signup.php') ) );
 		exit;
 	}
 

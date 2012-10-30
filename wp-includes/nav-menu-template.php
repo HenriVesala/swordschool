@@ -155,7 +155,7 @@ function wp_nav_menu( $args = array() ) {
 	if ( ! $menu && !$args->theme_location ) {
 		$menus = wp_get_nav_menus();
 		foreach ( $menus as $menu_maybe ) {
-			if ( $menu_items = wp_get_nav_menu_items($menu_maybe->term_id) ) {
+			if ( $menu_items = wp_get_nav_menu_items( $menu_maybe->term_id, array( 'update_post_term_cache' => false ) ) ) {
 				$menu = $menu_maybe;
 				break;
 			}
@@ -164,15 +164,21 @@ function wp_nav_menu( $args = array() ) {
 
 	// If the menu exists, get its items.
 	if ( $menu && ! is_wp_error($menu) && !isset($menu_items) )
-		$menu_items = wp_get_nav_menu_items( $menu->term_id );
+		$menu_items = wp_get_nav_menu_items( $menu->term_id, array( 'update_post_term_cache' => false ) );
 
-	// If no menu was found or if the menu has no items and no location was requested, call the fallback_cb if it exists
+	/*
+	 * If no menu was found:
+	 *  - Fallback (if one was specified), or bail.
+	 *
+	 * If no menu items were found:
+	 *  - Fallback, but only if no theme location was specified.
+	 *  - Otherwise, bail.
+	 */
 	if ( ( !$menu || is_wp_error($menu) || ( isset($menu_items) && empty($menu_items) && !$args->theme_location ) )
 		&& $args->fallback_cb && is_callable( $args->fallback_cb ) )
 			return call_user_func( $args->fallback_cb, (array) $args );
 
-	// If no fallback function was specified and the menu doesn't exists, bail.
-	if ( !$menu || is_wp_error($menu) )
+	if ( !$menu || is_wp_error( $menu ) || empty( $menu_items ) )
 		return false;
 
 	$nav_menu = $items = '';
@@ -469,7 +475,7 @@ function walk_nav_menu_tree( $items, $depth, $r ) {
 	$walker = ( empty($r->walker) ) ? new Walker_Nav_Menu : $r->walker;
 	$args = array( $items, $depth, $r );
 
-	return call_user_func_array( array(&$walker, 'walk'), $args );
+	return call_user_func_array( array($walker, 'walk'), $args );
 }
 
 /**

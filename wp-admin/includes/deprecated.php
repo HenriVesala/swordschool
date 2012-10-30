@@ -42,16 +42,34 @@ function documentation_link() {
  * @since 2.0.0
  * @deprecated 3.0.0
  * @deprecated Use wp_constrain_dimensions()
+ * @see wp_constrain_dimensions()
  *
  * @param int $width Current width of the image
  * @param int $height Current height of the image
  * @param int $wmax Maximum wanted width
  * @param int $hmax Maximum wanted height
- * @return mixed Array(height,width) of shrunk dimensions.
+ * @return array Shrunk dimensions (width, height).
  */
 function wp_shrink_dimensions( $width, $height, $wmax = 128, $hmax = 96 ) {
 	_deprecated_function( __FUNCTION__, '3.0', 'wp_constrain_dimensions()' );
 	return wp_constrain_dimensions( $width, $height, $wmax, $hmax );
+}
+
+/**
+ * Calculated the new dimensions for a downsampled image.
+ *
+ * @since 2.0.0
+ * @deprecated 3.5.0
+ * @deprecated Use wp_constrain_dimensions()
+ * @see wp_constrain_dimensions()
+ *
+ * @param int $width Current width of the image
+ * @param int $height Current height of the image
+ * @return array Shrunk dimensions (width, height).
+ */
+function get_udims( $width, $height ) {
+	_deprecated_function( __FUNCTION__, '3.5', 'wp_constrain_dimensions()' );
+	return wp_constrain_dimensions( $width, $height, 128, 96 );
 }
 
 /**
@@ -974,3 +992,37 @@ function get_post_to_edit( $id ) {
 	return get_post( $id, OBJECT, 'edit' );
 }
 
+/**
+ * Get the default page information to use.
+ *
+ * @since 2.5.0
+ * @deprecated 3.5.0
+ * @deprecated Use get_default_post_to_edit()
+ *
+ * @return WP_Post Post object containing all the default post data as attributes
+ */
+function get_default_page_to_edit() {
+	_deprecated_function( __FUNCTION__, '3.5', "get_default_post_to_edit( 'page' )" );
+
+	$page = get_default_post_to_edit();
+	$page->post_type = 'page';
+	return $page;
+}
+
+/**
+ * This was once used to create a thumbnail from an Image given a maximum side size.
+ *
+ * @since 1.2.0
+ * @deprecated 3.5.0
+ * @deprecated Use image_resize()
+ * @see  image_resize()
+ *
+ * @param mixed $file Filename of the original image, Or attachment id.
+ * @param int $max_side Maximum length of a single side for the thumbnail.
+ * @param mixed $deprecated Never used.
+ * @return string Thumbnail path on success, Error string on failure.
+ */
+function wp_create_thumbnail( $file, $max_side, $deprecated = '' ) {
+	_deprecated_function( __FUNCTION__, '3.5', 'image_resize' );
+	return apply_filters( 'wp_create_thumbnail', image_resize( $file, $max_side, $max_side ) );
+}

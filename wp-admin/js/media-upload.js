@@ -86,3 +86,85 @@ var tb_position;
 	});
 
 })(jQuery);
+
+// WordPress, TinyMCE, and Media
+// -----------------------------
+(function($){
+	// Stores the editors' `wp.media.controller.Workflow` instances.
+	var workflows = {};
+
+	wp.mce.media = {
+		insert: send_to_editor,
+
+		add: function( id, options ) {
+			var workflow = this.get( id );
+
+			if ( workflow )
+				return workflow;
+
+			workflow = workflows[ id ] = wp.media( _.defaults( options || {}, {
+				title:    wp.media.view.l10n.insertMedia,
+				multiple: true,
+				describe: true
+			} ) );
+
+			workflow.on( 'update:insert', function( selection ) {
+				this.insert( selection.map( function( attachment ) {
+					if ( 'image' === attachment.get('type') )
+						return wp.media.string.image( attachment ) + ' ';
+					else
+						return wp.media.string.link( attachment ) + ' ';
+				}).join('') );
+			}, this );
+
+			workflow.on( 'update:gallery', function( selection ) {
+				var view = wp.mce.view.get('gallery'),
+					shortcode;
+
+				if ( ! view )
+					return;
+
+				shortcode = view.gallery.shortcode( selection );
+				this.insert( shortcode.string() );
+
+				// Reset the workflow view to the library.
+				workflow.render('library');
+			}, this );
+
+			return workflow;
+		},
+
+		get: function( id ) {
+			return workflows[ id ];
+		},
+
+		remove: function( id ) {
+			delete workflows[ id ];
+		},
+
+		init: function() {
+			$('.insert-media').on( 'click', function( event ) {
+				var editor = $(this).data('editor'),
+					workflow;
+
+				event.preventDefault();
+
+				if ( ! editor )
+					return;
+
+				workflow = wp.mce.media.get( editor );
+
+				// If the workflow exists, just open it.
+				if ( workflow ) {
+					workflow.open();
+					return;
+				}
+
+				// Initialize the editor's workflow if we haven't yet.
+				wp.mce.media.add( editor );
+			});
+		}
+	};
+
+	$( wp.mce.media.init );
+}(jQuery));

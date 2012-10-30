@@ -1,0 +1,50 @@
+html {
+    background-image: url(http://swordschool.axis-of-evil.org/wp-content/uploads/2012/10/background1.jpg);
+    background-position: right top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% auto;
+}
+
+body {
+    background: none !important;
+}
+
+body #wrapper {
+    border-radius: 20px;
+    padding: 20px;
+    clear: both;
+    display: block;
+
+}
+
+div#horizontal-outer-widgets-1 {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+#menu-branches {
+    font-size: 18px;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#menu-branches li {
+    float: left;
+    padding-left: 20px;
+    background-image: none;
+}
+
+#anchors-menu {
+    clear: both;
+}
+
+#anchors-menu h3 {
+    border: none;
+}
+
+#nav ul.sf-menu li a { background: none !important; }
+
+body article.page {
+    background-color: rgba(255, 255, 255, 0.8);
+}

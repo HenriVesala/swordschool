@@ -1,8 +1,7 @@
-if ( typeof wp === 'undefined' )
-	var wp = {};
+window.wp = window.wp || {};
 
 (function($){
-	var Attachment, Attachments, Query;
+	var Attachment, Attachments, Query, compare, l10n;
 
 	/**
 	 * wp.media( attributes )
@@ -16,16 +15,37 @@ if ( typeof wp === 'undefined' )
 	 */
 	media = wp.media = function( attributes ) {
 		if ( media.controller.Workflow )
-			return new media.controller.Workflow( attributes ).render();
+			return new media.controller.Workflow( attributes ).attach().render();
 	};
 
 	_.extend( media, { model: {}, view: {}, controller: {} });
+
+	// Link any localized strings.
+	l10n = media.model.l10n = _.isUndefined( _wpMediaModelsL10n ) ? {} : _wpMediaModelsL10n;
 
 	/**
 	 * ========================================================================
 	 * UTILITIES
 	 * ========================================================================
 	 */
+
+	/**
+	 * A basic comparator.
+	 *
+	 * @param  {mixed}  a  The primary parameter to compare.
+	 * @param  {mixed}  b  The primary parameter to compare.
+	 * @param  {string} ac The fallback parameter to compare, a's cid.
+	 * @param  {string} bc The fallback parameter to compare, b's cid.
+	 * @return {number}    -1: a should come before b.
+	 *                      0: a and b are of the same rank.
+	 *                      1: b should come before a.
+	 */
+	compare = function( a, b, ac, bc ) {
+		if ( _.isEqual( a, b ) )
+			return ac === bc ? 0 : (ac > bc ? -1 : 1);
+		else
+			return a > b ? -1 : 1;
+	};
 
 	_.extend( media, {
 		/**
@@ -103,6 +123,45 @@ if ( typeof wp === 'undefined' )
 					deferred.rejectWith( this, arguments );
 				});
 			}).promise();
+		},
+
+		// Scales a set of dimensions to fit within bounding dimensions.
+		fit: function( dimensions ) {
+			var width     = dimensions.width,
+				height    = dimensions.height,
+				maxWidth  = dimensions.maxWidth,
+				maxHeight = dimensions.maxHeight,
+				constraint;
+
+			// Compare ratios between the two values to determine which
+			// max to constrain by. If a max value doesn't exist, then the
+			// opposite side is the constraint.
+			if ( ! _.isUndefined( maxWidth ) && ! _.isUndefined( maxHeight ) ) {
+				constraint = ( width / height > maxWidth / maxHeight ) ? 'width' : 'height';
+			} else if ( _.isUndefined( maxHeight ) ) {
+				constraint = 'width';
+			} else if (  _.isUndefined( maxWidth ) && height > maxHeight ) {
+				constraint = 'height';
+			}
+
+			// If the value of the constrained side is larger than the max,
+			// then scale the values. Otherwise return the originals; they fit.
+			if ( 'width' === constraint && width > maxWidth ) {
+				return {
+					width : maxWidth,
+					height: Math.round( maxWidth * height / width )
+				};
+			} else if ( 'height' === constraint && height > maxHeight ) {
+				return {
+					width : Math.round( maxHeight * width / height ),
+					height: maxHeight
+				};
+			} else {
+				return {
+					width : width,
+					height: height
+				};
+			}
 		}
 	});
 
@@ -118,7 +177,7 @@ if ( typeof wp === 'undefined' )
 	 */
 	Attachment = media.model.Attachment = Backbone.Model.extend({
 		sync: function( method, model, options ) {
-			// Overload the read method so Attachment.fetch() functions correctly.
+			// Overload the `read` request so Attachment.fetch() functions correctly.
 			if ( 'read' === method ) {
 				options = options || {};
 				options.context = this;
@@ -128,13 +187,36 @@ if ( typeof wp === 'undefined' )
 				});
 				return media.ajax( options );
 
-			// Otherwise, fall back to Backbone.sync()
-			} else {
-				return Backbone.sync.apply( this, arguments );
+			// Overload the `update` request so properties can be saved.
+			} else if ( 'update' === method ) {
+				options = options || {};
+				options.context = this;
+
+				// Set the action and ID.
+				options.data = _.extend( options.data || {}, {
+					action: 'save-attachment',
+					id:     this.id,
+					nonce:  l10n.saveAttachmentNonce
+				});
+
+				// Record the values of the changed attributes.
+				if ( options.changes ) {
+					_.each( options.changes, function( value, key ) {
+						options.changes[ key ] = this.get( key );
+					}, this );
+
+					options.data.changes = options.changes;
+					delete options.changes;
+				}
+
+				return media.ajax( options );
 			}
 		},
 
 		parse: function( resp, xhr ) {
+			if ( ! resp )
+				return resp;
+
 			// Convert date strings into Date objects.
 			resp.date = new Date( resp.date );
 			resp.modified = new Date( resp.modified );
@@ -159,17 +241,82 @@ if ( typeof wp === 'undefined' )
 		initialize: function( models, options ) {
 			options = options || {};
 
+			this.props   = new Backbone.Model();
 			this.filters = options.filters || {};
 
+			// Bind default `change` events to the `props` model.
+			this.props.on( 'change:order',   this._changeOrder,   this );
+			this.props.on( 'change:orderby', this._changeOrderby, this );
+			this.props.on( 'change:query',   this._changeQuery,   this );
+			this.props.on( 'change:search',  this._changeSearch,  this );
+			this.props.on( 'change:type',    this._changeType,    this );
+
+			// Set the `props` model and fill the default property values.
+			this.props.set( _.defaults( options.props || {} ) );
+
+			// Observe another `Attachments` collection if one is provided.
 			if ( options.observe )
 				this.observe( options.observe );
+		},
 
-			if ( options.mirror )
-				this.mirror( options.mirror );
+		// Automatically sort the collection when the order changes.
+		_changeOrder: function( model, order ) {
+			if ( this.comparator )
+				this.sort();
+		},
+
+		// Set the default comparator only when the `orderby` property is set.
+		_changeOrderby: function( model, orderby ) {
+			// If a different comparator is defined, bail.
+			if ( this.comparator && this.comparator !== Attachments.comparator )
+				return;
+
+			if ( orderby && 'post__in' !== orderby )
+				this.comparator = Attachments.comparator;
+			else
+				delete this.comparator;
+		},
+
+		// If the `query` property is set to true, query the server using
+		// the `props` values, and sync the results to this collection.
+		_changeQuery: function( model, query ) {
+			if ( query ) {
+				this.props.on( 'change', this._requery, this );
+				this._requery();
+			} else {
+				this.props.off( 'change', this._requery, this );
+			}
+		},
+
+		_changeFilteredProp: function( prop, model, term ) {
+			// Bail if we're currently searching for the same term.
+			if ( this.props.get( prop ) === term )
+				return;
+
+			if ( term && ! this.filters[ prop ] )
+				this.filters[ prop ] = Attachments.filters[ prop ];
+			else if ( ! term && this.filters[ prop ] === Attachments.filters[ prop ] )
+				delete this.filters[ prop ];
+
+			// If no `Attachments` model is provided to source the searches
+			// from, then automatically generate a source from the existing
+			// models.
+			if ( ! this.props.get('source') )
+				this.props.set( 'source', new Attachments( this.models ) );
+
+			this.reset( this.props.get('source').filter( this.validator ) );
+		},
+
+		_changeSearch: function( model, term ) {
+			return this._changeFilteredProp( 'search', model, term );
+		},
+
+		_changeType: function( model, term ) {
+			return this._changeFilteredProp( 'type', model, term );
 		},
 
 		validator: function( attachment ) {
-			return _.all( this.filters, function( filter ) {
+			return _.all( this.filters, function( filter, key ) {
 				return !! filter.call( this, attachment );
 			}, this );
 		},
@@ -223,6 +370,7 @@ if ( typeof wp === 'undefined' )
 		more: function( options ) {
 			if ( this.mirroring && this.mirroring.more )
 				return this.mirroring.more( options );
+			return $.Deferred().resolve().promise();
 		},
 
 		parse: function( resp, xhr ) {
@@ -230,6 +378,50 @@ if ( typeof wp === 'undefined' )
 				var attachment = Attachment.get( attrs.id );
 				return attachment.set( attachment.parse( attrs, xhr ) );
 			});
+		},
+
+		_requery: function() {
+			if ( this.props.get('query') )
+				this.mirror( Query.get( this.props.toJSON() ) );
+		}
+	}, {
+		comparator: function( a, b ) {
+			var key   = this.props.get('orderby'),
+				order = this.props.get('order') || 'DESC',
+				ac    = a.cid,
+				bc    = b.cid;
+
+			a = a.get( key );
+			b = b.get( key );
+
+			if ( 'date' === key || 'modified' === key ) {
+				a = a || new Date();
+				b = b || new Date();
+			}
+
+			return ( 'DESC' === order ) ? compare( a, b, ac, bc ) : compare( b, a, bc, ac );
+		},
+
+		filters: {
+			// Note that this client-side searching is *not* equivalent
+			// to our server-side searching.
+			search: function( attachment ) {
+				if ( ! this.props.get('search') )
+					return true;
+
+				return _.any(['title','filename','description','caption','name'], function( key ) {
+					var value = attachment.get( key );
+					return value && -1 !== value.search( this.props.get('search') );
+				}, this );
+			},
+
+			type: function( attachment ) {
+				var type = this.props.get('type');
+				if ( ! type )
+					return true;
+
+				return -1 !== type.indexOf( attachment.get('type') );
+			}
 		}
 	});
 
@@ -238,24 +430,11 @@ if ( typeof wp === 'undefined' )
 	/**
 	 * wp.media.query
 	 */
-	media.query = (function(){
-		var queries = [];
-
-		return function( args, options ) {
-			args = _.defaults( args || {}, Query.defaultArgs );
-
-			var query = _.find( queries, function( query ) {
-				return _.isEqual( query.args, args );
-			});
-
-			if ( ! query ) {
-				query = new Query( [], _.extend( options || {}, { args: args } ) );
-				queries.push( query );
-			}
-
-			return query;
-		};
-	}());
+	media.query = function( props ) {
+		return new Attachments( null, {
+			props: _.extend( _.defaults( props || {}, { orderby: 'date' } ), { query: true } )
+		});
+	};
 
 	/**
 	 * wp.media.model.Query
@@ -268,39 +447,19 @@ if ( typeof wp === 'undefined' )
 	 */
 	Query = media.model.Query = Attachments.extend({
 		initialize: function( models, options ) {
-			var orderby,
-				defaultArgs = Query.defaultArgs;
+			var allowed;
 
 			options = options || {};
 			Attachments.prototype.initialize.apply( this, arguments );
 
-			// Generate this.args. Don't mess with them.
-			this.args = _.defaults( options.args || {}, defaultArgs );
-
-			// Normalize the order.
-			this.args.order = this.args.order.toUpperCase();
-			if ( 'DESC' !== this.args.order && 'ASC' !== this.args.order )
-				this.args.order = defaultArgs.order.toUpperCase();
-
-			// Set allowed orderby values.
-			// These map directly to attachment keys in most scenarios.
-			// Exceptions are specified in orderby.keymap.
-			orderby = {
-				allowed: [ 'name', 'author', 'date', 'title', 'modified', 'parent', 'ID' ],
-				keymap:  {
-					'ID':     'id',
-					'parent': 'uploadedTo'
-				}
-			};
-
-			if ( ! _.contains( orderby.allowed, this.args.orderby ) )
-				this.args.orderby = defaultArgs.orderby;
-			this.orderkey = orderby.keymap[ this.args.orderby ] || this.args.orderby;
-
+			this.args    = options.args;
 			this.hasMore = true;
 			this.created = new Date();
 
 			this.filters.order = function( attachment ) {
+				if ( ! this.comparator )
+					return true;
+
 				// We want any items that can be placed before the last
 				// item in the set. If we add any items after the last
 				// item, then we can't guarantee the set is complete.
@@ -310,39 +469,36 @@ if ( typeof wp === 'undefined' )
 				// Handle the case where there are no items yet and
 				// we're sorting for recent items. In that case, we want
 				// changes that occurred after we created the query.
-				} else if ( 'DESC' === this.args.order && ( 'date' === this.orderkey || 'modified' === this.orderkey ) ) {
-					return attachment.get( this.orderkey ) >= this.created;
+				} else if ( 'DESC' === this.args.order && ( 'date' === this.args.orderby || 'modified' === this.args.orderby ) ) {
+					return attachment.get( this.args.orderby ) >= this.created;
 				}
 
 				// Otherwise, we don't want any items yet.
 				return false;
 			};
 
-			if ( this.args.s ) {
-				// Note that this client-side searching is *not* equivalent
-				// to our server-side searching.
-				this.filters.search = function( attachment ) {
-					return _.any(['title','filename','description','caption','name'], function( key ) {
-						var value = attachment.get( key );
-						return value && -1 !== value.search( this.args.s );
-					}, this );
-				};
-			}
-
-			this.observe( Attachments.all );
+			// Observe the central `Attachments.all` model to watch for new
+			// matches for the query.
+			//
+			// Only observe when a limited number of query args are set. There
+			// are no filters for other properties, so observing will result in
+			// false positives in those queries.
+			allowed = [ 's', 'order', 'orderby', 'posts_per_page', 'post_mime_type' ];
+			if ( _( this.args ).chain().keys().difference( allowed ).isEmpty().value() )
+				this.observe( Attachments.all );
 		},
 
 		more: function( options ) {
 			var query = this;
 
 			if ( ! this.hasMore )
-				return;
+				return $.Deferred().resolve().promise();
 
 			options = options || {};
 			options.add = true;
 
 			return this.fetch( options ).done( function( resp ) {
-				if ( _.isEmpty( resp ) || resp.length < this.args.posts_per_page )
+				if ( _.isEmpty( resp ) || -1 === this.args.posts_per_page || resp.length < this.args.posts_per_page )
 					query.hasMore = false;
 			});
 		},
@@ -362,7 +518,8 @@ if ( typeof wp === 'undefined' )
 				args = _.clone( this.args );
 
 				// Determine which page to query.
-				args.paged = Math.floor( this.length / args.posts_per_page ) + 1;
+				if ( -1 !== args.posts_per_page )
+					args.paged = Math.floor( this.length / args.posts_per_page ) + 1;
 
 				options.data.query = args;
 				return media.ajax( options );
@@ -372,50 +529,88 @@ if ( typeof wp === 'undefined' )
 				fallback = Attachments.prototype.sync ? Attachments.prototype : Backbone;
 				return fallback.sync.apply( this, arguments );
 			}
+		}
+	}, {
+		defaultProps: {
+			orderby: 'date',
+			order:   'DESC'
 		},
 
-		comparator: (function(){
-			/**
-			 * A basic comparator.
-			 *
-			 * @param  {mixed}  a  The primary parameter to compare.
-			 * @param  {mixed}  b  The primary parameter to compare.
-			 * @param  {string} ac The fallback parameter to compare, a's cid.
-			 * @param  {string} bc The fallback parameter to compare, b's cid.
-			 * @return {number}    -1: a should come before b.
-			 *                      0: a and b are of the same rank.
-			 *                      1: b should come before a.
-			 */
-			var compare = function( a, b, ac, bc ) {
-				if ( _.isEqual( a, b ) )
-					return ac === bc ? 0 : (ac > bc ? -1 : 1);
-				else
-					return a > b ? -1 : 1;
-			};
+		defaultArgs: {
+			posts_per_page: 40
+		},
 
-			return function( a, b ) {
-				var key   = this.orderkey,
-					order = this.args.order,
-					ac    = a.cid,
-					bc    = b.cid;
+		orderby: {
+			allowed:  [ 'name', 'author', 'date', 'title', 'modified', 'uploadedTo', 'id', 'post__in' ],
+			valuemap: {
+				'id':         'ID',
+				'uploadedTo': 'parent'
+			}
+		},
 
-				a = a.get( key );
-				b = b.get( key );
+		propmap: {
+			'search':  's',
+			'type':    'post_mime_type',
+			'parent':  'post_parent',
+			'perPage': 'posts_per_page'
+		},
 
-				if ( 'date' === key || 'modified' === key ) {
-					a = a || new Date();
-					b = b || new Date();
+		// Caches query objects so queries can be easily reused.
+		get: (function(){
+			var queries = [];
+
+			return function( props, options ) {
+				var args     = {},
+					orderby  = Query.orderby,
+					defaults = Query.defaultProps,
+					query;
+
+				// Remove the `query` property. This isn't linked to a query,
+				// this *is* the query.
+				delete props.query;
+
+				// Fill default args.
+				_.defaults( props, defaults );
+
+				// Normalize the order.
+				props.order = props.order.toUpperCase();
+				if ( 'DESC' !== props.order && 'ASC' !== props.order )
+					props.order = defaults.order.toUpperCase();
+
+				// Ensure we have a valid orderby value.
+				if ( ! _.contains( orderby.allowed, props.orderby ) )
+					props.orderby = defaults.orderby;
+
+				// Generate the query `args` object.
+				// Correct any differing property names.
+				_.each( props, function( value, prop ) {
+					args[ Query.propmap[ prop ] || prop ] = value;
+				});
+
+				// Fill any other default query args.
+				_.defaults( args, Query.defaultArgs );
+
+				// `props.orderby` does not always map directly to `args.orderby`.
+				// Substitute exceptions specified in orderby.keymap.
+				args.orderby = orderby.valuemap[ props.orderby ] || props.orderby;
+
+				// Search the query cache for matches.
+				query = _.find( queries, function( query ) {
+					return _.isEqual( query.args, args );
+				});
+
+				// Otherwise, create a new query and add it to the cache.
+				if ( ! query ) {
+					query = new Query( [], _.extend( options || {}, {
+						props: props,
+						args:  args
+					} ) );
+					queries.push( query );
 				}
 
-				return ( 'DESC' === order ) ? compare( a, b, ac, bc ) : compare( b, a, bc, ac );
+				return query;
 			};
 		}())
-	}, {
-		defaultArgs: {
-			posts_per_page: 40,
-			orderby:       'date',
-			order:         'DESC'
-		}
 	});
 
 }(jQuery));

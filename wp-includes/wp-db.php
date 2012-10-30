@@ -534,7 +534,7 @@ class wpdb {
 	 * @param string $dbhost MySQL database host
 	 */
 	function __construct( $dbuser, $dbpassword, $dbname, $dbhost ) {
-		register_shutdown_function( array( &$this, '__destruct' ) );
+		register_shutdown_function( array( $this, '__destruct' ) );
 
 		if ( WP_DEBUG )
 			$this->show_errors();
@@ -1000,7 +1000,7 @@ class wpdb {
 		$query = str_replace( '"%s"', '%s', $query ); // doublequote unquoting
 		$query = str_replace( '%f' , '%F', $query ); // Force floats to be locale unaware
 		$query = preg_replace( '|(?<!%)%s|', "'%s'", $query ); // quote the strings, avoiding escaped strings like %%s
-		array_walk( $args, array( &$this, 'escape_by_ref' ) );
+		array_walk( $args, array( $this, 'escape_by_ref' ) );
 		return @vsprintf( $query, $args );
 	}
 
@@ -1030,11 +1030,7 @@ class wpdb {
 		else
 			$error_str = sprintf( __( 'WordPress database error %1$s for query %2$s' ), $str, $this->last_query );
 
-		if ( function_exists( 'error_log' )
-			&& ( $log_file = @ini_get( 'error_log' ) )
-			&& ( 'syslog' == $log_file || @is_writable( $log_file ) )
-			)
-			@error_log( $error_str );
+		error_log( $error_str );
 
 		// Are we showing errors?
 		if ( ! $this->show_errors )

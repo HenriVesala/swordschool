@@ -28,11 +28,11 @@ function post_submit_meta_box($post) {
 <div id="minor-publishing-actions">
 <div id="save-action">
 <?php if ( 'publish' != $post->post_status && 'future' != $post->post_status && 'pending' != $post->post_status ) { ?>
-<input <?php if ( 'private' == $post->post_status ) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button button-highlighted" />
+<input <?php if ( 'private' == $post->post_status ) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button" />
 <?php } elseif ( 'pending' == $post->post_status && $can_publish ) { ?>
-<input type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save as Pending'); ?>" class="button button-highlighted" />
+<input type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save as Pending'); ?>" class="button" />
 <?php } ?>
-<img src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" class="ajax-loading" id="draft-ajax-loading" alt="" />
+<span class="spinner"></span>
 </div>
 <?php if ( $post_type_object->public ) : ?>
 <div id="preview-action">
@@ -51,7 +51,7 @@ if ( 'publish' == $post->post_status ) {
 </div>
 <?php endif; // public post type ?>
 <div class="clear"></div>
-</div><?php // /minor-publishing-actions ?>
+</div><!-- #minor-publishing-actions -->
 
 <div id="misc-publishing-actions">
 
@@ -103,7 +103,7 @@ switch ( $post->post_status ) {
 </div>
 
 <?php } ?>
-</div><?php // /misc-pub-section ?>
+</div><!-- .misc-pub-section -->
 
 <div class="misc-pub-section" id="visibility">
 <?php _e('Visibility:'); ?> <span id="post-visibility-display"><?php
@@ -148,7 +148,7 @@ echo esc_html( $visibility_trans ); ?></span>
 </div>
 <?php } ?>
 
-</div><?php // /misc-pub-section ?>
+</div><!-- .misc-pub-section -->
 
 <?php
 // translators: Publish box date format, see http://php.net/date
@@ -200,25 +200,25 @@ if ( current_user_can( "delete_post", $post->ID ) ) {
 </div>
 
 <div id="publishing-action">
-<img src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" class="ajax-loading" id="ajax-loading" alt="" />
+<span class="spinner"></span>
 <?php
 if ( !in_array( $post->post_status, array('publish', 'future', 'private') ) || 0 == $post->ID ) {
 	if ( $can_publish ) :
 		if ( !empty($post->post_date_gmt) && time() < strtotime( $post->post_date_gmt . ' +0000' ) ) : ?>
 		<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e('Schedule') ?>" />
-		<?php submit_button( __( 'Schedule' ), 'primary', 'publish', false, array( 'accesskey' => 'p' ) ); ?>
+		<?php submit_button( __( 'Schedule' ), 'primary button-large', 'publish', false, array( 'accesskey' => 'p' ) ); ?>
 <?php	else : ?>
 		<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e('Publish') ?>" />
-		<?php submit_button( __( 'Publish' ), 'primary', 'publish', false, array( 'accesskey' => 'p' ) ); ?>
+		<?php submit_button( __( 'Publish' ), 'primary button-large', 'publish', false, array( 'accesskey' => 'p' ) ); ?>
 <?php	endif;
 	else : ?>
 		<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e('Submit for Review') ?>" />
-		<?php submit_button( __( 'Submit for Review' ), 'primary', 'publish', false, array( 'accesskey' => 'p' ) ); ?>
+		<?php submit_button( __( 'Submit for Review' ), 'primary button-large', 'publish', false, array( 'accesskey' => 'p' ) ); ?>
 <?php
 	endif;
 } else { ?>
 		<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e('Update') ?>" />
-		<input name="save" type="submit" class="button-primary" id="publish" accesskey="p" value="<?php esc_attr_e('Update') ?>" />
+		<input name="save" type="submit" class="button-primary button-large" id="publish" accesskey="p" value="<?php esc_attr_e('Update') ?>" />
 <?php
 } ?>
 </div>
@@ -226,6 +226,106 @@ if ( !in_array( $post->post_status, array('publish', 'future', 'private') ) || 0
 </div>
 </div>
 
+<?php
+}
+
+/**
+ * Display attachment submit form fields.
+ *
+ * @since 3.5.0
+ *
+ * @param object $post
+ */
+function attachment_submit_meta_box( $post ) {
+	global $action;
+
+	$post_type = $post->post_type;
+	$post_type_object = get_post_type_object($post_type);
+	$can_publish = current_user_can($post_type_object->cap->publish_posts);
+?>
+<div class="submitbox" id="submitpost">
+
+<div id="minor-publishing">
+
+<?php // Hidden submit button early on so that the browser chooses the right button when form is submitted with Return key ?>
+<div style="display:none;">
+<?php submit_button( __( 'Save' ), 'button', 'save' ); ?>
+</div>
+
+
+<div id="misc-publishing-actions">
+	<?php
+	// translators: Publish box date format, see http://php.net/date
+	$datef = __( 'M j, Y @ G:i' );
+	$stamp = __('Uploaded on: <b>%1$s</b>');
+	$date = date_i18n( $datef, strtotime( $post->post_date ) );
+	?>
+	<div class="misc-pub-section curtime">
+		<span id="timestamp"><?php printf($stamp, $date); ?></span>
+	</div><!-- .misc-pub-section -->
+
+	<?php do_action('attachment_submitbox_misc_actions'); ?>
+</div><!-- #misc-publishing-actions -->
+<div class="clear"></div>
+</div><!-- #minor-publishing -->
+
+<div id="major-publishing-actions">
+	<div id="delete-action">
+	<?php
+	if ( current_user_can( 'delete_post', $post->ID ) )
+		if ( EMPTY_TRASH_DAYS && MEDIA_TRASH ) {
+			echo "<a class='submitdelete deletion' href='" . get_delete_post_link( $post->ID ) . "'>" . __( 'Trash' ) . "</a>";
+		} else {
+			$delete_ays = ! MEDIA_TRASH ? " onclick='return showNotice.warn();'" : '';
+			echo  "<a class='submitdelete deletion'$delete_ays href='" . get_delete_post_link( $post->ID, null, true ) . "''>" . __( 'Delete Permanently' ) . "</a>";
+		}
+	?>
+	</div>
+
+	<div id="publishing-action">
+		<span class="spinner"></span>
+		<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e('Update') ?>" />
+		<input name="save" type="submit" class="button-primary button-large" id="publish" accesskey="p" value="<?php esc_attr_e('Update') ?>" />
+	</div>
+	<div class="clear"></div>
+</div><!-- #major-publishing-actions -->
+
+</div>
+
+<?php
+}
+
+/**
+ * Display attachment/media-specific information
+ *
+ * @since 3.5.0
+ *
+ * @param object $post
+ */
+function attachment_data_meta_box( $post ) {
+	$alt_text = get_post_meta( $post->ID, '_wp_attachment_image_alt', true );
+	$quicktags_settings = array( 'buttons' => 'strong,em,link,block,del,ins,img,ul,ol,li,code,spell,close' );
+	$editor_args = array(
+		'textarea_name' => 'content',
+		'textarea_rows' => 5,
+		'media_buttons' => false,
+		'tinymce' => false,
+		'quicktags' => $quicktags_settings,
+	);
+?>
+<p>
+	<label class="screen-reader-text" for="content"><strong><?php _e( 'Attachment Page Content' ); ?></strong></label>
+	<?php wp_editor( $post->post_content, 'attachment_content', $editor_args ); ?>
+</p>
+
+<p>
+	<label for="attachment_caption"><strong><?php _e( 'Caption' ); ?></strong></label><br />
+	<textarea class="widefat" name="excerpt" id="attachment_caption"><?php echo $post->post_excerpt; ?></textarea>
+</p>
+<p>
+	<label for="attachment_alt"><strong><?php _e( 'Alternative Text' ); ?></strong></label><br />
+	<input type="text" class="widefat" name="_wp_attachment_image_alt" id="attachment_alt" value="<?php echo esc_attr( $alt_text ); ?>" />
+</p>
 <?php
 }
 
@@ -466,15 +566,15 @@ function post_comment_meta_box_thead($result) {
  *
  * @param object $post
  */
-function post_comment_meta_box($post) {
-	global $wpdb, $post_ID;
+function post_comment_meta_box( $post ) {
+	global $wpdb;
 
 	wp_nonce_field( 'get-comments', 'add_comment_nonce', false );
 	?>
-	<p class="hide-if-no-js" id="add-new-comment"><a href="#commentstatusdiv" onclick="commentReply.addcomment(<?php echo $post_ID; ?>);return false;"><?php _e('Add comment'); ?></a></p>
+	<p class="hide-if-no-js" id="add-new-comment"><a href="#commentstatusdiv" onclick="commentReply.addcomment(<?php echo $post->ID; ?>);return false;"><?php _e('Add comment'); ?></a></p>
 	<?php
 
-	$total = get_comments( array( 'post_id' => $post_ID, 'number' => 1, 'count' => true ) );
+	$total = get_comments( array( 'post_id' => $post->ID, 'number' => 1, 'count' => true ) );
 	$wp_list_table = _get_list_table('WP_Post_Comments_List_Table');
 	$wp_list_table->display( true );
 
@@ -489,7 +589,7 @@ function post_comment_meta_box($post) {
 		}
 
 		?>
-		<p class="hide-if-no-js" id="show-comments"><a href="#commentstatusdiv" onclick="commentsBox.get(<?php echo $total; ?>);return false;"><?php _e('Show comments'); ?></a> <img class="waiting" style="display:none;" src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" alt="" /></p>
+		<p class="hide-if-no-js" id="show-comments"><a href="#commentstatusdiv" onclick="commentsBox.get(<?php echo $total; ?>);return false;"><?php _e('Show comments'); ?></a> <span class="spinner"></span></p>
 		<?php
 	}
 
@@ -636,9 +736,9 @@ if ( !empty($_GET['action']) && 'edit' == $_GET['action'] && current_user_can('m
 
 <div id="publishing-action">
 <?php if ( !empty($link->link_id) ) { ?>
-	<input name="save" type="submit" class="button-primary" id="publish" accesskey="p" value="<?php esc_attr_e('Update Link') ?>" />
+	<input name="save" type="submit" class="button-large button-primary" id="publish" accesskey="p" value="<?php esc_attr_e('Update Link') ?>" />
 <?php } else { ?>
-	<input name="save" type="submit" class="button-primary" id="publish" accesskey="p" value="<?php esc_attr_e('Add Link') ?>" />
+	<input name="save" type="submit" class="button-large button-primary" id="publish" accesskey="p" value="<?php esc_attr_e('Add Link') ?>" />
 <?php } ?>
 </div>
 <div class="clear"></div>
@@ -910,8 +1010,81 @@ function link_advanced_meta_box($link) {
  *
  * @since 2.9.0
  */
-function post_thumbnail_meta_box() {
-	global $post;
-	$thumbnail_id = get_post_meta( $post->ID, '_thumbnail_id', true );
-	echo _wp_post_thumbnail_html( $thumbnail_id );
+function post_thumbnail_meta_box( $post ) {
+	global $_wp_additional_image_sizes;
+
+	?><script type="text/javascript">
+	jQuery( function($) {
+		var $element     = $('#select-featured-image'),
+			$thumbnailId = $element.find('input[name="thumbnail_id"]'),
+			title        = '<?php _e( "Choose a Featured Image" ); ?>',
+			workflow, setFeaturedImage;
+
+		setFeaturedImage = function( thumbnailId ) {
+			$element.find('img').remove();
+			$element.toggleClass( 'has-featured-image', -1 != thumbnailId );
+			$thumbnailId.val( thumbnailId );
+		};
+
+		$element.on( 'click', '.choose, img', function( event ) {
+			event.preventDefault();
+
+			if ( ! workflow ) {
+				workflow = wp.media({
+					title:   title,
+					library: {
+						type: 'image'
+					}
+				});
+
+				workflow.selection.on( 'add', function( model ) {
+					var sizes = model.get('sizes'),
+						size;
+
+					setFeaturedImage( model.id );
+
+					// @todo: might need a size hierarchy equivalent.
+					if ( sizes )
+						size = sizes['post-thumbnail'] || sizes.medium;
+
+					// @todo: Need a better way of accessing full size
+					// data besides just calling toJSON().
+					size = size || model.toJSON();
+
+					workflow.modal.close();
+					workflow.selection.clear();
+
+					$( '<img />', {
+						src:    size.url,
+						width:  size.width
+					}).prependTo( $element );
+				});
+			}
+
+			workflow.modal.open();
+		});
+
+		$element.on( 'click', '.remove', function( event ) {
+			event.preventDefault();
+			setFeaturedImage( -1 );
+		});
+	});
+	</script>
+
+	<?php
+	$thumbnail_id   = get_post_meta( $post->ID, '_thumbnail_id', true );
+	$thumbnail_size = isset( $_wp_additional_image_sizes['post-thumbnail'] ) ? 'post-thumbnail' : 'medium';
+	$thumbnail_html = wp_get_attachment_image( $thumbnail_id, $thumbnail_size );
+
+	$classes = empty( $thumbnail_id ) ? '' : 'has-featured-image';
+
+	?><div id="select-featured-image"
+		class="<?php echo esc_attr( $classes ); ?>"
+		data-post-id="<?php echo esc_attr( $post->ID ); ?>">
+		<?php echo $thumbnail_html; ?>
+		<input type="hidden" name="thumbnail_id" value="<?php echo esc_attr( $thumbnail_id ); ?>" />
+		<a href="#" class="choose button-secondary"><?php _e( 'Choose a Featured Image' ); ?></a>
+		<a href="#" class="remove"><?php _e( 'Remove Featured Image' ); ?></a>
+	</div>
+	<?php
 }

@@ -559,7 +559,8 @@ global $_new_bundled_files;
 $_new_bundled_files = array(
 'plugins/akismet/' => '2.0',
 'themes/twentyten/' => '3.0',
-'themes/twentyeleven/' => '3.2'
+'themes/twentyeleven/' => '3.2',
+'themes/twentytwelve/' => '3.5',
 );
 
 /**
@@ -613,11 +614,36 @@ function update_core($from, $to) {
 
 	@set_time_limit( 300 );
 
+	// Sanity check the unzipped distribution
+	apply_filters( 'update_feedback', __('Verifying the unpacked files&#8230;') );
+	$distro = '';
+	$roots = array( '/wordpress/', '/wordpress-mu/' );
+	foreach ( $roots as $root ) {
+		if ( $wp_filesystem->exists( $from . $root . 'readme.html' ) && $wp_filesystem->exists( $from . $root . 'wp-includes/version.php' ) ) {
+			$distro = $root;
+			break;
+		}
+	}
+	if ( ! $distro ) {
+		$wp_filesystem->delete( $from, true );
+		return new WP_Error( 'insane_distro', __('The update could not be unpacked') );
+	}
+
+	// Import $wp_version, $required_php_version, and $required_mysql_version from the new version
+	$versions_file = $wp_filesystem->wp_content_dir() . 'upgrade/version-current.php';
+	if ( ! $wp_filesystem->copy( $from . $distro . 'wp-includes/version.php', $versions_file ) ) {
+		 $wp_filesystem->delete( $from, true );
+		 return new WP_Error( 'copy_failed', __('Could not copy file.') );
+	}
+
+	$wp_filesystem->chmod( $versions_file, FS_CHMOD_FILE );
+	require_once( WP_CONTENT_DIR . '/upgrade/version-current.php' );
+	$wp_filesystem->delete( $versions_file );
+
 	$php_version    = phpversion();
 	$mysql_version  = $wpdb->db_version();
-	$required_php_version = '5.2.4';
-	$required_mysql_version = '5.0';
-	$wp_version = '3.4';
+	$old_wp_version = $GLOBALS['wp_version']; // The version of WordPress we're updating from
+	$development_build = ( false !== strpos( $old_wp_version . $wp_version, '-' )  ); // a dash in the version indicates a Development release
 	$php_compat     = version_compare( $php_version, $required_php_version, '>=' );
 	if ( file_exists( WP_CONTENT_DIR . '/db.php' ) && empty( $wpdb->is_mysql ) )
 		$mysql_compat = true;
@@ -633,21 +659,6 @@ function update_core($from, $to) {
 		return new WP_Error( 'php_not_compatible', sprintf( __('The update cannot be installed because WordPress %1$s requires PHP version %2$s or higher. You are running version %3$s.'), $wp_version, $required_php_version, $php_version ) );
 	elseif ( !$mysql_compat )
 		return new WP_Error( 'mysql_not_compatible', sprintf( __('The update cannot be installed because WordPress %1$s requires MySQL version %2$s or higher. You are running version %3$s.'), $wp_version, $required_mysql_version, $mysql_version ) );
-
-	// Sanity check the unzipped distribution
-	apply_filters('update_feedback', __('Verifying the unpacked files&#8230;'));
-	$distro = '';
-	$roots = array( '/wordpress/', '/wordpress-mu/' );
-	foreach( $roots as $root ) {
-		if ( $wp_filesystem->exists($from . $root . 'readme.html') && $wp_filesystem->exists($from . $root . 'wp-includes/version.php') ) {
-			$distro = $root;
-			break;
-		}
-	}
-	if ( !$distro ) {
-		$wp_filesystem->delete($from, true);
-		return new WP_Error('insane_distro', __('The update could not be unpacked') );
-	}
 
 	apply_filters('update_feedback', __('Installing the latest version&#8230;'));
 
@@ -682,11 +693,11 @@ function update_core($from, $to) {
 
 	// Copy New bundled plugins & themes
 	// This gives us the ability to install new plugins & themes bundled with future versions of WordPress whilst avoiding the re-install upon upgrade issue.
+	// $development_build controls us overwriting bundled themes and plugins when a non-stable release is being updated
 	if ( !is_wp_error($result) && ( ! defined('CORE_UPGRADE_SKIP_NEW_BUNDLED') || ! CORE_UPGRADE_SKIP_NEW_BUNDLED ) ) {
-		$old_version = $GLOBALS['wp_version']; // $wp_version in local scope == new version
 		foreach ( (array) $_new_bundled_files as $file => $introduced_version ) {
-			// If $introduced version is greater than what the site was previously running
-			if ( version_compare($introduced_version, $old_version, '>') ) {
+			// If a $development_build or if $introduced version is greater than what the site was previously running
+			if ( $development_build || version_compare( $introduced_version, $old_wp_version, '>' ) ) {
 				$directory = ('/' == $file[ strlen($file)-1 ]);
 				list($type, $filename) = explode('/', $file, 2);
 
@@ -698,13 +709,13 @@ function update_core($from, $to) {
 					continue;
 
 				if ( ! $directory ) {
-					if ( $wp_filesystem->exists($dest . $filename) )
+					if ( ! $development_build && $wp_filesystem->exists( $dest . $filename ) )
 						continue;
 
 					if ( ! $wp_filesystem->copy($from . $distro . 'wp-content/' . $file, $dest . $filename, FS_CHMOD_FILE) )
 						$result = new WP_Error('copy_failed', __('Could not copy file.'), $dest . $filename);
 				} else {
-					if ( $wp_filesystem->is_dir($dest . $filename) )
+					if ( ! $development_build && $wp_filesystem->is_dir( $dest . $filename ) )
 						continue;
 
 					$wp_filesystem->mkdir($dest . $filename, FS_CHMOD_DIR);
@@ -835,12 +846,14 @@ function _redirect_to_about_wordpress( $new_version ) {
 
 	// See do_core_upgrade()
 	show_message( __('WordPress updated successfully') );
-	show_message( '<span class="hide-if-no-js">' . sprintf( __( 'Welcome to WordPress %1$s. You will be redirected to the About WordPress screen. If not, click <a href="%s">here</a>.' ), $new_version, esc_url( self_admin_url( 'about.php?updated' ) ) ) . '</span>' );
-	show_message( '<span class="hide-if-js">' . sprintf( __( 'Welcome to WordPress %1$s. <a href="%2$s">Learn more</a>.' ), $new_version, esc_url( self_admin_url( 'about.php?updated' ) ) ) . '</span>' );
+
+	// self_admin_url() won't exist when upgrading from <= 3.0, so relative URLs are intentional.
+	show_message( '<span class="hide-if-no-js">' . sprintf( __( 'Welcome to WordPress %1$s. You will be redirected to the About WordPress screen. If not, click <a href="%2$s">here</a>.' ), $new_version, 'about.php?updated' ) . '</span>' );
+	show_message( '<span class="hide-if-js">' . sprintf( __( 'Welcome to WordPress %1$s. <a href="%2$s">Learn more</a>.' ), $new_version, 'about.php?updated' ) . '</span>' );
 	echo '</div>';
 	?>
 <script type="text/javascript">
-window.location = '<?php echo self_admin_url( 'about.php?updated' ); ?>';
+window.location = 'about.php?updated';
 </script>
 	<?php
 

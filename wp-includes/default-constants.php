@@ -20,7 +20,7 @@ function wp_initial_constants( ) {
 		if( is_multisite() ) {
 			define('WP_MEMORY_LIMIT', '64M');
 		} else {
-			define('WP_MEMORY_LIMIT', '32M');
+			define('WP_MEMORY_LIMIT', '40M');
 		}
 	}
 
@@ -72,6 +72,14 @@ function wp_initial_constants( ) {
 
 	if ( !defined('SHORTINIT') )
 		define('SHORTINIT', false);
+
+	// Constants for expressing human-interval intervals
+	// in their respective number of seconds.
+ 	define( 'MINUTE_IN_SECONDS', 60 );
+ 	define( 'HOUR_IN_SECONDS',   60 * MINUTE_IN_SECONDS );
+ 	define( 'DAY_IN_SECONDS',    24 * HOUR_IN_SECONDS   );
+	define( 'WEEK_IN_SECONDS',    7 * DAY_IN_SECONDS    );
+ 	define( 'YEAR_IN_SECONDS',  365 * DAY_IN_SECONDS    );
 }
 
 /**
@@ -296,6 +304,6 @@ function wp_templating_constants( ) {
 	 * @since 3.0.0
 	 */
 	if ( !defined('WP_DEFAULT_THEME') )
-		define( 'WP_DEFAULT_THEME', 'twentyeleven' );
+		define( 'WP_DEFAULT_THEME', 'twentytwelve' );
 
 }

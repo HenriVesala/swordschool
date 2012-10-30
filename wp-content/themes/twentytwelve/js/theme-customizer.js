@@ -3,8 +3,6 @@
  *
  * Contains handlers to make Theme Customizer preview reload changes asynchronously.
  * Things like site title, description, and background color changes.
- *
- * See related settings in twentytwelve_customize_preview_js()
  */
 
 ( function( $ ) {
@@ -23,7 +21,7 @@
 	// Hook into background color change and adjust body class value as needed.
 	wp.customize( 'background_color', function( value ) {
 		value.bind( function( to ) {
-			if ( '#ffffff' == to || '#fff' == to || '' == to )
+			if ( '#ffffff' == to || '#fff' == to )
 				$( 'body' ).addClass( 'custom-background-white' );
 			else if ( '' == to )
 				$( 'body' ).addClass( 'custom-background-empty' );

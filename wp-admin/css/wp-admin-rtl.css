@@ -160,11 +160,6 @@ ul#add-to-blog-users {
 	float: right;
 }
 
-#minor-publishing .ajax-loading {
-	padding: 3px 4px 0 0;
-	float: right;
-}
-
 .preview {
 	float: left;
 }
@@ -347,7 +342,7 @@ form.upgrade .hint {
 	margin-right: 52px;
 }
 
-.folded.wp-admin #footer {
+.folded.wp-admin #wpfooter {
 	margin-left: 15px;
 	margin-right: 52px;
 }
@@ -481,7 +476,7 @@ form.upgrade .hint {
 		margin-right: 52px;
 	}
 
-	.auto-fold.wp-admin #footer {
+	.auto-fold.wp-admin #wpfooter {
 		margin-left: 15px;
 		margin-right: 52px;
 	}
@@ -588,11 +583,6 @@ form.upgrade .hint {
 
 .welcome-panel .wp-badge {
 	float: right;
-}
-
-.welcome-panel-content .about-description, .welcome-panel h3 {
-	margin-left: 0;
-	margin-right: 190px;
 }
 
 .welcome-panel .welcome-panel-column {
@@ -845,7 +835,7 @@ th.sorted a span {
 	font-style: normal;
 }
 
-#commentsdiv img.waiting {
+#commentsdiv .spinner {
 	padding-left: 0;
 	padding-right: 5px;
 }
@@ -883,11 +873,7 @@ th.sorted a span {
   11.1 - Custom Fields
 ------------------------------------------------------------------------------*/
 
-#postcustomstuff table input,
-#postcustomstuff table select,
-#postcustomstuff table textarea {
-	margin: 8px 8px 8px 0;
-}
+/* No RTL for now, this space intentionally left blank */
 
 /*------------------------------------------------------------------------------
   11.2 - Post Revisions
@@ -924,8 +910,7 @@ table.diff td, table.diff th {
 	border-bottom-right-radius: 3px;
 }
 
-#front-page-warning,
-#front-static-pages ul,
+#front-static-pages .sub-option,
 ul.export-filters,
 .inline-editor ul.cat-checklist ul,
 .categorydiv ul.categorychecklist ul,
@@ -1093,8 +1078,8 @@ form.upgrade .hint {
 
 /* reply to comments */
 
-#replysubmit img.waiting,
-.inline-edit-save img.waiting {
+#replysubmit .spinner,
+.inline-edit-save .spinner {
 	float: left;
 }
 
@@ -1335,12 +1320,12 @@ h2 .nav-tab {
   21.0 - Admin Footer
 ------------------------------------------------------------------------------*/
 
-#footer {
+#wpfooter {
 	margin-left: 20px;
 }
 
 #wpcontent,
-#footer {
+#wpfooter {
 	margin-right: 165px;
 }
 
@@ -1512,12 +1497,6 @@ table .column-rating {
 
 * html #template div {margin-left: 0;}
 
-.list-ajax-loading {
-	float: left;
-	margin-right: 0;
-	margin-left: 9px;
-}
-
 /* - Used - but could/should be deprecated with a CSS reset
 ------------------------------------------------------------------------------*/
 /* No RTL for now, this space intentionally left blank */
@@ -1585,7 +1564,7 @@ table .column-rating {
 .wp-full-overlay .collapse-sidebar-arrow {
 	margin-right: 2px;
 	margin-left: 0;
-	background: transparent url('../../wp-admin/images/arrows.png') no-repeat 0 -108px;
+	background: transparent url('../images/arrows.png') no-repeat 0 -108px;
 }
 
 .wp-full-overlay.collapsed .collapse-sidebar-arrow {
@@ -1597,6 +1576,18 @@ table .column-rating {
 	left: auto;
 	margin-right: 10px;
 	margin-left: 0;
+}
+
+/**
+ * HiDPI Displays
+ */
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+
+	.wp-full-overlay .collapse-sidebar-arrow {
+		background-image: url('../images/arrows-2x.png');
+		background-size: 15px 123px;
+	}
+
 }
 
 /*------------------------------------------------------------------------------
@@ -1850,48 +1841,19 @@ a.rsswidget,
 }
 
 /* QuickPress */
-#dashboard_quick_press h4 {
-	float: right;
-	text-align: left;
-}
-
-#dashboard_quick_press .wp-media-buttons {
-	margin: 0 5em 0.5em 0;
-}
-
-#dashboard_quick_press h4 label {
-	margin-right: 0;
-	margin-left: 10px;
-}
-
-#dashboard_quick_press .input-text-wrap,
-#dashboard_quick_press .textarea-wrap {
-	margin: 0 5em 1em 0;
-}
-
-#dashboard_quick_press #media-buttons {
-	margin: 0 5em .5em 0;
-	padding: 0;
-}
-
-#dashboard-widgets #dashboard_quick_press form p.submit {
-	margin-left: 0;
-	margin-right: 4.6em;
-}
-
 #dashboard-widgets #dashboard_quick_press form p.submit input {
 	float: right;
 }
 
 #dashboard-widgets #dashboard_quick_press form p.submit #save-post {
-	margin: 0 10px 0 1em;
+	margin: 0 0 0 1em;
 }
 
 #dashboard-widgets #dashboard_quick_press form p.submit #publish {
 	float: left;
 }
 
-#dashboard-widgets #dashboard_quick_press form p.submit img.waiting {
+#dashboard-widgets #dashboard_quick_press form p.submit .spinner {
 	margin: 4px 0 0 6px;
 }
 
@@ -2303,7 +2265,6 @@ h3.tb {
 .button,
 .button-primary,
 .button-secondary,
-.button-highlighted,
 #postcustomstuff .submit input {
 	font-family: Tahoma, Arial, sans-serif;
 }
@@ -2473,7 +2434,6 @@ body.login.locale-he-il,
 .locale-he-il .button,
 .locale-he-il .button-primary,
 .locale-he-il .button-secondary,
-.locale-he-il .button-highlighted,
 .locale-he-il #postcustomstuff .submit input,
 .locale-he-il div.sidebar-name h3 {
 	font-family: Arial, sans-serif;
