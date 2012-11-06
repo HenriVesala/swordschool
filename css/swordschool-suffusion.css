@@ -43,8 +43,42 @@ div#horizontal-outer-widgets-1 {
     border: none;
 }
 
-#nav ul.sf-menu li a { background: none !important; }
+nav#nav {
+    border-radius: 5px;
+}
+
+nav#nav ul.sf-menu li a {
+    background: none !important;
+}
 
 body article.page {
     background-color: rgba(255, 255, 255, 0.8);
+}
+
+#right-header-widgets .searchform {
+    margin-top: 2px;
+}
+
+#right-header-widgets .searchform input[type="submit"].searchsubmit {
+    background: url(../wp-content/themes/suffusion/images/search-button-gray-1.png) no-repeat 0 0;
+}
+
+code, pre {
+    background-color: rgba(247,247,247, 0.8) !important;
+}
+
+body .gcwt-table #timetable tr td {
+    background-color: rgba(200, 0, 0, 0.8) !important;
+    color: black;
+    font-size: 1em !important;
+}
+
+body .gcwt-table #timetable tr:hover th[scope=row]{
+    background-color: blue;
+    color: #fff;
+}
+
+body .gcwt-table #timetable tr:hover td {
+    background-color: rgba(100, 150, 225, 0.8) !important;
+    color: #fff;
 }

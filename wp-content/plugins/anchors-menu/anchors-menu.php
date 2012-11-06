@@ -34,7 +34,7 @@ add_filter("the_content", "anc_add_link_text");
 // renders the list in your theme;
 function anc_insert() 
 {	 
-	$tags_to_parse = "h2";
+	$tags_to_parse = "h3";
 	
 	$current_page_id = get_the_ID();
 	$page_data = get_page($current_page_id);
@@ -208,14 +208,6 @@ function anc_widget_insert_control() {
 		
 		$options["anc_title"] = $foo_title;
 		$options["anc_tags"] = $foo_tags;
-
-		update_option("anc_title", $options);
-		update_option("anc_tags", $options);
-	}
-	else {
-		//default options
-		$options["anc_title"] = "Menu";
-		$options["anc_tags"] = "h2";
 
 		update_option("anc_title", $options);
 		update_option("anc_tags", $options);
