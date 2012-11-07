@@ -67,8 +67,12 @@ code, pre {
     background-color: rgba(247,247,247, 0.8) !important;
 }
 
+body .gcwt-table {
+    border-radius: 5px;
+}
+
 body .gcwt-table #timetable tr td {
-    background-color: rgba(200, 0, 0, 0.8) !important;
+    background-color: rgba(230, 240, 255, 0.8) !important;
     color: black;
     font-size: 1em !important;
 }
@@ -79,6 +83,22 @@ body .gcwt-table #timetable tr:hover th[scope=row]{
 }
 
 body .gcwt-table #timetable tr:hover td {
-    background-color: rgba(100, 150, 225, 0.8) !important;
+   background-color: rgba(100, 150, 225, 0.8) !important;
     color: #fff;
+}
+
+body .gcwt-table #timetable tr th[scope="row"] {
+    background-color: rgba(170, 0, 0, 1);
+}
+
+body .gcwt-table #timetable tr:first-child th {
+    background: #EF0506 url(../wp-content/themes/suffusion/images/bg-red.png) repeat-x top left;
+    border: 0px;
+}
+
+header#header {
+    background:url(../images/sesh-logo.svg) no-repeat 3% 0%;
+    background-size:100px 100px;
+    min-height: 80px;
+
 }
