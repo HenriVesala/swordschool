@@ -18,8 +18,42 @@ body #wrapper {
 
 }
 
+
+header#header {
+    background:url(../images/sesh-logo.svg) no-repeat 3% 0%;
+    background-size:100px 100px;
+    min-height: 80px;
+}
+
+header#header h2 {
+    top: 10px;
+    left: 10px;
+}
+
+
 div#horizontal-outer-widgets-1 {
     background-color: rgba(255, 255, 255, 0.8);
+}
+
+
+div nav#nav {
+    border-radius: 5px;
+}
+div nav#nav.continuous ul.sf-menu li.menu-item a {
+    background: none !important;
+    color: white;
+}
+div nav#nav.continuous ul.sf-menu li.menu-item a:visited {
+    color: #EEE;
+}
+div nav#nav.continuous ul.sf-menu li.menu-item a:active {
+    color: blue;
+}
+div nav#nav.continuous ul.sf-menu li.menu-item a:hover {
+    color: #ffd700;
+}
+div nav#nav.continuous ul.sf-menu li.menu-item a .down-ptr {
+    background-position: 2px -8px;
 }
 
 #menu-branches {
@@ -43,24 +77,18 @@ div#horizontal-outer-widgets-1 {
     border: none;
 }
 
-nav#nav {
-    border-radius: 5px;
-}
-
-nav#nav ul.sf-menu li a {
-    background: none !important;
-}
-
 body article.page {
     background-color: rgba(255, 255, 255, 0.8);
 }
 
 #right-header-widgets .searchform {
-    margin-top: 2px;
+    margin-top: 3px;
 }
+
 
 #right-header-widgets .searchform input[type="submit"].searchsubmit {
     background: url(../wp-content/themes/suffusion/images/search-button-gray-1.png) no-repeat 0 0;
+    padding: 3px 3px 0 3px;
 }
 
 code, pre {
@@ -96,9 +124,25 @@ body .gcwt-table #timetable tr:first-child th {
     border: 0px;
 }
 
-header#header {
-    background:url(../images/sesh-logo.svg) no-repeat 3% 0%;
-    background-size:100px 100px;
-    min-height: 80px;
+body .gce-page-grid .gce-calendar {
+    border: 3px solid #BBB;
+}
 
+body .gce-page-grid .gce-calendar .gce-month-title{
+    font-size:  20px;
+}
+
+body .gce-page-grid .gce-calendar  .gce-change-month {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+body .gce-page-grid .gce-calendar th {
+    background: #EF0506 url(../wp-content/themes/suffusion/images/bg-red.png) repeat-x top left;
+    color: white;
+}
+
+body .gce-page-grid .gce-calendar .gce-today {
+    border: 3px solid royalblue;
+    background: rgba(100, 150, 225, 0.3);
 }
