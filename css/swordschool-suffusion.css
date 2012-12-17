@@ -28,6 +28,11 @@ header#header {
 header#header h2 {
     top: 10px;
     left: 10px;
+    padding-left: 90px;
+}
+
+header#header h2:first-letter {
+    font-size: 1.3em;
 }
 
 
