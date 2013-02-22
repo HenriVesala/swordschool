@@ -1,0 +1,25 @@
+/* TEAM */
+
+Development: Henri "Tohtori" Vesala
+Contact: henri.vesala@fraktio.fi
+Twitter: @DrVesala
+Location: Espoo, Finland
+
+Content: Guy Windsor
+Location:  Finland
+
+Hosting: Petri Wessman
+Location:  Finland
+
+/* THANKS */
+
+Development hosting: Mikko "Pekkis" Forsström
+Contact: mikko.forsstrom@fraktio.fi
+Twitter: @pekkisx
+From: Vantaa, Finland
+
+/* SITE */
+
+Language: English
+Doctype: HTML4
+Tech: PHP, Wordpress
