@@ -1,4 +1,5 @@
 cache/
+cache/*
 .DS_store
 .htaccess
 wp-*.php
