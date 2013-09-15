@@ -126,7 +126,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 	function _search_callback( $theme ) {
 		static $term;
 		if ( is_null( $term ) )
-			$term = stripslashes( $_REQUEST['s'] );
+			$term = wp_unslash( $_REQUEST['s'] );
 
 		foreach ( array( 'Name', 'Description', 'Author', 'Author', 'AuthorURI' ) as $field ) {
 			// Don't mark up; Do translate.
@@ -242,21 +242,12 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 		return $actions;
 	}
 
-	function bulk_actions( $which ) {
-		global $status;
-		parent::bulk_actions( $which );
-	}
-
-	function current_action() {
-		return parent::current_action();
-	}
-
 	function display_rows() {
-		foreach ( $this->items as $key => $theme )
-			$this->single_row( $key, $theme );
+		foreach ( $this->items as $theme )
+			$this->single_row( $theme );
 	}
 
-	function single_row( $key, $theme ) {
+	function single_row( $theme ) {
 		global $status, $page, $s, $totals;
 
 		$context = $status;

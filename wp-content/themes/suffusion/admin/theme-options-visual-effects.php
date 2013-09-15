@@ -52,8 +52,7 @@ $suffusion_visual_effects_options = array(
 		"type" => "sub-section-4",),
 
 	array("name" => "Basic Setup",
-		"desc" => "You can define what you want to show in your navigation bar. The navigation bar contains two widget areas, 'Top Bar Left Widgets' and 'Top Bar Right Widgets' and a drop down menu.
-				If you prefer having pages, categories and links listed in the sidebar, select \"Hidden\".",
+		"desc" => "You can define what you want to show in your navigation bar. The navigation bar contains two widget areas, 'Top Bar Left Widgets' and 'Top Bar Right Widgets' and a drop down menu.",
 		"id" => "suf_navt_contents",
 		"parent" => "navt-setup",
 		"grouping" => "navt-lf",
@@ -2035,7 +2034,6 @@ $suffusion_visual_effects_options = array(
 		"std" => "disabled"),
 
 	array("name" => "Category view",
-		"desc" => "You can enable the Featured Posts slider for your category view. This way you will see the featured section whenever you are looking at posts in a particular category: ",
 		"id" => "suf_featured_category_view",
 		"parent" => "featured-settings",
 		"grouping" => "fc-where",
@@ -2044,7 +2042,6 @@ $suffusion_visual_effects_options = array(
 		"std" => "disabled"),
 
 	array("name" => "Tag view",
-		"desc" => "You can enable the Featured Posts slider for your tag view. This way you will see the featured section whenever you are looking at posts with a particular tag: ",
 		"id" => "suf_featured_tag_view",
 		"parent" => "featured-settings",
 		"grouping" => "fc-where",
@@ -2053,7 +2050,6 @@ $suffusion_visual_effects_options = array(
 		"std" => "disabled"),
 
 	array("name" => "Author view",
-		"desc" => "You can enable the Featured Posts slider for your author view. This way you will see the featured section whenever you are looking at an author page: ",
 		"id" => "suf_featured_author_view",
 		"parent" => "featured-settings",
 		"grouping" => "fc-where",
@@ -2062,7 +2058,6 @@ $suffusion_visual_effects_options = array(
 		"std" => "disabled"),
 
 	array("name" => "Search view",
-		"desc" => "You can enable the Featured Posts slider for your search view. This way you will see the featured section whenever you are looking at search results: ",
 		"id" => "suf_featured_search_view",
 		"parent" => "featured-settings",
 		"grouping" => "fc-where",
@@ -2460,7 +2455,7 @@ $suffusion_visual_effects_options = array(
 		"parent" => "pagination-settings",
 		"grouping" => "nav-bc",
 		"type" => "multi-select",
-		"options" => suffusion_get_formatted_options_array("suf_show_breadcrumbs_in",
+		"options" => suffusion_get_formatted_options_array(
 			array(
 				'single' => 'Single posts',
 				'attach' => 'Attachment views',
@@ -2484,7 +2479,7 @@ $suffusion_visual_effects_options = array(
 		"parent" => "pagination-settings",
 		"grouping" => "nav-bc",
 		"type" => "multi-select",
-		"options" => suffusion_get_formatted_options_array("suf_show_home_in",
+		"options" => suffusion_get_formatted_options_array(
 			array(
 				'single' => 'Single posts',
 				'page' => 'Pages',
@@ -2670,12 +2665,19 @@ $suffusion_visual_effects_options = array(
 			"dont-preserve" => "Allow overriding the image's aspect ratio by explicit use of the 'height' attribute"),
 		"std" => "preserve"),
 
+	array("name" => "Use JetPack Photon for Resizing",
+		"desc" => "If JetPack is installed and the Photon module is activated, use Photon for resizing images.",
+		"id" => "suf_use_photon_resizing",
+		"parent" => "body-styles",
+		"type" => "checkbox",
+		"std" => ""),
+
 	array("name" => "Thumbnail Generation",
 		"desc" => "If you are not using a particular feature, you can turn off the automatic thumbnail generation for that. This will be applicable to all new images you upload and not to existing images:",
 		"id" => "suf_disable_auto_thumbs",
 		"parent" => "body-styles",
 		"type" => "multi-select",
-		"options" => suffusion_get_formatted_options_array("suf_seo_all_settings",
+		"options" => suffusion_get_formatted_options_array(
 			array(
 				'gallery-thumb' => 'Disable thumbnail generation for the "Gallery" post format',
 				'mosaic-thumb' => 'Disable thumbnail generation for the Mosaic layout',

@@ -34,11 +34,6 @@ body {
 
 .folded #adminmenu .wp-submenu {
 	right: 30px;
-	top: -4px;
-}
-
-#adminmenu .wp-submenu .wp-submenu-head {
-	padding: 6px 10px 6px 4px;
 }
 
 #wpcontent #adminmenu .wp-submenu li.wp-submenu-head {
@@ -116,6 +111,11 @@ p.row-actions {
 
 p.submit { /* quick edit and reply in edit-comments.php */
 	height:22px;
+}
+
+.available-theme .action-links li {
+	padding-left: 7px;
+	margin-left: 7px;
 }
 
 form#widgets-filter { /* fix widget page */
@@ -228,4 +228,13 @@ p.button-controls,
 
 #nav-menus-frame .delete-action {
 	float: none;
+}
+
+#title-wrap #title-prompt-text {
+	right: 0;
+}
+
+.screen-reader-text {
+	right: auto;
+	text-indent: -1000em;
 }

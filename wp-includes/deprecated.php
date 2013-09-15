@@ -394,7 +394,7 @@ function user_can_edit_user($user_id, $other_user) {
  * @param string $cat_name Optional. The category name to use. If no match is found uses all.
  * @param string $before Optional. The html to output before the link.
  * @param string $after Optional. The html to output after the link.
- * @param string $between Optional. The html to output between the link/image and it's description. Not used if no image or $show_images is true.
+ * @param string $between Optional. The html to output between the link/image and its description. Not used if no image or $show_images is true.
  * @param bool $show_images Optional. Whether to show images (if defined).
  * @param string $orderby Optional. The order to output the links. E.g. 'id', 'name', 'url', 'description' or 'rating'. Or maybe owner.
  *		If you start the name with an underscore the order will be reversed. You can also specify 'rand' as the order which will return links in a
@@ -547,7 +547,7 @@ function get_linkobjects($category = 0, $orderby = 'name', $limit = 0) {
  * @param string $cat_name The category name to use. If no match is found uses all
  * @param string $before The html to output before the link
  * @param string $after The html to output after the link
- * @param string $between The html to output between the link/image and it's description. Not used if no image or show_images is true
+ * @param string $between The html to output between the link/image and its description. Not used if no image or show_images is true
  * @param bool $show_images Whether to show images (if defined).
  * @param string $orderby the order to output the links. E.g. 'id', 'name', 'url',
  *		'description', or 'rating'. Or maybe owner. If you start the name with an
@@ -575,7 +575,7 @@ function get_linksbyname_withrating($cat_name = "noname", $before = '', $after =
  * @param int $category The category to use. If no category supplied uses all
  * @param string $before The html to output before the link
  * @param string $after The html to output after the link
- * @param string $between The html to output between the link/image and it's description. Not used if no image or show_images == true
+ * @param string $between The html to output between the link/image and its description. Not used if no image or show_images == true
  * @param bool $show_images Whether to show images (if defined).
  * @param string $orderby The order to output the links. E.g. 'id', 'name', 'url',
  *		'description', or 'rating'. Or maybe owner. If you start the name with an
@@ -794,12 +794,12 @@ function get_archives($type='', $limit='', $format='html', $before = '', $after 
  * @deprecated Use get_author_posts_url()
  * @see get_author_posts_url()
  *
- * @param bool $echo Optional.
- * @param int $author_id Required.
+ * @param bool $echo
+ * @param int $author_id
  * @param string $author_nicename Optional.
  * @return string|null
  */
-function get_author_link($echo = false, $author_id, $author_nicename = '') {
+function get_author_link($echo, $author_id, $author_nicename = '') {
 	_deprecated_function( __FUNCTION__, '2.1', 'get_author_posts_url()' );
 
 	$link = get_author_posts_url($author_id, $author_nicename);
@@ -1087,18 +1087,6 @@ function get_links_list($order = 'name') {
  */
 function links_popup_script($text = 'Links', $width=400, $height=400, $file='links.all.php', $count = true) {
 	_deprecated_function( __FUNCTION__, '2.1' );
-
-	if ( $count )
-		$counts = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->links");
-
-	$javascript = "<a href=\"#\" onclick=\"javascript:window.open('$file?popup=1', '_blank', 'width=$width,height=$height,scrollbars=yes,status=no'); return false\">";
-	$javascript .= $text;
-
-	if ( $count )
-		$javascript .= " ($counts)";
-
-	$javascript .= "</a>\n\n";
-		echo $javascript;
 }
 
 /**
@@ -1215,7 +1203,7 @@ function get_author_rss_link($echo = false, $author_id = 1) {
  */
 function comments_rss() {
 	_deprecated_function( __FUNCTION__, '2.2', 'get_post_comments_feed_link()' );
-	return get_post_comments_feed_link();
+	return esc_url( get_post_comments_feed_link() );
 }
 
 /**
@@ -1691,8 +1679,6 @@ function the_author_ID() {
  * @subpackage Feed
  * @since 0.71
  * @uses apply_filters() Calls 'the_content_rss' on the content before processing.
- * @see get_the_content() For the $more_link_text, $stripteaser, and $more_file
- *		parameters.
  *
  * @deprecated 2.9.0
  * @deprecated Use the_content_feed()
@@ -1706,7 +1692,7 @@ function the_author_ID() {
  */
 function the_content_rss($more_link_text='(more...)', $stripteaser=0, $more_file='', $cut = 0, $encode_html = 0) {
 	_deprecated_function( __FUNCTION__, '2.9', 'the_content_feed' );
-	$content = get_the_content($more_link_text, $stripteaser, $more_file);
+	$content = get_the_content($more_link_text, $stripteaser);
 	$content = apply_filters('the_content_rss', $content);
 	if ( $cut && !$encode_html )
 		$encode_html = 2;
@@ -3210,18 +3196,18 @@ function _get_post_ancestors( &$post ) {
  *
  * @since 2.1.0
  * @deprecated 3.5.0
- * @see WP_Image_Editor
+ * @see wp_get_image_editor()
  *
  * @param string $file Filename of the image to load.
  * @return resource The resulting image resource on success, Error string on failure.
  */
 function wp_load_image( $file ) {
-	_deprecated_function( __FUNCTION__, '3.5', 'WP_Image_Editor' );
+	_deprecated_function( __FUNCTION__, '3.5', 'wp_get_image_editor()' );
 
 	if ( is_numeric( $file ) )
 		$file = get_attached_file( $file );
 
-	if ( ! file_exists( $file ) )
+	if ( ! is_file( $file ) )
 		return sprintf(__('File &#8220;%s&#8221; doesn&#8217;t exist?'), $file);
 
 	if ( ! function_exists('imagecreatefromstring') )
@@ -3250,7 +3236,7 @@ function wp_load_image( $file ) {
  *
  * @since 2.5.0
  * @deprecated 3.5.0
- * @see WP_Image_Editor
+ * @see wp_get_image_editor()
  *
  * @param string $file Image file path.
  * @param int $max_w Maximum width to resize to.
@@ -3262,9 +3248,9 @@ function wp_load_image( $file ) {
  * @return mixed WP_Error on failure. String with new destination path.
  */
 function image_resize( $file, $max_w, $max_h, $crop = false, $suffix = null, $dest_path = null, $jpeg_quality = 90 ) {
-	_deprecated_function( __FUNCTION__, '3.5', 'WP_Image_Editor' );
+	_deprecated_function( __FUNCTION__, '3.5', 'wp_get_image_editor()' );
 
-	$editor = WP_Image_Editor::get_instance( $file );
+	$editor = wp_get_image_editor( $file );
 	if ( is_wp_error( $editor ) )
 		return $editor;
 	$editor->set_quality( $jpeg_quality );
@@ -3298,7 +3284,7 @@ function image_resize( $file, $max_w, $max_h, $crop = false, $suffix = null, $de
  */
 function wp_get_single_post( $postid = 0, $mode = OBJECT ) {
 	_deprecated_function( __FUNCTION__, '3.5', 'get_post()' );
-	return get_post( $postid, $mode, 'edit' );
+	return get_post( $postid, $mode );
 }
 
 /**
@@ -3329,3 +3315,66 @@ function user_pass_ok($user_login, $user_pass) {
  * @deprecated 3.5.0
  */
 function _save_post_hook() {}
+
+/**
+ * Check if the installed version of GD supports particular image type
+ *
+ * @since 2.9.0
+ * @deprecated 3.5.0
+ * @see wp_image_editor_supports()
+ *
+ * @param string $mime_type
+ * @return bool
+ */
+function gd_edit_image_support($mime_type) {
+	_deprecated_function( __FUNCTION__, '3.5', 'wp_image_editor_supports()' );
+
+	if ( function_exists('imagetypes') ) {
+		switch( $mime_type ) {
+			case 'image/jpeg':
+				return (imagetypes() & IMG_JPG) != 0;
+			case 'image/png':
+				return (imagetypes() & IMG_PNG) != 0;
+			case 'image/gif':
+				return (imagetypes() & IMG_GIF) != 0;
+		}
+	} else {
+		switch( $mime_type ) {
+			case 'image/jpeg':
+				return function_exists('imagecreatefromjpeg');
+			case 'image/png':
+				return function_exists('imagecreatefrompng');
+			case 'image/gif':
+				return function_exists('imagecreatefromgif');
+		}
+	}
+	return false;
+}
+
+/**
+ * Converts an integer byte value to a shorthand byte value.
+ *
+ * @since 2.3.0
+ * @deprecated 3.6.0
+ * @deprecated Use size_format()
+ *
+ * @param int $bytes An integer byte value.
+ * @return string A shorthand byte value.
+ */
+function wp_convert_bytes_to_hr( $bytes ) {
+	_deprecated_function( __FUNCTION__, '3.6', 'size_format()' );
+
+	$units = array( 0 => 'B', 1 => 'kB', 2 => 'MB', 3 => 'GB', 4 => 'TB' );
+	$log   = log( $bytes, 1024 );
+	$power = (int) $log;
+	$size  = pow( 1024, $log - $power );
+
+	if ( ! is_nan( $size ) && array_key_exists( $power, $units ) ) {
+		$unit = $units[ $power ];
+	} else {
+		$size = $bytes;
+		$unit = $units[0];
+	}
+
+	return $size . $unit;
+}

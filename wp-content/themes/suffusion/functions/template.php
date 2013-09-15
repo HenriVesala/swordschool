@@ -71,7 +71,7 @@ function suffusion_get_allowed_categories($prefix) {
 		if ($selected && trim($selected) != '') { $selected_categories = explode(',', $selected); } else { $selected_categories = array(); }
 		if ($selected_categories && is_array($selected_categories)) {
 			foreach ($selected_categories as $category) {
-				$allowed[count($allowed)] = get_category($category);
+				$allowed[] = get_category($category);
 			}
 		}
 	}
@@ -88,7 +88,7 @@ function suffusion_get_allowed_pages($prefix) {
 			if (is_array($selected_pages) && count($selected_pages) > 0) {
 				foreach ($selected_pages as $page_id) {
 					$page = get_page($page_id);
-					$allowed[count($allowed)] = $page;
+					$allowed[] = $page;
 				}
 			}
 		}
@@ -196,8 +196,14 @@ function suffusion_enqueue_styles() {
 	}
 
 	// BP admin-bar, loaded only if this is a BP installation
-	if (function_exists('bp_is_group')) {
-		wp_enqueue_style('bp-admin-bar', apply_filters('bp_core_admin_bar_css', WP_PLUGIN_URL.'/buddypress/bp-themes/bp-default/_inc/css/adminbar.css'));
+	if (defined('BP_VERSION')) {
+		if (substr(BP_VERSION, 0, 3) == '1.6') {
+			$stylesheet = WP_PLUGIN_URL.'/buddypress/bp-core/css/buddybar.css';
+		}
+		else {
+			$stylesheet = WP_PLUGIN_URL.'/buddypress/bp-themes/bp-default/_inc/css/adminbar.css';
+		}
+		wp_enqueue_style('bp-admin-bar', apply_filters('bp_core_admin_bar_css', $stylesheet), array(), BP_VERSION);
 	}
 
 	// IE-specific CSS, loaded if the browser is IE < 8
@@ -512,7 +518,7 @@ function suffusion_get_excluded_pages($prefix) {
         $include = explode(',', $inclusions);
         $translations = suffusion_get_wpml_lang_object_ids($include, 'post');
         foreach ($translations as $translation) {
-            $include[count($include)] = $translation;
+            $include[] = $translation;
         }
     }
     else {
@@ -523,7 +529,7 @@ function suffusion_get_excluded_pages($prefix) {
 	$exclude = array();
 	foreach ($all_pages as $page) {
 		if (!in_array($page, $include)) {
-            $exclude[count($exclude)] = $page;
+            $exclude[] = $page;
         }
 	}
 	// Now we need to figure out if these excluded pages are ancestors of any pages on the list. If so, we remove the descendants
@@ -531,7 +537,7 @@ function suffusion_get_excluded_pages($prefix) {
 		$ancestors = get_ancestors($page, 'page');
 		foreach ($ancestors as $ancestor) {
 			if (in_array($ancestor, $exclude)) {
-				$exclude[count($exclude)] = $page;
+				$exclude[] = $page;
 			}
 		}
 	}

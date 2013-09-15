@@ -309,6 +309,8 @@ function suffusion_video_attachment($attachment = '', $mime = '', $file = '') {
  * It instead relies on pre-defined (registered) sizes. A unique image is determined based on the resizing dimensions, the quality and the crop/no-crop of the resized image.
  * If the image has been already built in cache, that is returned. Otherwise a new image is created.
  *
+ * If the JetPack Photon module is installed and activated, that can be used for resizing by this method.
+ *
  * This method takes as input a URL corresponding to an image. The original method creates a resized copy in the same folder as the parent,
  * however that will not work here, due to the possiblity of an image on an external server. Instead the thumb-cache folder is used in the uploads directory (same as old versions).
  *
@@ -330,6 +332,7 @@ function suffusion_image_resize($img_url, $width, $height, $crop = false, $quali
 
 	$file_path = parse_url($img_url);
 	if ($_SERVER['HTTP_HOST'] != $file_path['host'] && $file_path['host'] != '') {  // The image is not locally hosted
+		$external_file = true;
 		$remote_file_info = pathinfo($file_path['path']);// Can't use $img_url as the parameter because pathinfo includes the 'query' for the URL
 		if (isset($remote_file_info['extension'])) {
 			$remote_file_extension = $remote_file_info['extension'];
@@ -359,7 +362,7 @@ function suffusion_image_resize($img_url, $width, $height, $crop = false, $quali
 		$file_path = $copy_to_file;
 	}
 	else {  // Locally hosted image
-		//$file_path = $_SERVER['DOCUMENT_ROOT'] . $file_path['path'];
+		$external_file = false;
 		$file_path = suffusion_get_document_root($file_path['path']).$file_path['path'];
 	}
 
@@ -372,11 +375,6 @@ function suffusion_image_resize($img_url, $width, $height, $crop = false, $quali
 		return $resized_image;
 	}
 
-	$orig_size = @getimagesize($file_path);
-	$source[0] = $img_url;
-	$source[1] = $orig_size[0];
-	$source[2] = $orig_size[1];
-
 	$file_info = pathinfo($file_path);
 	if (isset($file_info['extension'])) {
 		$extension = '.'. $file_info['extension'];
@@ -386,6 +384,53 @@ function suffusion_image_resize($img_url, $width, $height, $crop = false, $quali
 			$quality = floor(0.09 * $quality);
 		}
 	}
+
+	global $suf_use_photon_resizing;
+	if (!empty($suf_use_photon_resizing) && function_exists('jetpack_photon_url') &&
+		class_exists('Jetpack') && method_exists('Jetpack', 'get_active_modules') && in_array('photon', Jetpack::get_active_modules())) {
+		if ($external_file) {
+			$img_path = $file_info['dirname'].'/'.$file_info['basename'];
+			$img_path = str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $img_path);
+		}
+		else {
+			$img_path = $img_url;
+		}
+
+		$base = '';
+		if (stripos($upload_dir['baseurl'], 'https://') === 0) {
+			$base = 'https://i0.wp.com/';
+			$img_path = substr_replace($img_path, '', 0, 8);
+		}
+		else if (stripos($upload_dir['baseurl'], 'http://') === 0) {
+			$base = 'http://i0.wp.com/';
+			$img_path = substr_replace($img_path, '', 0, 7);
+		}
+
+		$img_path = $base.$img_path;
+		$arguments = array();
+		if ($crop) {
+			$arguments[] = 'resize='.$width.','.$height;
+		}
+		else {
+			$arguments[] = 'fit='.$width.','.$height;
+		}
+		$arguments = implode('&', $arguments);
+		if (!empty($arguments)) {
+			$img_path .= '?'.$arguments;
+		}
+
+		$resized_image = array(
+			'url' => $img_path,
+			'width' => $width,
+			'height' => $height
+		);
+		return $resized_image;
+	}
+
+	$orig_size = @getimagesize($file_path);
+	$source[0] = $img_url;
+	$source[1] = $orig_size[0];
+	$source[2] = $orig_size[1];
 
 	$crop_str = $crop ? '-crop' : '-nocrop';
 	$quality_str = $quality != null ? '-' . $quality : '';
@@ -429,7 +474,32 @@ function suffusion_image_resize($img_url, $width, $height, $crop = false, $quali
 		}
 
 		// No cache files - let's finally resize it using WP's inbuilt resizer
-		$new_img_path = image_resize($file_path, $width, $height, $crop, $suffix, $upload_path, $quality);
+		if (function_exists('wp_get_image_editor')) { // For WP 3.5+
+			$editor = wp_get_image_editor($file_path);
+			if (is_wp_error($editor)) {
+				$new_img_path = $editor;
+			}
+			else {
+				$editor->set_quality($quality);
+				$resized = $editor->resize($width, $height, $crop);
+				if (is_wp_error($resized)) {
+					$new_img_path = $resized;
+				}
+				else {
+					$dest_file = $editor->generate_filename($suffix, $upload_path);
+					$saved = $editor->save($dest_file);
+					if (is_wp_error($saved)) {
+						$new_img_path = $saved;
+					}
+					else {
+						$new_img_path = $dest_file;
+					}
+				}
+			}
+		}
+		else { // For WP 3.4 and below
+			$new_img_path = image_resize($file_path, $width, $height, $crop, $suffix, $upload_path, $quality);
+		}
 		if (is_wp_error($new_img_path)) {
 			// We hit some errors. Let's just return the original image
 			$resized_image = array(

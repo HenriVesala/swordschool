@@ -316,7 +316,7 @@ class SimplePie_Item_GCalendarWT extends SimplePie_Item {
 	 *
 	 * @return the id of the event
 	 */
-	function get_id(){
+	function get_id($hash = false){
 		if(!$this->gc_id){
 			$this->gc_id = substr($this->get_link(),strpos(strtolower($this->get_link()),'eid=')+4);
 		}

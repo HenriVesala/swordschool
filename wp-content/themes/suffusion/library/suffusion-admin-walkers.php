@@ -25,7 +25,7 @@ class Suffusion_MM_Walker_Edit extends Walker_Nav_Menu {
 	 *
 	 * @param string $output Passed by reference.
 	 */
-	function start_lvl(&$output) {}
+    function start_lvl( &$output, $depth = 0, $args = array() ) {}
 
 	/**
 	 * @see Walker_Nav_Menu::end_lvl()
@@ -33,7 +33,7 @@ class Suffusion_MM_Walker_Edit extends Walker_Nav_Menu {
 	 *
 	 * @param string $output Passed by reference.
 	 */
-	function end_lvl(&$output) {
+    function end_lvl( &$output, $depth = 0, $args = array() ) {
 	}
 
 	/**
@@ -46,7 +46,7 @@ class Suffusion_MM_Walker_Edit extends Walker_Nav_Menu {
 	 * @param object $args
 	 * @return void
 	 */
-	function start_el(&$output, $item, $depth, $args) {
+	function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
 		global $_wp_nav_menu_max_depth;
 		$_wp_nav_menu_max_depth = $depth > $_wp_nav_menu_max_depth ? $depth : $_wp_nav_menu_max_depth;
 

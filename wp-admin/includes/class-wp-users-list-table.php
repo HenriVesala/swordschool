@@ -136,18 +136,20 @@ class WP_Users_List_Table extends WP_List_Table {
 	function extra_tablenav( $which ) {
 		if ( 'top' != $which )
 			return;
-		if ( ! current_user_can( 'promote_users' ) )
-			return;
-?>
+	?>
 	<div class="alignleft actions">
+		<?php if ( current_user_can( 'promote_users' ) ) : ?>
 		<label class="screen-reader-text" for="new_role"><?php _e( 'Change role to&hellip;' ) ?></label>
 		<select name="new_role" id="new_role">
 			<option value=''><?php _e( 'Change role to&hellip;' ) ?></option>
 			<?php wp_dropdown_roles(); ?>
 		</select>
-		<?php submit_button( __( 'Change' ), 'small', 'changeit', false ); ?>
-	</div>
-<?php
+	<?php
+			submit_button( __( 'Change' ), 'button', 'changeit', false );
+		endif;
+
+		do_action( 'restrict_manage_users' );
+		echo '</div>';
 	}
 
 	function current_action() {
@@ -191,15 +193,23 @@ class WP_Users_List_Table extends WP_List_Table {
 		if ( ! $this->is_site_users )
 			$post_counts = count_many_users_posts( array_keys( $this->items ) );
 
+		$editable_roles = array_keys( get_editable_roles() );
+
 		$style = '';
 		foreach ( $this->items as $userid => $user_object ) {
-			$role = reset( $user_object->roles );
+			if ( count( $user_object->roles ) <= 1 ) {
+				$role = reset( $user_object->roles );
+			} elseif ( $roles = array_intersect( array_values( $user_object->roles ), $editable_roles ) ) {
+				$role = reset( $roles );
+			} else {
+				$role = reset( $user_object->roles );
+			}
 
-			if ( is_multisite() && empty( $role ) )
+			if ( is_multisite() && empty( $user_object->allcaps ) )
 				continue;
 
 			$style = ( ' class="alternate"' == $style ) ? '' : ' class="alternate"';
-			echo "\n\t", $this->single_row( $user_object, $style, $role, isset( $post_counts ) ? $post_counts[ $userid ] : 0 );
+			echo "\n\t" . $this->single_row( $user_object, $style, $role, isset( $post_counts ) ? $post_counts[ $userid ] : 0 );
 		}
 	}
 
@@ -231,7 +241,7 @@ class WP_Users_List_Table extends WP_List_Table {
 		// Check if the user for this row is editable
 		if ( current_user_can( 'list_users' ) ) {
 			// Set up the user editing link
-			$edit_link = esc_url( add_query_arg( 'wp_http_referer', urlencode( stripslashes( $_SERVER['REQUEST_URI'] ) ), get_edit_user_link( $user_object->ID ) ) );
+			$edit_link = esc_url( add_query_arg( 'wp_http_referer', urlencode( wp_unslash( $_SERVER['REQUEST_URI'] ) ), get_edit_user_link( $user_object->ID ) ) );
 
 			// Set up the hover actions for this user
 			$actions = array();
@@ -250,7 +260,7 @@ class WP_Users_List_Table extends WP_List_Table {
 			$actions = apply_filters( 'user_row_actions', $actions, $user_object );
 			$edit .= $this->row_actions( $actions );
 
-			// Set up the checkbox ( because the user is editable, otherwise its empty )
+			// Set up the checkbox ( because the user is editable, otherwise it's empty )
 			$checkbox = '<label class="screen-reader-text" for="cb-select-' . $user_object->ID . '">' . sprintf( __( 'Select %s' ), $user_object->user_login ) . '</label>'
 						. "<input type='checkbox' name='users[]' id='user_{$user_object->ID}' class='$role' value='{$user_object->ID}' />";
 

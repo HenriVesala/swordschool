@@ -21,16 +21,14 @@ add_shortcode('suffusion-loginout', 'suffusion_sc_loginout');
 add_shortcode('suffusion-register', 'suffusion_sc_register');
 add_shortcode('suffusion-adsense', 'suffusion_sc_ad');
 add_shortcode('suffusion-tag-cloud', 'suffusion_sc_tag_cloud');
-add_shortcode('suffusion-widgets', 'suffusion_sc_widget_area');
-add_shortcode('suffusion-multic', 'suffusion_sc_multi_column');
-add_shortcode('suffusion-column', 'suffusion_sc_column');
 add_shortcode('suffusion-flickr', 'suffusion_sc_flickr');
 
-global $suf_enable_audio_shortcode;
-
-// Check for the JetPack [audio] shortcode and the WP Audio Player plugin. If neither exist AND the audio shortcode is enabled, only then define our audio shortcode.
-if (!function_exists('audio_shortcode') && !class_exists('AudioPlayer') && isset($suf_enable_audio_shortcode) && $suf_enable_audio_shortcode == 'on') {
-	add_shortcode('audio', 'suffusion_sc_audio');
+// Check for the JetPack [audio] shortcode and the WP Audio Player plugin. If neither exist AND the user has enabled the audio shortcode, only then define our audio shortcode.
+if (!function_exists('audio_shortcode') && !class_exists('AudioPlayer')) {
+	$global_options = get_option('suffusion_options');
+	if (isset ($global_options['suf_enable_audio_shortcode']) && $global_options['suf_enable_audio_shortcode'] == 'on') {
+		add_shortcode('audio', 'suffusion_sc_audio');
+	}
 }
 
 function suffusion_sc_list_categories($attr) {
@@ -206,107 +204,6 @@ function suffusion_sc_tag_cloud($attr) {
 	if (isset($attr['number'])) $attr['number'] = (int)$attr['number'];
 	$attr['echo'] = false;
 	return wp_tag_cloud($attr);
-}
-
-/**
- * Creates an ad hoc widget area based on parameters passed to it. To use this feature you have to add widgets to the corresponding
- * Ad Hoc widget areas in your administration panel. The syntax for this short code is [suffusion-widgets id='2' container='false' class='some-class'].
- * The 'id' refers to the index of the ad hoc widget area and can be anything from 1 to 5.
- * The 'container' parameter, if set to false, will not put the widgets in a container. Otherwise the container will have the id "ad-hoc-[id]", where [id] is the id that you passed.
- * The 'container-class' parameter assigns the passed class to the container. If the 'container' parameter is false then this is ignored.
- *
- * @param  $attr
- * @return string
- */
-function suffusion_sc_widget_area($attr) {
-	$id = 1;
-	if (isset($attr['id'])) {
-		$id = (int)$attr['id'];
-	}
-	$container = isset($attr['container']) ? (bool)$attr['container'] : true;
-	$sidebar_class = isset($attr['container-class']) ? $attr['container-class'] : "";
-	ob_start(); // Output buffering is needed here otherwise there is no way to get the dynamic_sidebar output added to existing text
-	if ($container) echo "<div id='ad-hoc-$id' class='$sidebar_class warea'>\n";
-	dynamic_sidebar("Ad Hoc Widgets $id");
-	if ($container) echo "</div>\n";
-	$content = ob_get_contents();
-	ob_end_clean();
-	return $content;
-}
-
-/**
- * Creates the container for multi-column content, corresponding to the short code [suffusion-multic].
- * No attributes are required for the short code. This should be used in conjunction with the [suffusion-column] short code.
- *
- * @param  $attr
- * @param  $content
- * @return string
- */
-function suffusion_sc_multi_column($attr, $content = null) {
-	$content = do_shortcode($content);
-	return "<div class='suf-multic'>".$content."</div>";
-}
-
-/**
- * Creates a column within the multi-column layout, corresponding to the short code [suffusion-column].
- * This is to be invoked inside the [suffusion-multic] short code for best results.
- * This short code takes a parameter called "width" and an optional parameter called "class".
- * The "width" parameter can have the values 1, 1/2, 1/3, 1/4, 2/3, 3/4, 100, 050, 033, 025, 066 and 075. The default is 1.
- * You can have a layout such as this:
- * [suffusion-multic]
- *      [suffusion-column width='1/3']Some content in one-third the width[/suffusion-column]
- *      [suffusion-column width='2/3']Some content in two-third the width[/suffusion-column]
- * [/suffusion-multic]
- * Or:
- * [suffusion-multic]
- *      [suffusion-column width='1/4']Some content in one-fourth the width[/suffusion-column]
- *      [suffusion-column width='1/2']Some more content in half the width[/suffusion-column]
- *      [suffusion-column width='1/4']Yet some more content in one-fourth the width[/suffusion-column]
- * [/suffusion-multic]
- * You are responsible for balancing the widths - the theme will not do that automatically for you.
- *
- * @param  $attr
- * @param  $content
- * @return string
- */
-function suffusion_sc_column($attr, $content = null) {
-	$content = do_shortcode($content);
-	$width = isset($attr['width']) ? $attr['width'] : "1";
-	$class = isset($attr['class']) ? $attr['class'] : "";
-	$base_class = "suf-mc-100";
-	switch ($width) {
-		case "1/4":
-		case "025":
-			$base_class = "suf-mc-col-025";
-			break;
-
-		case "1/3":
-		case "033":
-			$base_class = "suf-mc-col-033";
-			break;
-
-		case "1/2":
-		case "050":
-			$base_class = "suf-mc-col-050";
-			break;
-
-		case "2/3":
-		case "066":
-			$base_class = "suf-mc-col-066";
-			break;
-
-		case "3/4":
-		case "075":
-			$base_class = "suf-mc-col-075";
-			break;
-
-		case "1":
-		case "100":
-		default:
-			$base_class = "suf-mc-col-100";
-			break;
-	}
-	return "<div class='suf-mc-col $base_class $class'>".$content."</div>";
 }
 
 function suffusion_shortcode_string_to_bool($value) {

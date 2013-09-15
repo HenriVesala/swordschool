@@ -16,12 +16,7 @@ if ($suf_seo_enabled == 'enabled') {
 		}
 
 		if (in_array('theme', $seo_settings)) {
-			if (function_exists('wp_get_theme')) {
-				$theme_data = wp_get_theme(get_template_directory().'/style.css');
-			}
-			else {
-				$theme_data = get_theme_data(get_template_directory().'/style.css');
-			}
+            $theme_data = wp_get_theme(get_template_directory().'/style.css');
 			echo "\t".'<meta name="template" content="'.esc_attr("{$theme_data['Title']} {$theme_data['Version']}").'" />'."\n";
 		}
 

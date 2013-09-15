@@ -5,10 +5,10 @@ inlineEditTax = {
 	init : function() {
 		var t = this, row = $('#inline-edit');
 
-		t.type = $('#the-list').attr('class').substr(5);
+		t.type = $('#the-list').attr('data-wp-lists').substr(5);
 		t.what = '#'+t.type+'-';
 
-		$('.editinline').live('click', function(){
+		$('#the-list').on('click', 'a.editinline', function(){
 			inlineEditTax.edit(this);
 			return false;
 		});

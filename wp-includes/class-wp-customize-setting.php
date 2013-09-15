@@ -144,7 +144,7 @@ class WP_Customize_Setting {
 	 * @return mixed Null if an input isn't valid, otherwise the sanitized value.
 	 */
 	public function sanitize( $value ) {
-		$value = stripslashes_deep( $value );
+		$value = wp_unslash( $value );
 		return apply_filters( "customize_sanitize_{$this->id}", $value, $this );
 	}
 
@@ -380,11 +380,11 @@ class WP_Customize_Setting {
  * @since 3.4.0
  */
 class WP_Customize_Filter_Setting extends WP_Customize_Setting {
-	
+
 	/**
 	 * @since 3.4.0
 	 */
-	public function update() {}
+	public function update( $value ) {}
 }
 
 /**

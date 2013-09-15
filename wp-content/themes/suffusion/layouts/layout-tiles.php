@@ -84,7 +84,7 @@ if (have_posts()) {
 
 	if ($number_of_cols > 0) {
 ?>
-<div class='suf-tiles'>
+<div class='suf-tiles suf-tiles-<?php echo $number_of_cols;?>'>
 <?php
 		$ctr = 0;
 		$cols_per_row = $number_of_cols;
@@ -108,12 +108,11 @@ if (have_posts()) {
 				if ($total - 1 - $ctr < $number_of_cols) {
 					$cols_per_row = $total - $ctr;
 				}
-				echo "<div class='suf-tile-row suf-tile-row-$cols_per_row-cols fix'>\n";
 			}
 
 			global $suf_mag_excerpt_full_story_position;
 			do_action('suffusion_before_post', $post->ID, 'tile', $suffusion_current_post_index);
-			echo "\t<article class='suf-tile suf-tile-{$cols_per_row}c $suf_mag_excerpt_full_story_position suf-tile-ctr-$ctr'>\n";
+			echo "\n\t<article class='suf-tile suf-tile-{$cols_per_row}c $suf_mag_excerpt_full_story_position suf-tile-ctr-$ctr'>\n";
 			$image_size = $suf_tile_image_settings == 'inherit' ? 'mag-excerpt' : 'tile-thumb';
 			$image_link = suffusion_get_image(array($image_size => true));
 
@@ -136,12 +135,9 @@ if (have_posts()) {
 				echo "\t</div>\n";
 			}
 
-			echo "\t</article>\n";
+			echo "\t</article>";
 			do_action('suffusion_after_post', $post->ID, 'tile', $suffusion_current_post_index);
 
-			if ($ctr == $total - 1 || $ctr%$number_of_cols == $number_of_cols - 1) {
-				echo "</div>\n";
-			}
 			$ctr++;
 		}
 ?>

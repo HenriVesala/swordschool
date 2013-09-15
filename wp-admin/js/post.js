@@ -124,9 +124,9 @@ tagBox = {
 	init : function() {
 		var t = this, ajaxtag = $('div.ajaxtag');
 
-	    $('.tagsdiv').each( function() {
-	        tagBox.quickClicks(this);
-	    });
+		$('.tagsdiv').each( function() {
+			tagBox.quickClicks(this);
+		});
 
 		$('input.tagadd', ajaxtag).click(function(){
 			t.flushTags( $(this).closest('.tagsdiv') );
@@ -138,8 +138,8 @@ tagBox = {
 
 		$('input.newtag', ajaxtag).blur(function() {
 			if ( this.value == '' )
-	            $(this).parent().siblings('.taghint').css('visibility', '');
-	    }).focus(function(){
+				$(this).parent().siblings('.taghint').css('visibility', '');
+		}).focus(function(){
 			$(this).parent().siblings('.taghint').css('visibility', 'hidden');
 		}).keyup(function(e){
 			if ( 13 == e.which ) {
@@ -156,10 +156,10 @@ tagBox = {
 			$(this).suggest( ajaxurl + '?action=ajax-tag-search&tax=' + tax, { delay: 500, minchars: 2, multiple: true, multipleSep: postL10n.comma + ' ' } );
 		});
 
-	    // save tags on post save/publish
-	    $('#post').submit(function(){
+		// save tags on post save/publish
+		$('#post').submit(function(){
 			$('div.tagsdiv').each( function() {
-	        	tagBox.flushTags(this, false, 1);
+				tagBox.flushTags(this, false, 1);
 			});
 		});
 
@@ -251,12 +251,125 @@ WPRemoveThumbnail = function(nonce){
 	);
 };
 
-})(jQuery);
+$(document).on( 'heartbeat-send.refresh-lock', function( e, data ) {
+	var lock = $('#active_post_lock').val(),
+		post_id = $('#post_ID').val(),
+		send = {};
+
+	if ( ! post_id || ! $('#post-lock-dialog').length )
+		return;
+
+	send['post_id'] = post_id;
+
+	if ( lock )
+		send['lock'] = lock;
+
+	data['wp-refresh-post-lock'] = send;
+});
+
+// Post locks: update the lock string or show the dialog if somebody has taken over editing
+$(document).on( 'heartbeat-tick.refresh-lock', function( e, data ) {
+	var received, wrap, avatar;
+
+	if ( data['wp-refresh-post-lock'] ) {
+		received = data['wp-refresh-post-lock'];
+
+		if ( received.lock_error ) {
+			// show "editing taken over" message
+			wrap = $('#post-lock-dialog');
+
+			if ( wrap.length && ! wrap.is(':visible') ) {
+				if ( typeof autosave == 'function' ) {
+					$(document).on('autosave-disable-buttons.post-lock', function() {
+						wrap.addClass('saving');
+					}).on('autosave-enable-buttons.post-lock', function() {
+						wrap.removeClass('saving').addClass('saved');
+						window.onbeforeunload = null;
+					});
+
+					// Save the latest changes and disable
+					if ( ! autosave() )
+						window.onbeforeunload = null;
+
+					autosave = function(){};
+				}
+
+				if ( received.lock_error.avatar_src ) {
+					avatar = $('<img class="avatar avatar-64 photo" width="64" height="64" />').attr( 'src', received.lock_error.avatar_src.replace(/&amp;/g, '&') );
+					wrap.find('div.post-locked-avatar').empty().append( avatar );
+				}
+
+				wrap.show().find('.currently-editing').text( received.lock_error.text );
+				wrap.find('.wp-tab-first').focus();
+			}
+		} else if ( received.new_lock ) {
+			$('#active_post_lock').val( received.new_lock );
+		}
+	}
+});
+
+}(jQuery));
+
+(function($) {
+	var check, timeout;
+
+	function schedule() {
+		check = false;
+		window.clearTimeout( timeout );
+		timeout = window.setTimeout( function(){ check = true; }, 300000 );
+	}
+
+	$(document).on( 'heartbeat-send.wp-refresh-nonces', function( e, data ) {
+		var nonce, post_id;
+
+		if ( check ) {
+			if ( ( post_id = $('#post_ID').val() ) && ( nonce = $('#_wpnonce').val() ) ) {
+				data['wp-refresh-post-nonces'] = {
+					post_id: post_id,
+					post_nonce: nonce
+				};
+			}
+		}
+	}).on( 'heartbeat-tick.wp-refresh-nonces', function( e, data ) {
+		var nonces = data['wp-refresh-post-nonces'];
+
+		if ( nonces ) {
+			schedule();
+
+			if ( nonces.replace ) {
+				$.each( nonces.replace, function( selector, value ) {
+					$( '#' + selector ).val( value );
+				});
+			}
+
+			if ( nonces.heartbeatNonce )
+				window.heartbeatSettings.nonce = nonces.heartbeatNonce;
+		}
+	}).ready( function() {
+		schedule();
+	});
+}(jQuery));
 
 jQuery(document).ready( function($) {
 	var stamp, visibility, sticky = '', last = 0, co = $('#content');
 
 	postboxes.add_postbox_toggles(pagenow);
+
+	// Post locks: contain focus inside the dialog. If the dialog is shown, focus the first item.
+	$('#post-lock-dialog .notification-dialog').on( 'keydown', function(e) {
+		if ( e.which != 9 )
+			return;
+
+		var target = $(e.target);
+
+		if ( target.hasClass('wp-tab-first') && e.shiftKey ) {
+			$(this).find('.wp-tab-last').focus();
+			e.preventDefault();
+		} else if ( target.hasClass('wp-tab-last') && ! e.shiftKey ) {
+			$(this).find('.wp-tab-first').focus();
+			e.preventDefault();
+		}
+	}).filter(':visible').find('.wp-tab-first').focus();
 
 	// multi-taxonomies
 	if ( $('#tagsdiv-post_tag').length ) {
@@ -272,14 +385,14 @@ jQuery(document).ready( function($) {
 
 	// categories
 	$('.categorydiv').each( function(){
-		var this_id = $(this).attr('id'), noSyncChecks = false, syncChecks, catAddAfter, taxonomyParts, taxonomy, settingName;
+		var this_id = $(this).attr('id'), catAddBefore, catAddAfter, taxonomyParts, taxonomy, settingName;
 
 		taxonomyParts = this_id.split('-');
 		taxonomyParts.shift();
 		taxonomy = taxonomyParts.join('-');
- 		settingName = taxonomy + '_tab';
- 		if ( taxonomy == 'category' )
- 			settingName = 'cats';
+		settingName = taxonomy + '_tab';
+		if ( taxonomy == 'category' )
+			settingName = 'cats';
 
 		// TODO: move to jQuery 1.3+, support for multiple hierarchical taxonomies, see wp-lists.js
 		$('a', '#' + taxonomy + '-tabs').click( function(){
@@ -302,20 +415,11 @@ jQuery(document).ready( function($) {
 
 		$('#new' + taxonomy).keypress( function(event){
 			if( 13 === event.keyCode ) {
-				 event.preventDefault();
-				 $('#' + taxonomy + '-add-submit').click();
+				event.preventDefault();
+				$('#' + taxonomy + '-add-submit').click();
 			}
 		});
 		$('#' + taxonomy + '-add-submit').click( function(){ $('#new' + taxonomy).focus(); });
-
-		syncChecks = function() {
-			if ( noSyncChecks )
-				return;
-			noSyncChecks = true;
-			var th = jQuery(this), c = th.is(':checked'), id = th.val().toString();
-			$('#in-' + taxonomy + '-' + id + ', #in-' + taxonomy + '-category-' + id).prop( 'checked', c );
-			noSyncChecks = false;
-		};
 
 		catAddBefore = function( s ) {
 			if ( !$('#new'+taxonomy).val() )
@@ -349,7 +453,7 @@ jQuery(document).ready( function($) {
 			return false;
 		});
 
-		$('#' + taxonomy + 'checklist li.popular-category input[type="checkbox"], #' + taxonomy + 'checklist-pop input[type="checkbox"]').live( 'click', function(){
+		$('#' + taxonomy + 'checklist, #' + taxonomy + 'checklist-pop').on( 'click', 'li.popular-category > label input[type="checkbox"]', function() {
 			var t = $(this), c = t.is(':checked'), id = t.val();
 			if ( id && t.parents('#taxonomy-'+taxonomy).length )
 				$('#in-' + taxonomy + '-' + id + ', #in-popular-' + taxonomy + '-' + id).prop( 'checked', c );
@@ -389,6 +493,10 @@ jQuery(document).ready( function($) {
 		}
 
 		function updateText() {
+
+			if ( ! $('#timestampdiv').length )
+				return true;
+
 			var attemptedDate, originalDate, currentDate, publishOn, postStatus = $('#post_status'),
 				optPublish = $('option[value="publish"]', postStatus), aa = $('#aa').val(),
 				mm = $('#mm').val(), jj = $('#jj').val(), hh = $('#hh').val(), mn = $('#mn').val();
@@ -419,11 +527,12 @@ jQuery(document).ready( function($) {
 			} else {
 				$('#timestamp').html(
 					publishOn + ' <b>' +
-					$('option[value="' + $('#mm').val() + '"]', '#mm').text() + ' ' +
-					jj + ', ' +
-					aa + ' @ ' +
-					hh + ':' +
-					mn + '</b> '
+					postL10n.dateFormat.replace( '%1$s', $('option[value="' + $('#mm').val() + '"]', '#mm').text() )
+						.replace( '%2$s', jj )
+						.replace( '%3$s', aa )
+						.replace( '%4$s', hh )
+						.replace( '%5$s', mn )
+					+ '</b> '
 				);
 			}
 
@@ -474,7 +583,7 @@ jQuery(document).ready( function($) {
 		$('.cancel-post-visibility', '#post-visibility-select').click(function () {
 			$('#post-visibility-select').slideUp('fast');
 			$('#visibility-radio-' + $('#hidden-post-visibility').val()).prop('checked', true);
-			$('#post_password').val($('#hidden_post_password').val());
+			$('#post_password').val($('#hidden-post-password').val());
 			$('#sticky').prop('checked', $('#hidden-post-sticky').prop('checked'));
 			$('#post-visibility-display').html(visibility);
 			$('.edit-visibility', '#visibility').show();
@@ -510,6 +619,7 @@ jQuery(document).ready( function($) {
 		$('#timestampdiv').siblings('a.edit-timestamp').click(function() {
 			if ($('#timestampdiv').is(":hidden")) {
 				$('#timestampdiv').slideDown('fast');
+				$('#mm').focus();
 				$(this).hide();
 			}
 			return false;
@@ -535,6 +645,16 @@ jQuery(document).ready( function($) {
 			return false;
 		});
 
+		$('#post').on( 'submit', function(e){
+			if ( ! updateText() ) {
+				e.preventDefault();
+				$('#timestampdiv').show();
+				$('#publishing-action .spinner').hide();
+				$('#publish').prop('disabled', false).removeClass('button-primary-disabled');
+				return false;
+			}
+		});
+
 		$('#post-status-select').siblings('a.edit-post-status').click(function() {
 			if ($('#post-status-select').is(":hidden")) {
 				$('#post-status-select').slideDown('fast');
@@ -558,6 +678,78 @@ jQuery(document).ready( function($) {
 			return false;
 		});
 	} // end submitdiv
+
+	// permalink
+	if ( $('#edit-slug-box').length ) {
+		editPermalink = function(post_id) {
+			var i, c = 0, e = $('#editable-post-name'), revert_e = e.html(), real_slug = $('#post_name'), revert_slug = real_slug.val(), b = $('#edit-slug-buttons'), revert_b = b.html(), full = $('#editable-post-name-full').html();
+
+			$('#view-post-btn').hide();
+			b.html('<a href="#" class="save button button-small">'+postL10n.ok+'</a> <a class="cancel" href="#">'+postL10n.cancel+'</a>');
+			b.children('.save').click(function() {
+				var new_slug = e.children('input').val();
+				if ( new_slug == $('#editable-post-name-full').text() ) {
+					return $('.cancel', '#edit-slug-buttons').click();
+				}
+				$.post(ajaxurl, {
+					action: 'sample-permalink',
+					post_id: post_id,
+					new_slug: new_slug,
+					new_title: $('#title').val(),
+					samplepermalinknonce: $('#samplepermalinknonce').val()
+				}, function(data) {
+					var box = $('#edit-slug-box');
+					box.html(data);
+					if (box.hasClass('hidden')) {
+						box.fadeIn('fast', function () {
+							box.removeClass('hidden');
+						});
+					}
+					b.html(revert_b);
+					real_slug.val(new_slug);
+					makeSlugeditClickable();
+					$('#view-post-btn').show();
+				});
+				return false;
+			});
+
+			$('.cancel', '#edit-slug-buttons').click(function() {
+				$('#view-post-btn').show();
+				e.html(revert_e);
+				b.html(revert_b);
+				real_slug.val(revert_slug);
+				return false;
+			});
+
+			for ( i = 0; i < full.length; ++i ) {
+				if ( '%' == full.charAt(i) )
+					c++;
+			}
+
+			slug_value = ( c > full.length / 4 ) ? '' : full;
+			e.html('<input type="text" id="new-post-slug" value="'+slug_value+'" />').children('input').keypress(function(e) {
+				var key = e.keyCode || 0;
+				// on enter, just save the new slug, don't save the post
+				if ( 13 == key ) {
+					b.children('.save').click();
+					return false;
+				}
+				if ( 27 == key ) {
+					b.children('.cancel').click();
+					return false;
+				}
+			}).keyup(function(e) {
+				real_slug.val(this.value);
+			}).focus();
+		}
+
+		makeSlugeditClickable = function() {
+			$('#editable-post-name').click(function() {
+				$('#edit-slug-buttons').children('.edit-slug').click();
+			});
+		}
+		makeSlugeditClickable();
+	}
 
 	// word count
 	if ( typeof(wpWordCount) != 'undefined' ) {
@@ -606,6 +798,9 @@ jQuery(document).ready( function($) {
 	// resizable textarea#content
 	(function() {
 		var textarea = $('textarea#content'), offset = null, el;
+		// No point for touch devices
+		if ( !textarea.length || 'ontouchstart' in window )
+			return;
 
 		function dragging(e) {
 			textarea.height( Math.max(50, offset + e.pageY) + 'px' );
@@ -613,15 +808,16 @@ jQuery(document).ready( function($) {
 		}
 
 		function endDrag(e) {
-			var height = $('#wp-content-editor-container').height();
+			var height;
 
 			textarea.focus();
 			$(document).unbind('mousemove', dragging).unbind('mouseup', endDrag);
 
-			if ( height > 83 ) {
-				height -= 33; // compensate for toolbars, padding...
+			height = parseInt( textarea.css('height'), 10 );
+
+			// sanity check
+			if ( height && height > 50 && height < 5000 )
 				setUserSetting( 'ed_size', height );
-			}
 		}
 
 		textarea.css('resize', 'none');
@@ -637,49 +833,89 @@ jQuery(document).ready( function($) {
 
 	if ( typeof(tinymce) != 'undefined' ) {
 		tinymce.onAddEditor.add(function(mce, ed){
-			if ( ed.id != 'content' )
+			// iOS expands the iframe to full height and the user cannot adjust it.
+			if ( ed.id != 'content' || tinymce.isIOS5 )
 				return;
+
+			function getHeight() {
+				var height, node = document.getElementById('content_ifr'),
+					ifr_height = node ? parseInt( node.style.height, 10 ) : 0,
+					tb_height = $('#content_tbl tr.mceFirst').height();
+
+				if ( !ifr_height || !tb_height )
+					return false;
+
+				// total height including toolbar and statusbar
+				height = ifr_height + tb_height + 21;
+				// textarea height = total height - 33px toolbar
+				height -= 33;
+
+				return height;
+			}
 
 			// resize TinyMCE to match the textarea height when switching Text -> Visual
 			ed.onLoadContent.add( function(ed, o) {
-				var ifr_height, height = parseInt( $('#content').css('height'), 10 ),
-					tb_height = $('#content_tbl tr.mceFirst').height();
+				var ifr_height, node = document.getElementById('content'),
+					height = node ? parseInt( node.style.height, 10 ) : 0,
+					tb_height = $('#content_tbl tr.mceFirst').height() || 33;
 
-				if ( height && !isNaN(height) && tb_height ) {
-					ifr_height = (height - tb_height) + 12; // compensate for padding in the textarea
+				// height cannot be under 50 or over 5000
+				if ( !height || height < 50 || height > 5000 )
+					height = 360; // default height for the main editor
 
+				if ( getUserSetting( 'ed_size' ) > 5000  )
+					setUserSetting( 'ed_size', 360 );
+
+				// compensate for padding and toolbars
+				ifr_height = ( height - tb_height ) + 12;
+
+				// sanity check
+				if ( ifr_height > 50 && ifr_height < 5000 ) {
 					$('#content_tbl').css('height', '' );
 					$('#content_ifr').css('height', ifr_height + 'px' );
-					setUserSetting( 'ed_size', height );
 				}
 			});
 
 			// resize the textarea to match TinyMCE's height when switching Visual -> Text
 			ed.onSaveContent.add( function(ed, o) {
-				var height = $('#content_tbl').height();
+				var height = getHeight();
 
-				if ( height && height > 83 ) {
-					height -= 33;
+				if ( !height || height < 50 || height > 5000 )
+					return;
 
-					$('#content').css( 'height', height + 'px' );
-					setUserSetting( 'ed_size', height );
-				}
+				$('textarea#content').css( 'height', height + 'px' );
 			});
 
 			// save on resizing TinyMCE
 			ed.onPostRender.add(function() {
 				$('#content_resize').on('mousedown.wp-mce-resize', function(e){
 					$(document).on('mouseup.wp-mce-resize', function(e){
-						var height = $('#wp-content-editor-container').height();
-
-						height -= 33;
-						if ( height > 50 && height != getUserSetting( 'ed_size' ) )
-							setUserSetting( 'ed_size', height );
+						var height;
 
 						$(document).off('mouseup.wp-mce-resize');
+
+						height = getHeight();
+						// sanity check
+						if ( height && height > 50 && height < 5000 )
+							setUserSetting( 'ed_size', height );
 					});
 				});
 			});
+		});
+
+		// When changing post formats, change the editor body class
+		$('#post-formats-select input.post-format').on( 'change.set-editor-class', function( event ) {
+			var editor, body, format = this.id;
+
+			if ( format && $( this ).prop('checked') ) {
+				editor = tinymce.get( 'content' );
+
+				if ( editor ) {
+					body = editor.getBody();
+					body.className = body.className.replace( /\bpost-format-[^ ]+/, '' );
+					editor.dom.addClass( body, format == 'post-format-0' ? 'post-format-standard' : format );
+				}
+			}
 		});
 	}
 });

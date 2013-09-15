@@ -22,6 +22,8 @@ TABLE OF CONTENTS:
 11.0 - Write/Edit Post Screen
 	11.1 - Custom Fields
 	11.2 - Post Revisions
+	11.3 - Featured Images
+	11.4 - Post formats
 12.0 - Categories
 13.0 - Tags
 14.0 - Media Screen
@@ -43,6 +45,8 @@ TABLE OF CONTENTS:
 25.0 - TinyMCE tweaks
 26.0 - Full Overlay w/ Sidebar
 27.0 - Customize Loader
+28.0 - Nav Menus
+29.0 - HiDPI
 
 
 ------------------------------------------------------------------------------*/
@@ -113,6 +117,14 @@ p.search-box {
 	float: left;
 }
 
+.search-box input[name="s"],
+#search-plugins input[name="s"],
+.tagsdiv .newtag {
+	float: right;
+	margin-right: 0;
+	margin-left: 4px;
+}
+
 input[type=password] {
 	direction: ltr;
 }
@@ -139,10 +151,15 @@ ul#add-to-blog-users {
 
 #publishing-action {
 	float: left;
+	text-align: left;
+}
+
+#publishing-action .spinner {
+	float: right;
 }
 
 #post-body .misc-pub-section {
-	border-right:0;
+	border-right: 0;
 	border-left-width: 1px;
 	border-left-style: solid;
 }
@@ -177,11 +194,6 @@ ul#add-to-blog-users {
 td.action-links,
 th.action-links {
 	text-align: left;
-}
-
-.describe .del-link {
-	padding-left: 0;
-	padding-right: 5px;
 }
 
 
@@ -419,12 +431,12 @@ form.upgrade .hint {
 	transform:         translate( -138px );
 }
 
-.folded .wp-menu-arrow {
-	-moz-transform:    translate( -27px );
-	-webkit-transform: translate( -27px );
-	-o-transform:      translate( -27px );
-	-ms-transform:     translate( -27px );
-	transform:         translate( -27px );
+.folded #adminmenu li .wp-menu-arrow {
+	-moz-transform:    translate( -26px );
+	-webkit-transform: translate( -26px );
+	-o-transform:      translate( -26px );
+	-ms-transform:     translate( -26px );
+	transform:         translate( -26px );
 }
 
 #adminmenu .wp-not-current-submenu .wp-menu-arrow div {
@@ -437,7 +449,7 @@ form.upgrade .hint {
 }
 
 #adminmenu .wp-submenu .wp-submenu-head {
-	padding: 6px 10px 5px 4px;
+	padding: 5px 10px 5px 4px;
 	-webkit-border-top-right-radius: 0;
 	-webkit-border-top-left-radius: 3px;
 	border-top-right-radius: 0;
@@ -481,6 +493,11 @@ form.upgrade .hint {
 		margin-right: 52px;
 	}
 
+	.auto-fold #adminmenu div.wp-menu-image {
+		float: right;
+		width: 30px;
+	}
+
 	.auto-fold #adminmenu .wp-submenu.sub-open,
 	.auto-fold #adminmenu .opensub .wp-submenu,
 	.auto-fold #adminmenu .wp-has-current-submenu .wp-submenu.sub-open,
@@ -497,7 +514,7 @@ form.upgrade .hint {
 		padding-right: 12px;
 	}
 
-	.auto-fold .wp-menu-arrow {
+	.auto-fold #adminmenu li .wp-menu-arrow {
 		-moz-transform:    translate( -27px );
 		-webkit-transform: translate( -27px );
 		-o-transform:      translate( -27px );
@@ -524,6 +541,10 @@ form.upgrade .hint {
 	font-family: Tahoma, Arial, sans-serif;
 }
 
+.post-com-count {
+	background-image: url('../images/bubble_bg-rtl.gif');
+}
+
 .column-response .post-com-count {
 	float: right;
 	margin-right: 0;
@@ -543,12 +564,29 @@ form.upgrade .hint {
 	font-family: Tahoma, Arial, sans-serif;
 }
 
-.widefat td p {
-	margin: 2px 0 0.8em;
-}
-
 .postbox-container {
 	float: right;
+}
+
+#post-body-content {
+	float: right;
+}
+
+#poststuff #post-body.columns-2 {
+	margin-left: 300px;
+	margin-right: 0;
+}
+
+#post-body.columns-2 #postbox-container-1 {
+	float: left;
+	margin-left: -300px;
+	margin-right: 0;
+}
+
+@media only screen and (max-width: 850px) {
+	#wpbody-content #post-body.columns-2 #postbox-container-1 {
+		margin-left: 0;
+	}
 }
 
 .postbox .handlediv {
@@ -571,6 +609,7 @@ form.upgrade .hint {
 	padding-left: 125px;
 }
 
+/* Welcome Panel */
 .welcome-panel .welcome-panel-close {
 	right: auto;
 	left: 10px;
@@ -581,39 +620,68 @@ form.upgrade .hint {
 	right: -12px;
 }
 
-.welcome-panel .wp-badge {
-	float: right;
+.welcome-panel-content {
+	margin-left: 0;
+	margin-right: 13px;
 }
 
 .welcome-panel .welcome-panel-column {
-	margin: 0 -25px 0 5%;
-	padding-left: 0;
-	padding-right: 25px;
 	float: right;
 }
 
-.welcome-panel .welcome-panel-column.welcome-panel-last {
-	margin-right: auto;
-	padding-right: 0;
-	margin-left: 0;
-}
-
-.welcome-panel h4 .icon16 {
-	margin-left: 0;
-	margin-right: -32px;
-}
-
-.welcome-panel .welcome-panel-column-container {
-	padding: 0 25px 0 0;
-}
-
 .welcome-panel .welcome-panel-column ul {
-	margin: 1.6em 1.3em 1em 1em;
+	margin-right: 0;
+	margin-left: 1em;
 }
 
 .welcome-panel .welcome-panel-column li {
 	padding-left: 0;
 	padding-right: 2px;
+}
+
+.welcome-panel .welcome-add-page {
+	background-position: right 2px;
+}
+
+.welcome-panel .welcome-edit-page {
+	background-position: right -90px;
+}
+
+.welcome-panel .welcome-learn-more {
+	background-position: right -136px;
+}
+
+.welcome-panel .welcome-comments {
+	background-position: right -182px;
+}
+
+.welcome-panel .welcome-view-site {
+	background-position: right -274px;
+}
+
+.welcome-panel .welcome-widgets-menus {
+	background-position: right -229px;
+	line-height: 14px;
+}
+
+.welcome-panel .welcome-write-blog {
+ 	background-position: right -44px;
+}
+
+.welcome-panel .welcome-icon {
+	padding: 2px 32px 8px 0;
+}
+
+@media screen and (max-width: 870px) {
+	.welcome-panel .welcome-panel-column li {
+		margin-right: 0;
+		margin-left: 13px;
+	}
+
+	.welcome-panel .welcome-icon {
+		padding-right: 25px;
+		padding-left: 0;
+	}
 }
 
 /*------------------------------------------------------------------------------
@@ -623,17 +691,29 @@ form.upgrade .hint {
 .fixed .column-comments {
 	text-align: right;
 }
+
 .fixed .column-comments .vers {
 	padding-left: 0;
 	padding-right: 3px;
 }
+
 .fixed .column-comments a {
 	float: right;
 }
+
+.fixed .column-menus {
+	text-align: right;
+}
+
 .sorting-indicator {
 	margin-left: 0;
 	margin-right: 7px;
 }
+
+tr.wp-locked .locked-indicator {
+	margin: -2px 6px 0 0;
+}
+
 th.sortable a span,
 th.sorted a span {
 	float: right;
@@ -667,6 +747,12 @@ th.sorted a span {
 
 .tablenav .actions {
 	padding: 2px 0 0 8px;
+}
+
+.tablenav .actions select {
+	float: right;
+	margin-right: 0;
+	margin-left: 6px;
 }
 
 .tablenav .delete {
@@ -745,8 +831,6 @@ th.sorted a span {
 }
 
 .inline-edit-row fieldset ul.cat-checklist label,
-.inline-edit-row .catshow,
-.inline-edit-row .cathide,
 .inline-edit-row #bulk-titles div {
 	font-family: Tahoma, Arial, sans-serif;
 }
@@ -766,43 +850,39 @@ th.sorted a span {
 /*------------------------------------------------------------------------------
   11.0 - Write/Edit Post Screen
 ------------------------------------------------------------------------------*/
-/* structural/layout */
-#post-body-content {
+
+#save-action .spinner,
+#show-comments a,
+#show-comments .spinner {
 	float: right;
-}
-
-#poststuff #post-body.columns-2 {
-	margin-left: 300px;
-	margin-right: 0;
-}
-
-#post-body.columns-2 #postbox-container-1 {
-	float: left;
-	margin-left: -300px;
-	margin-right: 0;
-}
-
-@media only screen and (max-width: 850px) {
-	#wpbody-content #post-body.columns-2 #postbox-container-1 {
-		margin-left: 0;
-	}
 }
 
 #titlediv #title-prompt-text,
 #wp-fullscreen-title-prompt-text {
-	right:0;
+	right: 0;
 }
 
 #sample-permalink {
-	direction:ltr;
+	direction: ltr;
 }
 
 #sample-permalink #editable-post-name {
-	unicode-bidi:embed;
+	unicode-bidi: embed;
 }
+
 #wp-fullscreen-title-prompt-text {
 	left: auto;
 	right: 0;
+}
+
+#wp-fullscreen-save .spinner,
+#wp-fullscreen-save .fs-saved {
+	float: left;
+}
+
+#edit-slug-box .cancel {
+	margin-right: 0;
+	margin-left: 10px;
 }
 
 .postarea h3 label {
@@ -859,7 +939,7 @@ th.sorted a span {
 }
 
 #post-body .wp_themeSkin .mceStatusbar a.mceResize {
-	background: transparent url(../images/resize-rtl.gif) no-repeat scroll left bottom;
+	background: transparent url('../images/resize-rtl.gif') no-repeat scroll left bottom;
 	cursor: sw-resize;
 }
 
@@ -868,6 +948,28 @@ th.sorted a span {
 	padding-left: 0;
 	padding-right: 18px;
 }
+
+.compat-attachment-fields th {
+	padding-right: 0;
+	padding-left: 10px;
+}
+
+#post-lock-dialog .post-locked-message a.button {
+	margin-right: 0;
+	margin-left: 10px;
+}
+
+#post-lock-dialog .post-locked-avatar {
+	float: right;
+	margin: 0 0 20px 20px;
+}
+
+#post-lock-dialog .locked-saving img {
+	float: right;
+	margin-right: 0;
+	margin-left: 3px;
+}
+
 
 /*------------------------------------------------------------------------------
   11.1 - Custom Fields
@@ -878,9 +980,177 @@ th.sorted a span {
 /*------------------------------------------------------------------------------
   11.2 - Post Revisions
 ------------------------------------------------------------------------------*/
+.wp-slider .ui-slider-handle.from-handle:before,
+.wp-slider .ui-slider-handle.to-handle:before {
+	height: 8px;
+	width: 7px;
+}
 
-table.diff td, table.diff th {
-	font-family: Consolas, Monaco, monospace;
+.wp-slider .ui-slider-handle.from-handle:before {
+	background-position: -5px -10px;
+	left: 6px;
+}
+
+.wp-slider .ui-slider-handle.to-handle:before {
+	background-position: -4px -29px;
+	left: 6px;
+}
+
+.revision-toggle-compare-mode {
+	right: auto;
+	left: 0;
+}
+
+.revisions .loading-indicator {
+	margin-right: -90px;
+}
+
+body.folded .revisions .loading-indicator {
+	margin-right: -32px;
+}
+
+.revisions-next {
+	float: left;
+}
+
+.revisions-previous {
+	float: right;
+}
+
+.diff-title strong {
+	text-align: left;
+	float: right;
+	margin-right: 0;
+	margin-left: 5px;
+}
+
+.revisions-controls .author-card .avatar,
+.revisions-controls .author-card .author-info {
+	float: right;
+}
+
+.diff-meta input.restore-revision {
+	float: left;
+}
+
+.diff-col-title-added,
+.diff-col-title-removed {
+	text-align: right;
+	float: right;
+}
+
+.revisions-tooltip {
+	margin-left: 0;
+	margin-right: -69px;
+}
+
+.revisions-tooltip.flipped {
+	margin-right: 0;
+	margin-left: -70px;
+}
+
+.ie8 .revisions-tooltip {
+	margin-right: -75px;
+}
+
+.ie8 .revisions-tooltip.flipped {
+	margin-left: -63px;
+}
+
+.revisions-tooltip-arrow {
+	right: 0;
+	margin-left: 0;
+	margin-right: 35px;
+}
+
+.revisions-tooltip.flipped .revisions-tooltip-arrow {
+	margin-right: 0;
+	margin-left: 35px;
+	right: auto;
+	left: 0;
+}
+
+.revisions-tooltip-arrow > span {
+	left: auto;
+	right: 20px;
+}
+
+.revisions-tooltip.flipped .revisions-tooltip-arrow > span {
+	right: auto;
+	left: 20px;
+}
+
+.ie8 .revisions-tooltip-arrow > span {
+	right: 21px;
+}
+
+.revisions-tickmarks > div {
+	float: right;
+	border-width: 0 0 0 1px;
+}
+
+/*------------------------------------------------------------------------------
+  11.3 - Featured Images
+------------------------------------------------------------------------------*/
+
+#select-featured-image a {
+	float: right;
+}
+
+/*------------------------------------------------------------------------------
+  11.4 - Post formats
+------------------------------------------------------------------------------*/
+
+a.post-state-format {
+	margin-right: 0;
+	margin-left: 5px;
+}
+
+label.post-format-icon {
+	margin-left: 0;
+	margin-right: 5px;
+	padding-left: 0px;
+	padding-right: 21px;
+}
+
+.post-format-icon.post-format-standard  {
+	background-position: 100% 0;
+}
+
+.post-format-icon.post-format-image  {
+	background-position: 100% -32px;
+}
+
+.post-format-icon.post-format-gallery {
+	background-position: 100% -64px;
+}
+
+.post-format-icon.post-format-audio {
+	background-position: 100% -96px;
+}
+
+.post-format-icon.post-format-video {
+	background-position: 100% -128px;
+}
+
+.post-format-icon.post-format-chat {
+	background-position: 100% -160px;
+}
+
+.post-format-icon.post-format-status {
+	background-position: 100% -192px;
+}
+
+.post-format-icon.post-format-aside {
+	background-position: 100% -224px;
+}
+
+.post-format-icon.post-format-quote {
+	background-position: 100% -256px;
+}
+
+.post-format-icon.post-format-link {
+	background-position: 100% -288px;
 }
 
 /*------------------------------------------------------------------------------
@@ -910,7 +1180,8 @@ table.diff td, table.diff th {
 	border-bottom-right-radius: 3px;
 }
 
-#front-static-pages .sub-option,
+#front-page-warning,
+#front-static-pages ul,
 ul.export-filters,
 .inline-editor ul.cat-checklist ul,
 .categorydiv ul.categorychecklist ul,
@@ -987,6 +1258,7 @@ span.description,
 	padding: 0 5px 0 0;
 }
 
+.media-item .edit-attachment,
 .media-item .error-div a.dismiss,
 .describe-toggle-on,
 .describe-toggle-off {
@@ -1021,6 +1293,21 @@ span.description,
   14.1 - Media Uploader
 ------------------------------------------------------------------------------*/
 
+#find-posts-input {
+	float: right;
+}
+
+#find-posts-search {
+	float: right;
+	margin-right: 3px;
+	margin-left: 4px;
+}
+
+.find-box-search .spinner {
+	left: auto;
+	right: 115px;
+}
+
 #find-posts-response .found-radio {
 	padding: 5px 8px 0 0;
 }
@@ -1044,8 +1331,38 @@ form.upgrade .hint {
   14.2 - Image Editor
 ------------------------------------------------------------------------------*/
 
+.wp_attachment_image .button,
+.A1B1 .button {
+	float: right;
+}
+
+.wp_attachment_image .spinner,
+.A1B1 .spinner {
+	float: right;
+}
+
 .imgedit-menu div {
 	float: right;
+}
+
+.imgedit-crop {
+	margin: 0;
+}
+
+.imgedit-rleft,
+.imgedit-flipv,
+.imgedit-undo {
+	margin: 0 8px 0 3px;
+}
+
+.imgedit-rright,
+.imgedit-fliph,
+.imgedit-redo {
+	margin: 0 3px;
+}
+
+.imgedit-applyto img {
+	margin: 0 0 0 8px;
 }
 
 .imgedit-help {
@@ -1138,6 +1455,11 @@ h3.available-themes {
 .available-theme .action-links li {
 	padding-left: 8px;
 	margin-left: 8px;
+}
+
+.ie8 .available-theme .action-links li {
+	padding-left: 7px;
+	margin-left: 7px;
 }
 
 #current-theme .theme-info li:last-child,
@@ -1316,6 +1638,18 @@ h2 .nav-tab {
 	font-family: Tahoma, Arial, sans-serif;
 }
 
+#permalink_structure {
+	float: right;
+}
+
+.options-permalink-php code {
+	unicode-bidi: embed;
+}
+
+.options-permalink-php #rules {
+	direction: ltr;
+}
+
 /*------------------------------------------------------------------------------
   21.0 - Admin Footer
 ------------------------------------------------------------------------------*/
@@ -1395,14 +1729,15 @@ h2 .nav-tab {
 	margin: 0 0 10px 0.7%;
 }
 
-.about-wrap .feature-section.images-stagger-right img {
+.about-wrap .feature-section.images-stagger-right img,
+.about-wrap .feature-section.images-stagger-right .video {
 	float: left;
-	margin: 0 12px 12px 5px;
+	margin: 0 2em 12px 5px;
 }
 
 .about-wrap .feature-section.images-stagger-left img {
 	float: right;
-	margin: 0 5px 12px 12px;
+	margin: 0 5px 12px 2em;
 }
 
 .about-wrap li.wp-person,
@@ -1410,6 +1745,26 @@ h2 .nav-tab {
 	float: right;
 	margin-right: 0;
 	margin-left: 10px;
+}
+
+@media only screen and (max-width: 900px) {
+	.about-wrap .feature-section.images-stagger-right .video.image-66 {
+		margin-right: 3px;
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	.about-wrap .feature-section .image-66 {
+		float: none;
+	}
+
+	.about-wrap .feature-section.images-stagger-right .image-66 {
+		margin-right: 3px;
+	}
+
+	.about-wrap .feature-section.images-stagger-left .image-66 {
+		margin-left: 3px;
+	}
 }
 
 /*------------------------------------------------------------------------------
@@ -1482,6 +1837,18 @@ table .column-rating {
 	left: 15px;
 }
 
+.screen-reader-text,
+.screen-reader-text span,
+.ui-helper-hidden-accessible {
+	left: auto;
+	right: -1000em;
+}
+
+.screen-reader-shortcut:focus {
+	left: auto;
+	right: 6px;
+}
+
 /*------------------------------------------------------------------------------
   24.0  - Dead
 ------------------------------------------------------------------------------*/
@@ -1510,12 +1877,20 @@ table .column-rating {
 	padding-left: 0;
 	padding-right: 5px;
 }
+
 #editorcontainer .wp_themeSkin .mceStatusbar div {
 	float: right;
 }
 
 #editorcontainer .wp_themeSkin .mceStatusbar a.mceResize {
 	float: left;
+}
+
+#content-resize-handle {
+	background: transparent url('../images/resize-rtl.gif') no-repeat scroll left bottom;
+	right: auto;
+	left: 2px;
+	cursor: sw-resize;
 }
 
 /*------------------------------------------------------------------------------
@@ -1551,9 +1926,10 @@ table .column-rating {
 }
 
 /* Collapse Button */
-.wp-full-overlay .collapse-sidebar {
-	right: 0;
+.wp-full-overlay a.collapse-sidebar {
 	left: auto;
+	right: 0;
+	margin-left: 0;
 	margin-right: 15px;
 }
 
@@ -1564,7 +1940,7 @@ table .column-rating {
 .wp-full-overlay .collapse-sidebar-arrow {
 	margin-right: 2px;
 	margin-left: 0;
-	background: transparent url('../images/arrows.png') no-repeat 0 -108px;
+	background: transparent url('../images/arrows.png') no-repeat 1px -108px;
 }
 
 .wp-full-overlay.collapsed .collapse-sidebar-arrow {
@@ -1576,18 +1952,6 @@ table .column-rating {
 	left: auto;
 	margin-right: 10px;
 	margin-left: 0;
-}
-
-/**
- * HiDPI Displays
- */
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-
-	.wp-full-overlay .collapse-sidebar-arrow {
-		background-image: url('../images/arrows-2x.png');
-		background-size: 15px 123px;
-	}
-
 }
 
 /*------------------------------------------------------------------------------
@@ -1810,6 +2174,11 @@ a.rsswidget,
 
 #dashboard-widgets h3 .postbox-title-action {
 	right: auto;
+	left: 10px;
+}
+
+.js #dashboard-widgets h3 .postbox-title-action {
+	right: auto;
 	left: 30px;
 }
 
@@ -1846,7 +2215,7 @@ a.rsswidget,
 }
 
 #dashboard-widgets #dashboard_quick_press form p.submit #save-post {
-	margin: 0 0 0 1em;
+	margin: 0 1px 0 0.7em;
 }
 
 #dashboard-widgets #dashboard_quick_press form p.submit #publish {
@@ -1924,6 +2293,27 @@ body.login {
 	float: right;
 }
 
+.menu-location-menus select {
+	float: right;
+}
+
+.locations-row-links {
+	float: right;
+	margin: 4px 6px 0 0;
+}
+
+.locations-add-menu-link {
+	direction: rtl;
+}
+
+.locations-edit-menu-link {
+	border-left: 1px solid #CCCCCC;
+	border-right: 0;
+	padding-left: 6px;
+	padding-right: 0;
+	float: right;
+}
+
 /* Menu Container */
 #menu-management-liquid {
 	float: right;
@@ -1982,9 +2372,11 @@ body.login {
 }
 
 /* Add Menu Item Boxes */
-.postbox .howto input {
+.postbox .howto input,
+.accordion-container .howto input {
 	float: left;
 }
+
 #nav-menu-theme-locations .button-controls {
 	text-align: left;
 }
@@ -1999,6 +2391,10 @@ body.login {
 #cancel-save {
 	margin-left: 0;
 	margin-right: 20px;
+}
+
+.button.right, .button-secondary.right, .button-primary.right {
+	float: left;
 }
 
 /* Button Secondary Actions */
@@ -2039,10 +2435,21 @@ body.login {
 .menu-item-handle .item-title {
 	margin-left:13em;
 	margin-right:0;
+	overflow: hidden;
 }
 .menu-item-handle .item-edit {
 	right: auto;
 	left: -20px;
+}
+
+.menu-item-handle .menu-item-title {
+	float: right;
+}
+
+.menu-item-settings .field-move a,
+.menu-item-settings .field-move span {
+	float: right;
+	margin-left: 4px;
 }
 
 /* WARNING: The factor of 30px is hardcoded into the nav-menus javascript. */
@@ -2142,17 +2549,17 @@ body.login {
 	margin-right:0;
 }
 
-.auto-add-pages {
+/* Star ratings */
+div.star-holder {
+	background: url('../images/stars-rtl.png?ver=20121108') repeat-x bottom right;
+}
+div.star-holder .star-rating {
+	background: url('../images/stars-rtl.png?ver=20121108') repeat-x top right;
 	float: right;
 }
 
-/* Star ratings */
-div.star-holder {
-	background: url('../images/stars-rtl.png?ver=20120506.png') repeat-x bottom right;
-}
-div.star-holder .star-rating {
-	background: url('../images/stars-rtl.png?ver=20120506.png') repeat-x top right;
-	float: right;
+#plugin-information .wrap {
+	margin: 4px 15px 0 0;
 }
 
 #plugin-information ul#sidemenu {
@@ -2160,34 +2567,13 @@ div.star-holder .star-rating {
 	right: 0;
 }
 
-#plugin-information h2 {
-	margin-right: 0;
-	margin-left: 200px;
-}
-
 #plugin-information .fyi {
-	margin-left: 5px;
-	margin-right: 20px;
-}
-
-#plugin-information .fyi h2 {
-	margin-left: 0;
-}
-
-#plugin-information .fyi ul {
-	padding: 10px 7px 10px 5px;
+	float: right;
 }
 
 #plugin-information #section-screenshots li p {
 	padding-left: 0;
 	padding-right: 20px;
-}
-
-#plugin-information #section-screenshots ol,
-#plugin-information .updated,
-#plugin-information pre {
-	margin-right: 0;
-	margin-left: 215px;
 }
 
 #plugin-information .updated,
@@ -2278,6 +2664,14 @@ h3.tb {
 	left: 25px;
 }
 
+#TB_closeAjaxWindow {
+	float: left;
+}
+
+#TB_ajaxWindowTitle {
+	float: right;
+}
+
 #post_status {
 	margin-left: 0;
 	margin-right: 10px;
@@ -2306,13 +2700,7 @@ h3.tb {
 	float: right;
 }
 
-.feature-filter .feature-name {
-	float: right;
-	text-align: left;
-}
-
 .feature-filter .feature-group li {
-	float: right;
 	padding-right: 0;
 	padding-left: 25px;
 }
@@ -2379,6 +2767,105 @@ div.sidebar-name h3 {
 	direction: ltr;
 }
 
+.control-section .accordion-section-title {
+	font-family: Tahoma, Arial, sans-serif;
+}
+
+.js .accordion-section-title:after {
+	right: auto;
+	left: 20px;
+}
+
+/*------------------------------------------------------------------------------
+  28.0 - Nav Menus
+------------------------------------------------------------------------------*/
+.nav-menus-php .major-publishing-actions .publishing-action {
+	float: left;
+}
+
+.menu-settings dd {
+	float: right;
+}
+
+.manage-menus span {
+	float: right;
+}
+
+.manage-menus select {
+	float: right;
+	margin-right: 0;
+	margin-left: 6px;
+}
+
+.manage-menus .submit-btn {
+	float: right;
+}
+
+.manage-menus .selected-menu {
+	float: right;
+	margin: 5px 0 0 6px;
+}
+
+.nav-menus-php .add-new-menu-action {
+	float: right;
+	margin: 4px 6px 0 0;
+}
+
+.nav-menus-php .meta-sep,
+.nav-menus-php .submitdelete,
+.nav-menus-php .submitcancel {
+	float: right;
+}
+
+.is-submenu {
+	float: right;
+	margin-right: 8px;
+}
+
+/*------------------------------------------------------------------------------
+  29.0 - HiDPI
+------------------------------------------------------------------------------*/
+@media print,
+  (-o-min-device-pixel-ratio: 5/4),
+  (-webkit-min-device-pixel-ratio: 1.25),
+  (min-resolution: 120dpi) {
+	.post-com-count {
+		background-image: url('../images/bubble_bg-rtl-2x.gif');
+		background-size: 18px 100px;
+	}
+
+	#content-resize-handle, #post-body .wp_themeSkin .mceStatusbar a.mceResize {
+		background: transparent url('../images/resize-rtl-2x.gif') no-repeat scroll right bottom;
+		background-size: 11px 11px;
+	}
+
+	.wp-full-overlay .collapse-sidebar-arrow {
+		background-image: url('../images/arrows-2x.png');
+		background-size: 15px 123px;
+	}
+
+	div.star-holder {
+		background: url('../images/stars-rtl-2x.png?ver=20121108') repeat-x bottom right;
+		background-size: 21px 37px;
+	}
+
+	div.star-holder .star-rating {
+		background: url('../images/stars-rtl-2x.png?ver=20121108') repeat-x top right;
+		background-size: 21px 37px;
+	}
+
+	#post-body .wp_themeSkin .mceStatusbar a.mceResize,
+	#content-resize-handle {
+		background: transparent url('../images/resize-rtl-2x.gif') no-repeat scroll left bottom;
+	}
+
+	.wp-slider .ui-slider-handle:before {
+		background-image: url(../images/arrows-pr-2x.png);
+		background-size: 16px 102px;
+	}
+
+}
+
 /* =Localized CSS
 -------------------------------------------------------------- */
 
@@ -2395,8 +2882,6 @@ body.locale-he-il,
 .locale-he-il .inline-edit-row fieldset span.title,
 .locale-he-il .inline-edit-row fieldset span.checkbox-title,
 .locale-he-il .inline-edit-row fieldset ul.cat-checklist label,
-.locale-he-il .inline-edit-row .catshow,
-.locale-he-il .inline-edit-row .cathide,
 .locale-he-il .inline-edit-row #bulk-titles div,
 .locale-he-il p.help,
 .locale-he-il p.description,

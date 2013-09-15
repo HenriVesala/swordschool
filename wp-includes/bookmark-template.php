@@ -215,9 +215,13 @@ function wp_list_bookmarks($args = '') {
 	$output = '';
 
 	if ( $categorize ) {
-		//Split the bookmarks into ul's for each category
-		$cats = get_terms('link_category', array('name__like' => $category_name, 'include' => $category, 'exclude' => $exclude_category, 'orderby' => $category_orderby, 'order' => $category_order, 'hierarchical' => 0));
+		$cats = get_terms( 'link_category', array( 'name__like' => $category_name, 'include' => $category, 'exclude' => $exclude_category, 'orderby' => $category_orderby, 'order' => $category_order, 'hierarchical' => 0 ) );
+		if ( empty( $cats ) )
+			$categorize = false;
+	}
 
+	if ( $categorize ) {
+		// Split the bookmarks into ul's for each category
 		foreach ( (array) $cats as $cat ) {
 			$params = array_merge($r, array('category'=>$cat->term_id));
 			$bookmarks = get_bookmarks($params);

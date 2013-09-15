@@ -107,6 +107,7 @@ class Suffusion_Options_Renderer {
 	/**
 	 * Creates the closing markup for each option.
 	 *
+	 * @param $value
 	 * @return void
 	 */
 	function create_closing_tag($value) {
@@ -1120,35 +1121,6 @@ class Suffusion_Options_Renderer {
 		$this->create_closing_tag($value);
 	}
 
-	function get_template_element_universe() {
-		$universe = array(
-			'nav-top' => array(
-				'name' => 'Navigation Bar Above Header',
-			),
-			'header' => array(
-				'name' => 'Header',
-			),
-			'nav-below' => array(
-				'name' => 'Navigation Bar Below Header',
-			),
-			'featured-content' => array(
-				'name' => 'Featured Content',
-			),
-			'page-content' => array(
-				'name' => 'Page Content',
-			),
-			'posts' => array(
-				'name' => 'All Posts',
-			),
-			'breadcrumb' => array(
-				'name' => 'Breadcrumbs',
-			),
-			'post-pagination' => array(
-				'name' => 'Post Pagination',
-			),
-		);
-		return $universe;
-	}
 	/**
 	 * Takes the flat options array and converts it into a hierarchical array, with the root level, and subsequent nested levels.
 	 *
@@ -1583,7 +1555,6 @@ class Suffusion_Options_Renderer {
 				$options[$hidden_option] = esc_attr($hidden_value);
 			}
 		}
-		$options['pre-navt'] = $options['suf_navt_entity_order'];
 
 		foreach ($this->nested_options as $section => $children) {
 			if (isset($options['submit-'.$section])) {
@@ -1709,7 +1680,6 @@ class Suffusion_Options_Renderer {
 			echo "<h2 class='fix'><a href='#'><img src='".get_template_directory_uri()."/admin/images/remove.png' alt='Close' /></a>Save / Reset</h2>\n";
 			echo "<input name=\"suffusion_options[submit-{$section['id']}]\" type='submit' value=\"Save page '{$option_structure[$section['id']]['name']}'\" class=\"button suf-button-section\" />\n";
 			echo "<input name=\"suffusion_options[submit-{$section['id']}]\" type='submit' value=\"Reset page '{$option_structure[$section['id']]['name']}'\" class=\"button suf-button-section\" />\n";
-			//echo "<input name=\"suffusion_options[submit-{$section['id']}]\" type='submit' value=\"Save changes for '$group_name'\" class=\"button suf-button-sub-menu\" />\n";
 			echo "<input name=\"suffusion_options[submit-{$section['id']}]\" type='submit' value=\"Reset changes for '$group_name'\" class=\"button suf-button-sub-menu\" />\n";
 			echo "<input name=\"suffusion_options[submit-{$section['id']}]\" type='submit' value=\"Delete all theme options\" class=\"button suf-button-all\" />\n";
 			echo "</div><!-- suf-button-bar -->\n";

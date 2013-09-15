@@ -6,9 +6,6 @@ class GCWT_Parser{
 	var $title = null;
 	var $max_events_display = 0;
 
-	function GCWT_Parser($feed_ids, $title_text = null, $max_events = 0, $start, $cache_duration, $refresh_one){
-		$this->__construct($feed_ids, $title_text, $max_events, $start, $cache_duration, $refresh_one);
-	}
 
 	function __construct($feed_ids, $title_text = null, $max_events = 0, $start, $cache_duration, $refresh_one){
 		require_once('gcwt-feed.php');
@@ -105,9 +102,21 @@ class GCWT_Parser{
 		//More SimplePie magic to merge items from all feeds together
 		$this->merged_feed_data = SimplePie::merge_items($this->feeds);
 
+
 		//Sort the items by into date order
-		usort($this->merged_feed_data, array('SimplePie_Item_GCalendarWT', 'compare'));
+		usort($this->merged_feed_data, array('GCWT_Parser', 'compare'));
 	}
+
+    static function compare($gc_sp_item1, $gc_sp_item2){
+        $time1 = $gc_sp_item1->get_start_date();
+        $time2 = $gc_sp_item2->get_start_date();
+        $feed = $gc_sp_item1->get_feed();
+        if(!$feed->orderby_by_start_date){
+            $time1 = $gc_sp_item1->get_publish_date();
+            $time2 = $gc_sp_item2->get_publish_date();
+        }
+        return $time1-$time2;
+    }
 
 	//Returns an array of feed ids that have encountered errors
 	function get_errors(){

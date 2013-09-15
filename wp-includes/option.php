@@ -32,14 +32,14 @@
 function get_option( $option, $default = false ) {
 	global $wpdb;
 
+	$option = trim( $option );
+	if ( empty( $option ) )
+		return false;
+
 	// Allow plugins to short-circuit options.
 	$pre = apply_filters( 'pre_option_' . $option, false );
 	if ( false !== $pre )
 		return $pre;
-
-	$option = trim($option);
-	if ( empty($option) )
-		return false;
 
 	if ( defined( 'WP_SETUP_CONFIG' ) )
 		return false;
@@ -104,8 +104,7 @@ function get_option( $option, $default = false ) {
  * @param string $option Option name.
  */
 function wp_protect_special_option( $option ) {
-	$protected = array( 'alloptions', 'notoptions' );
-	if ( in_array( $option, $protected ) )
+	if ( 'alloptions' === $option || 'notoptions' === $option )
 		wp_die( sprintf( __( '%s is a protected WP option and may not be modified' ), esc_html( $option ) ) );
 }
 
@@ -248,10 +247,10 @@ function update_option( $option, $newvalue ) {
 	if ( ! defined( 'WP_INSTALLING' ) ) {
 		$alloptions = wp_load_alloptions();
 		if ( isset( $alloptions[$option] ) ) {
-			$alloptions[$option] = $_newvalue;
+			$alloptions[$option] = $newvalue;
 			wp_cache_set( 'alloptions', $alloptions, 'options' );
 		} else {
-			wp_cache_set( $option, $_newvalue, 'options' );
+			wp_cache_set( $option, $newvalue, 'options' );
 		}
 	}
 
@@ -359,6 +358,10 @@ function add_option( $option, $value = '', $deprecated = '', $autoload = 'yes' )
  */
 function delete_option( $option ) {
 	global $wpdb;
+
+	$option = trim( $option );
+	if ( empty( $option ) )
+		return false;
 
 	wp_protect_special_option( $option );
 
@@ -512,8 +515,8 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 		}
 	}
 	if ( $result ) {
-		do_action( 'set_transient_' . $transient );
-		do_action( 'setted_transient', $transient );
+		do_action( 'set_transient_' . $transient, $value, $expiration );
+		do_action( 'setted_transient', $transient, $value, $expiration );
 	}
 	return $result;
 }
@@ -538,6 +541,11 @@ function wp_user_settings() {
 		return;
 
 	if ( ! $user = wp_get_current_user() )
+		return;
+
+	if ( is_super_admin( $user->ID ) &&
+		! in_array( get_current_blog_id(), array_keys( get_blogs_of_user( $user->ID ) ) )
+		)
 		return;
 
 	$settings = get_user_option( 'user-settings', $user->ID );
@@ -696,6 +704,11 @@ function wp_set_all_user_settings($all) {
 
 	if ( ! $user = wp_get_current_user() )
 		return false;
+
+	if ( is_super_admin( $user->ID ) &&
+		! in_array( get_current_blog_id(), array_keys( get_blogs_of_user( $user->ID ) ) )
+		)
+		return;
 
 	$_updated_user_settings = $all;
 	$settings = '';
@@ -1039,8 +1052,8 @@ function set_site_transient( $transient, $value, $expiration = 0 ) {
 		}
 	}
 	if ( $result ) {
-		do_action( 'set_site_transient_' . $transient );
-		do_action( 'setted_site_transient', $transient );
+		do_action( 'set_site_transient_' . $transient, $value, $expiration );
+		do_action( 'setted_site_transient', $transient, $value, $expiration );
 	}
 	return $result;
 }

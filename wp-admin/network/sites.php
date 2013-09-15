@@ -53,7 +53,7 @@ if ( isset( $_GET['action'] ) ) {
 
 	if ( 'confirm' === $_GET['action'] ) {
 		check_admin_referer( 'confirm' );
-		
+
 		if ( ! headers_sent() ) {
 			nocache_headers();
 			header( 'Content-Type: text/html; charset=utf-8' );
@@ -72,33 +72,33 @@ if ( isset( $_GET['action'] ) ) {
 				wp_admin_css( 'ie', true );
 				?>
 			</head>
-			<body>
-				<h1 id="logo"><img alt="WordPress" src="<?php echo esc_attr( admin_url( 'images/wordpress-logo.png?ver=20120216' ) ); ?>" /></h1>
+			<body class="wp-core-ui">
+				<h1 id="logo"><a href="<?php echo esc_url( __( 'http://wordpress.org/' ) ); ?>"><?php _e( 'WordPress' ); ?></a></h1>
 				<form action="sites.php?action=<?php echo esc_attr( $_GET['action2'] ) ?>" method="post">
 					<input type="hidden" name="action" value="<?php echo esc_attr( $_GET['action2'] ) ?>" />
 					<input type="hidden" name="id" value="<?php echo esc_attr( $id ); ?>" />
 					<input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( wp_get_referer() ); ?>" />
 					<?php wp_nonce_field( $_GET['action2'], '_wpnonce', false ); ?>
-					<p><?php echo esc_html( stripslashes( $_GET['msg'] ) ); ?></p>
+					<p><?php echo esc_html( wp_unslash( $_GET['msg'] ) ); ?></p>
 					<?php submit_button( __('Confirm'), 'button' ); ?>
 				</form>
 			</body>
 		</html>
 		<?php
-		exit();	
+		exit();
 	}
-	
+
 	$updated_action = '';
-	
+
 	$manage_actions = array( 'deleteblog', 'allblogs', 'archiveblog', 'unarchiveblog', 'activateblog', 'deactivateblog', 'unspamblog', 'spamblog', 'unmatureblog', 'matureblog' );
-	if ( in_array( $_GET['action'], $manage_actions ) ) {		
+	if ( in_array( $_GET['action'], $manage_actions ) ) {
 		$action = $_GET['action'];
 		if ( 'allblogs' === $action )
 			$action = 'bulk-sites';
 
 		check_admin_referer( $action );
-	} 
-		
+	}
+
 	switch ( $_GET['action'] ) {
 
 		case 'deleteblog':
@@ -108,21 +108,21 @@ if ( isset( $_GET['action'] ) ) {
 			$updated_action = 'not_deleted';
 			if ( $id != '0' && $id != $current_site->blog_id && current_user_can( 'delete_site', $id ) ) {
 				wpmu_delete_blog( $id, true );
-				$updated_action = 'delete';	
+				$updated_action = 'delete';
 			}
 		break;
 
 		case 'allblogs':
 			if ( ( isset( $_POST['action'] ) || isset( $_POST['action2'] ) ) && isset( $_POST['allblogs'] ) ) {
 				$doaction = $_POST['action'] != -1 ? $_POST['action'] : $_POST['action2'];
-				
+
 				foreach ( (array) $_POST['allblogs'] as $key => $val ) {
 					if ( $val != '0' && $val != $current_site->blog_id ) {
 						switch ( $doaction ) {
 							case 'delete':
 								if ( ! current_user_can( 'delete_site', $val ) )
 									wp_die( __( 'You are not allowed to delete the site.' ) );
-								
+
 								$updated_action = 'all_delete';
 								wpmu_delete_blog( $val, true );
 							break;
@@ -131,7 +131,6 @@ if ( isset( $_GET['action'] ) ) {
 							case 'notspam':
 								$updated_action = ( 'spam' === $doaction ) ? 'all_spam' : 'all_notspam';
 								update_blog_status( $val, 'spam', ( 'spam' === $doaction ) ? '1' : '0' );
-								set_time_limit( 60 );
 							break;
 						}
 					} else {
@@ -163,16 +162,16 @@ if ( isset( $_GET['action'] ) ) {
 		case 'spamblog':
 			update_blog_status( $id, 'spam', ( 'spamblog' === $_GET['action'] ) ? '1' : '0' );
 		break;
-	
+
 		case 'unmatureblog':
 		case 'matureblog':
 			update_blog_status( $id, 'mature', ( 'matureblog' === $_GET['action'] ) ? '1' : '0' );
 		break;
 	}
-	
+
 	if ( empty( $updated_action ) && in_array( $_GET['action'], $manage_actions ) )
 		$updated_action = $_GET['action'];
-	
+
 	if ( ! empty( $updated_action ) ) {
 		wp_safe_redirect( add_query_arg( array( 'updated' => $updated_action ), wp_get_referer() ) );
 		exit();
@@ -219,7 +218,7 @@ if ( isset( $_GET['updated'] ) ) {
 			$msg = apply_filters( 'network_sites_updated_message_' . $_GET['updated'], __( 'Settings saved.' ) );
 		break;
 	}
-	
+
 	if ( ! empty( $msg ) )
 		$msg = '<div class="updated" id="message"><p>' . $msg . '</p></div>';
 }
@@ -232,7 +231,7 @@ require_once( '../admin-header.php' );
 <div class="wrap">
 <?php screen_icon( 'ms-admin' ); ?>
 <h2><?php _e( 'Sites' ) ?>
-	
+
 <?php if ( current_user_can( 'create_sites') ) : ?>
 	<a href="<?php echo network_admin_url('site-new.php'); ?>" class="add-new-h2"><?php echo esc_html_x( 'Add New', 'site' ); ?></a>
 <?php endif; ?>
@@ -242,8 +241,8 @@ require_once( '../admin-header.php' );
 } ?>
 </h2>
 
-<?php echo $msg; ?>	
-	
+<?php echo $msg; ?>
+
 <form action="" method="get" id="ms-search">
 <?php $wp_list_table->search_box( __( 'Search Sites' ), 'site' ); ?>
 <input type="hidden" name="action" value="blogs" />

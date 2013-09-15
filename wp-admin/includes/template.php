@@ -34,7 +34,7 @@ class Walker_Category_Checklist extends Walker {
 		$output .= "$indent</ul>\n";
 	}
 
-	function start_el( &$output, $category, $depth, $args, $id = 0 ) {
+	function start_el( &$output, $category, $depth = 0, $args = array(), $id = 0 ) {
 		extract($args);
 		if ( empty($taxonomy) )
 			$taxonomy = 'category';
@@ -176,10 +176,6 @@ function wp_popular_terms_checklist( $taxonomy, $default = 0, $number = 10, $ech
 	$terms = get_terms( $taxonomy, array( 'orderby' => 'count', 'order' => 'DESC', 'number' => $number, 'hierarchical' => false ) );
 
 	$tax = get_taxonomy($taxonomy);
-	if ( ! current_user_can($tax->cap->assign_terms) )
-		$disabled = 'disabled="disabled"';
-	else
-		$disabled = '';
 
 	$popular_ids = array();
 	foreach ( (array) $terms as $term ) {
@@ -192,7 +188,7 @@ function wp_popular_terms_checklist( $taxonomy, $default = 0, $number = 10, $ech
 
 		<li id="<?php echo $id; ?>" class="popular-category">
 			<label class="selectit">
-			<input id="in-<?php echo $id; ?>" type="checkbox" <?php echo $checked; ?> value="<?php echo (int) $term->term_id; ?>" <?php echo $disabled ?>/>
+			<input id="in-<?php echo $id; ?>" type="checkbox" <?php echo $checked; ?> value="<?php echo (int) $term->term_id; ?>" <?php disabled( ! current_user_can( $tax->cap->assign_terms ) ); ?> />
 				<?php echo esc_html( apply_filters( 'the_category', $term->name ) ); ?>
 			</label>
 		</li>
@@ -244,7 +240,7 @@ function wp_link_category_checklist( $link_id = 0 ) {
  */
 function get_inline_data($post) {
 	$post_type_object = get_post_type_object($post->post_type);
-	if ( ! current_user_can($post_type_object->cap->edit_post, $post->ID) )
+	if ( ! current_user_can( 'edit_post', $post->ID ) )
 		return;
 
 	$title = esc_textarea( trim( $post->post_title ) );
@@ -349,7 +345,7 @@ function wp_comment_reply($position = '1', $checkbox = false, $mode = 'single', 
 
 	<div id="replycontainer">
 	<?php
-	$quicktags_settings = array( 'buttons' => 'strong,em,link,block,del,ins,img,ul,ol,li,code,spell,close' );
+	$quicktags_settings = array( 'buttons' => 'strong,em,link,block,del,ins,img,ul,ol,li,code,close' );
 	wp_editor( '', 'replycontent', array( 'media_buttons' => false, 'tinymce' => false, 'quicktags' => $quicktags_settings ) );
 	?>
 	</div>
@@ -421,7 +417,7 @@ function list_meta( $meta ) {
 		<th>' . __( 'Value' ) . '</th>
 	</tr>
 	</thead>
-	<tbody id="the-list" class="list:meta">
+	<tbody id="the-list" data-wp-lists="list:meta">
 	<tr><td></td></tr>
 	</tbody>
 </table>'; //TBODY needed for list-manipulation JS
@@ -436,7 +432,7 @@ function list_meta( $meta ) {
 		<th><?php _e( 'Value' ) ?></th>
 	</tr>
 	</thead>
-	<tbody id='the-list' class='list:meta'>
+	<tbody id='the-list' data-wp-lists='list:meta'>
 <?php
 	foreach ( $meta as $entry )
 		echo _list_meta_row( $entry, $count );
@@ -492,9 +488,9 @@ function _list_meta_row( $entry, &$count ) {
 	$r .= "\n\t\t<td class='left'><label class='screen-reader-text' for='meta[{$entry['meta_id']}][key]'>" . __( 'Key' ) . "</label><input name='meta[{$entry['meta_id']}][key]' id='meta[{$entry['meta_id']}][key]' type='text' size='20' value='{$entry['meta_key']}' />";
 
 	$r .= "\n\t\t<div class='submit'>";
-	$r .= get_submit_button( __( 'Delete' ), "delete:the-list:meta-{$entry['meta_id']}::_ajax_nonce=$delete_nonce deletemeta small", "deletemeta[{$entry['meta_id']}]", false );
+	$r .= get_submit_button( __( 'Delete' ), 'deletemeta small', "deletemeta[{$entry['meta_id']}]", false, array( 'data-wp-lists' => "delete:the-list:meta-{$entry['meta_id']}::_ajax_nonce=$delete_nonce" ) );
 	$r .= "\n\t\t";
-	$r .= get_submit_button( __( 'Update' ), "add:the-list:meta-{$entry['meta_id']}::_ajax_nonce-add-meta=$update_nonce updatemeta small" , "meta-{$entry['meta_id']}-submit", false );
+	$r .= get_submit_button( __( 'Update' ), 'updatemeta small', "meta-{$entry['meta_id']}-submit", false, array( 'data-wp-lists' => "add:the-list:meta-{$entry['meta_id']}::_ajax_nonce-add-meta=$update_nonce" ) );
 	$r .= "</div>";
 	$r .= wp_nonce_field( 'change-meta', '_ajax_nonce', false, false );
 	$r .= "</td>";
@@ -539,6 +535,8 @@ function meta_form() {
 <?php
 
 	foreach ( $keys as $key ) {
+		if ( is_protected_meta( $key, 'post' ) )
+			continue;
 		echo "\n<option value='" . esc_attr($key) . "'>" . esc_html($key) . "</option>";
 	}
 ?>
@@ -556,7 +554,7 @@ function meta_form() {
 
 <tr><td colspan="2">
 <div class="submit">
-<?php submit_button( __( 'Add Custom Field' ), 'add:the-list:newmeta secondary', 'addmeta', false, array( 'id' => 'newmeta-submit' ) ); ?>
+<?php submit_button( __( 'Add Custom Field' ), 'secondary', 'addmeta', false, array( 'id' => 'newmeta-submit', 'data-wp-lists' => 'add:the-list:newmeta' ) ); ?>
 </div>
 <?php wp_nonce_field( 'add-meta', '_ajax_nonce-add-meta', false ); ?>
 </td></tr>
@@ -621,8 +619,8 @@ function touch_time( $edit = 1, $for_post = 1, $tab_index = 0, $multi = 0 ) {
 	$minute = '<input type="text" ' . ( $multi ? '' : 'id="mn" ' ) . 'name="mn" value="' . $mn . '" size="2" maxlength="2"' . $tab_index_attribute . ' autocomplete="off" />';
 
 	echo '<div class="timestamp-wrap">';
-	/* translators: 1: month input, 2: day input, 3: year input, 4: hour input, 5: minute input */
-	printf(__('%1$s%2$s, %3$s @ %4$s : %5$s'), $month, $day, $year, $hour, $minute);
+	/* translators: 1: month, 2: day, 3: year, 4: hour, 5: minute */
+	printf( __( '%1$s %2$s, %3$s @ %4$s : %5$s' ), $month, $day, $year, $hour, $minute );
 
 	echo '</div><input type="hidden" id="ss" name="ss" value="' . $ss . '" />';
 
@@ -680,7 +678,7 @@ function parent_dropdown( $default = 0, $parent = 0, $level = 0 ) {
 	if ( $items ) {
 		foreach ( $items as $item ) {
 			// A page cannot be its own parent.
-			if ( $post->ID && $item->ID == $post->ID )
+			if ( $post && $post->ID && $item->ID == $post->ID )
 				continue;
 
 			$pad = str_repeat( '&nbsp;', $level * 3 );
@@ -780,14 +778,14 @@ function wp_dropdown_roles( $selected = false ) {
  */
 function wp_import_upload_form( $action ) {
 	$bytes = apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
-	$size = wp_convert_bytes_to_hr( $bytes );
+	$size = size_format( $bytes );
 	$upload_dir = wp_upload_dir();
 	if ( ! empty( $upload_dir['error'] ) ) :
 		?><div class="error"><p><?php _e('Before you can upload your import file, you will need to fix the following error:'); ?></p>
 		<p><strong><?php echo $upload_dir['error']; ?></strong></p></div><?php
 	else :
 ?>
-<form enctype="multipart/form-data" id="import-upload-form" method="post" action="<?php echo esc_attr(wp_nonce_url($action, 'import-upload')); ?>">
+<form enctype="multipart/form-data" id="import-upload-form" method="post" class="wp-upload-form" action="<?php echo esc_url( wp_nonce_url( $action, 'import-upload' ) ); ?>">
 <p>
 <label for="upload"><?php _e( 'Choose a file from your computer:' ); ?></label> (<?php printf( __('Maximum size: %s' ), $size ); ?>)
 <input type="file" id="upload" name="import" size="25" />
@@ -811,6 +809,7 @@ function wp_import_upload_form( $action ) {
  * @param string|object $screen Optional. The screen on which to show the box (post, page, link). Defaults to current screen.
  * @param string $context Optional. The context within the page where the boxes should show ('normal', 'advanced').
  * @param string $priority Optional. The priority within the context where the boxes should show ('high', 'low').
+ * @param array $callback_args Optional. Data that should be set as the "args" property of the box array (which is the second parameter passed to your callback).
  */
 function add_meta_box( $id, $title, $callback, $screen = null, $context = 'advanced', $priority = 'default', $callback_args = null ) {
 	global $wp_meta_boxes;
@@ -917,7 +916,6 @@ function do_meta_boxes( $screen, $context, $object ) {
 					if ( false == $box || ! $box['title'] )
 						continue;
 					$i++;
-					$style = '';
 					$hidden_class = in_array($box['id'], $hidden) ? ' hide-if-js' : '';
 					echo '<div id="' . $box['id'] . '" class="postbox ' . postbox_classes($box['id'], $page) . $hidden_class . '" ' . '>' . "\n";
 					if ( 'dashboard_browser_nag' != $box['id'] )
@@ -966,6 +964,79 @@ function remove_meta_box($id, $screen, $context) {
 
 	foreach ( array('high', 'core', 'default', 'low') as $priority )
 		$wp_meta_boxes[$page][$context][$priority][$id] = false;
+}
+
+/**
+ * Meta Box Accordion Template Function
+ *
+ * Largely made up of abstracted code from {@link do_meta_boxes()}, this
+ * function serves to build meta boxes as list items for display as
+ * a collapsible accordion.
+ *
+ * @since 3.6.0
+ *
+ * @uses global $wp_meta_boxes Used to retrieve registered meta boxes.
+ *
+ * @param string|object $screen The screen identifier.
+ * @param string $context The meta box context.
+ * @param mixed $object gets passed to the section callback function as first parameter.
+ * @return int number of meta boxes as accordion sections.
+ */
+function do_accordion_sections( $screen, $context, $object ) {
+	global $wp_meta_boxes;
+
+	wp_enqueue_script( 'accordion' );
+
+	if ( empty( $screen ) )
+		$screen = get_current_screen();
+	elseif ( is_string( $screen ) )
+		$screen = convert_to_screen( $screen );
+
+	$page = $screen->id;
+
+	$hidden = get_hidden_meta_boxes( $screen );
+	?>
+	<div id="side-sortables" class="accordion-container">
+		<ul class="outer-border">
+	<?php
+	$i = 0;
+	$first_open = false;
+	do {
+		if ( ! isset( $wp_meta_boxes ) || ! isset( $wp_meta_boxes[$page] ) || ! isset( $wp_meta_boxes[$page][$context] ) )
+			break;
+
+		foreach ( array( 'high', 'core', 'default', 'low' ) as $priority ) {
+			if ( isset( $wp_meta_boxes[$page][$context][$priority] ) ) {
+				foreach ( $wp_meta_boxes[$page][$context][$priority] as $box ) {
+					if ( false == $box || ! $box['title'] )
+						continue;
+					$i++;
+					$hidden_class = in_array( $box['id'], $hidden ) ? 'hide-if-js' : '';
+
+					$open_class = '';
+					if ( ! $first_open && empty( $hidden_class ) ) {
+						$first_open = true;
+						$open_class = 'open';
+					}
+					?>
+					<li class="control-section accordion-section <?php echo $hidden_class; ?> <?php echo $open_class; ?> <?php echo esc_attr( $box['id'] ); ?>" id="<?php echo esc_attr( $box['id'] ); ?>">
+						<h3 class="accordion-section-title hndle" tabindex="0" title="<?php echo esc_attr( $box['title'] ); ?>"><?php echo esc_html( $box['title'] ); ?></h3>
+						<div class="accordion-section-content <?php postbox_classes( $box['id'], $page ); ?>">
+							<div class="inside">
+								<?php call_user_func( $box['callback'], $object, $box ); ?>
+							</div><!-- .inside -->
+						</div><!-- .accordion-section-content -->
+					</li><!-- .accordion-section -->
+					<?php
+				}
+			}
+		}
+	} while(0);
+	?>
+		</ul><!-- .outer-border -->
+	</div><!-- .accordion-container -->
+	<?php
+	return $i;
 }
 
 /**
@@ -1113,7 +1184,7 @@ function do_settings_fields($page, $section) {
 	foreach ( (array) $wp_settings_fields[$page][$section] as $field ) {
 		echo '<tr valign="top">';
 		if ( !empty($field['args']['label_for']) )
-			echo '<th scope="row"><label for="' . $field['args']['label_for'] . '">' . $field['title'] . '</label></th>';
+			echo '<th scope="row"><label for="' . esc_attr( $field['args']['label_for'] ) . '">' . $field['title'] . '</label></th>';
 		else
 			echo '<th scope="row">' . $field['title'] . '</th>';
 		echo '<td>';
@@ -1278,18 +1349,8 @@ function find_posts_div($found_action = '') {
 				<?php wp_nonce_field( 'find-posts', '_ajax_nonce', false ); ?>
 				<label class="screen-reader-text" for="find-posts-input"><?php _e( 'Search' ); ?></label>
 				<input type="text" id="find-posts-input" name="ps" value="" />
-				<input type="button" id="find-posts-search" value="<?php esc_attr_e( 'Search' ); ?>" class="button" /><br />
-
-				<?php
-				$post_types = get_post_types( array('public' => true), 'objects' );
-				foreach ( $post_types as $post ) {
-					if ( 'attachment' == $post->name )
-						continue;
-				?>
-				<input type="radio" name="find-posts-what" id="find-posts-<?php echo esc_attr($post->name); ?>" value="<?php echo esc_attr($post->name); ?>" <?php checked($post->name, 'post'); ?> />
-				<label for="find-posts-<?php echo esc_attr($post->name); ?>"><?php echo $post->label; ?></label>
-				<?php
-				} ?>
+				<span class="spinner"></span>
+				<input type="button" id="find-posts-search" value="<?php esc_attr_e( 'Search' ); ?>" class="button" />
 			</div>
 			<div id="find-posts-response"></div>
 		</div>
@@ -1344,7 +1405,7 @@ function _draft_or_post_title( $post = 0 ) {
  *
  */
 function _admin_search_query() {
-	echo isset($_REQUEST['s']) ? esc_attr( stripslashes( $_REQUEST['s'] ) ) : '';
+	echo isset($_REQUEST['s']) ? esc_attr( wp_unslash( $_REQUEST['s'] ) ) : '';
 }
 
 /**
@@ -1373,12 +1434,7 @@ wp_enqueue_style( 'colors' );
 //<![CDATA[
 addLoadEvent = function(func){if(typeof jQuery!="undefined")jQuery(document).ready(func);else if(typeof wpOnload!='function'){wpOnload=func;}else{var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}};
 function tb_close(){var win=window.dialogArguments||opener||parent||top;win.tb_remove();}
-var userSettings = {
-		'url': '<?php echo SITECOOKIEPATH; ?>',
-		'uid': '<?php if ( ! isset($current_user) ) $current_user = wp_get_current_user(); echo $current_user->ID; ?>',
-		'time':'<?php echo time() ?>'
-	},
-	ajaxurl = '<?php echo admin_url( 'admin-ajax.php', 'relative' ); ?>',
+var ajaxurl = '<?php echo admin_url( 'admin-ajax.php', 'relative' ); ?>',
 	pagenow = '<?php echo $current_screen->id; ?>',
 	typenow = '<?php echo $current_screen->post_type; ?>',
 	adminpage = '<?php echo $admin_body_class; ?>',
@@ -1399,7 +1455,7 @@ do_action('admin_head');
 $admin_body_class .= ' locale-' . sanitize_html_class( strtolower( str_replace( '_', '-', get_locale() ) ) );
 ?>
 </head>
-<body<?php if ( isset($GLOBALS['body_id']) ) echo ' id="' . $GLOBALS['body_id'] . '"'; ?> class="wp-admin no-js iframe <?php echo apply_filters( 'admin_body_class', '' ) . ' ' . $admin_body_class; ?>">
+<body<?php if ( isset($GLOBALS['body_id']) ) echo ' id="' . $GLOBALS['body_id'] . '"'; ?> class="wp-admin wp-core-ui no-js iframe <?php echo apply_filters( 'admin_body_class', '' ) . ' ' . $admin_body_class; ?>">
 <script type="text/javascript">
 //<![CDATA[
 (function(){
@@ -1450,7 +1506,7 @@ function _post_states($post) {
 	if ( is_sticky($post->ID) )
 		$post_states['sticky'] = __('Sticky');
 
-	$post_states = apply_filters( 'display_post_states', $post_states );
+	$post_states = apply_filters( 'display_post_states', $post_states, $post );
 
 	if ( ! empty($post_states) ) {
 		$state_count = count($post_states);
@@ -1463,8 +1519,6 @@ function _post_states($post) {
 		}
 	}
 
-	if ( get_post_format( $post->ID ) )
-		echo ' - <span class="post-state-format">' . get_post_format_string( get_post_format( $post->ID ) ) . '</span>';
 }
 
 function _media_states( $post ) {
@@ -1679,8 +1733,9 @@ final class WP_Internal_Pointers {
 
 		$registered_pointers = array(
 			'index.php'    => 'wp330_toolbar',
-			'post-new.php' => 'wp330_media_uploader',
-			'post.php'     => 'wp330_media_uploader',
+			'post-new.php' => 'wp350_media',
+			'post.php'     => array( 'wp350_media', 'wp360_revisions' ),
+			'edit.php'     => 'wp360_locks',
 			'themes.php'   => array( 'wp330_saving_widgets', 'wp340_customize_current_theme_link' ),
 			'appearance_page_custom-header' => 'wp340_choose_image_from_library',
 			'appearance_page_custom-background' => 'wp340_choose_image_from_library',
@@ -1693,10 +1748,10 @@ final class WP_Internal_Pointers {
 		$pointers = (array) $registered_pointers[ $hook_suffix ];
 
 		$caps_required = array(
-			'wp330_media_uploader' => array( 'upload_files' ),
 			'wp330_saving_widgets' => array( 'edit_theme_options', 'switch_themes' ),
 			'wp340_customize_current_theme_link' => array( 'edit_theme_options' ),
 			'wp340_choose_image_from_library' => array( 'edit_theme_options' ),
+			'wp350_media' => array( 'upload_files' ),
 		);
 
 		// Get dismissed pointers
@@ -1756,7 +1811,7 @@ final class WP_Internal_Pointers {
 			});
 
 			setup = function() {
-				$('<?php echo $selector; ?>').pointer( options ).pointer('open');
+				$('<?php echo $selector; ?>').first().pointer( options ).pointer('open');
 			};
 
 			if ( options.position && options.position.defer_loading )
@@ -1788,15 +1843,7 @@ final class WP_Internal_Pointers {
 	 *
 	 * @since 3.3.0
 	 */
-	public static function pointer_wp330_media_uploader() {
-		$content  = '<h3>' . __( 'Updated Media Uploader' ) . '</h3>';
-		$content .= '<p>' . __( 'The single media icon now launches the uploader for all file types, and the new drag and drop interface makes uploading a breeze.' ) . '</p>';
-
-		WP_Internal_Pointers::print_js( 'wp330_media_uploader', '#content-add_media', array(
-			'content'  => $content,
-			'position' => array( 'edge' => is_rtl() ? 'right' : 'left', 'align' => 'center' ),
-		) );
-	}
+	public static function pointer_wp330_media_uploader() {}
 
 	/**
 	 * Print 'New Feature: Saving Widgets' for 3.3.0.
@@ -1844,13 +1891,46 @@ final class WP_Internal_Pointers {
 		) );
 	}
 
+	public static function pointer_wp350_media() {
+		$content  = '<h3>' . __( 'New Media Manager' ) . '</h3>';
+		$content .= '<p>' . __( 'Uploading files and creating image galleries has a whole new look. Check it out!' ) . '</p>';
+
+		self::print_js( 'wp350_media', '.insert-media', array(
+			'content'  => $content,
+			'position' => array( 'edge' => is_rtl() ? 'right' : 'left', 'align' => 'center' ),
+		) );
+	}
+
+	public static function pointer_wp360_revisions() {
+		$content  = '<h3>' . __( 'Compare Revisions' ) . '</h3>';
+		$content .= '<p>' . __( 'View, compare, and restore other versions of this content on the improved revisions screen.' ) . '</p>';
+
+		self::print_js( 'wp360_revisions', '.misc-pub-section.num-revisions', array(
+			'content' => $content,
+			'position' => array( 'edge' => is_rtl() ? 'left' : 'right', 'align' => 'center', 'my' => is_rtl() ? 'left' : 'right-14px' ),
+		) );
+	}
+
+	public static function pointer_wp360_locks() {
+		$content  = '<h3>' . __( 'Edit Lock' ) . '</h3>';
+		$content .= '<p>' . __( 'Someone else is editing this. No need to refresh; the lock will disappear when they&#8217;re done.' ) . '</p>';
+
+		if ( ! is_multi_author() )
+			return;
+
+		self::print_js( 'wp360_locks', 'tr.wp-locked .locked-indicator', array(
+			'content' => $content,
+			'position' => array( 'edge' => 'left', 'align' => 'left' ),
+		) );
+	}
+
 	/**
 	 * Prevents new users from seeing existing 'new feature' pointers.
 	 *
 	 * @since 3.3.0
 	 */
 	public static function dismiss_pointers_for_new_users( $user_id ) {
-		add_user_meta( $user_id, 'dismissed_wp_pointers', 'wp330_toolbar,wp330_media_uploader,wp330_saving_widgets,wp340_choose_image_from_library,wp340_customize_current_theme_link' );
+		add_user_meta( $user_id, 'dismissed_wp_pointers', 'wp330_toolbar,wp330_saving_widgets,wp340_choose_image_from_library,wp340_customize_current_theme_link,wp350_media,wp360_revisions,wp360_locks' );
 	}
 }
 
@@ -1872,4 +1952,25 @@ function convert_to_screen( $hook_name ) {
 	}
 
 	return WP_Screen::get( $hook_name );
+}
+
+/**
+ * Output the HTML for restoring the post data from DOM storage
+ *
+ * @since 3.6
+ * @access private
+ */
+function _local_storage_notice() {
+	?>
+	<div id="local-storage-notice" class="hidden">
+	<p class="local-restore">
+		<?php _e('The backup of this post in your browser is different from the version below.'); ?>
+		<a class="restore-backup" href="#"><?php _e('Restore the backup.'); ?></a>
+	</p>
+	<p class="undo-restore hidden">
+		<?php _e('Post restored successfully.'); ?>
+		<a class="undo-restore-backup" href="#"><?php _e('Undo.'); ?></a>
+	</p>
+	</div>
+	<?php
 }

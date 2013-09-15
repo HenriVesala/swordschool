@@ -1212,12 +1212,6 @@ function suffusion_display_closed_header() {
 	}
 }
 
-function suffusion_include_bp_admin_css() {
-	if (function_exists('bp_is_group')) {
-		wp_enqueue_style('bp-admin-bar', apply_filters('bp_core_admin_bar_css', WP_PLUGIN_URL.'/buddypress/bp-themes/bp-default/_inc/css/adminbar.css'), array(), null);
-	}
-}
-
 function suffusion_display_widgets_above_header() {
 	get_sidebar('above-header');
 }
@@ -1450,4 +1444,22 @@ function suffusion_print_line_byline($position) {
  */
 function suffusion_print_post_updated_information() {
 	echo "<span class='updated' title='".get_the_time('c')."'></span>";
+}
+
+/**
+ * Prints the meta tag required for responsive layouts
+ */
+function suffusion_include_responsive_meta() {
+	global $suf_enable_responsive;
+	if (isset($suf_enable_responsive) && $suf_enable_responsive == 'on') {
+		global $suf_responsive_prevent_user_scaling;
+		if (isset($suf_responsive_prevent_user_scaling) && $suf_responsive_prevent_user_scaling == 'on') {
+			$user_scalable = ', minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
+		}
+		else {
+			$user_scalable = '';
+		}
+		//user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0
+		echo '<meta name="viewport" content="width=device-width,initial-scale=1.0'.$user_scalable.'">'."\n";
+	}
 }

@@ -44,9 +44,9 @@ get_header();
 						if ($$default_skinning) {
 							$custom = 'custom-skin';
 						}
-						echo "<section id='cl-warea-id-$i' class='cl-warea cl-warea-$cols cl-warea-id-$i cl-warea-$widget_height $custom fix'>";
+						echo "\n<section id='cl-warea-id-$i' class='cl-warea cl-warea-$cols cl-warea-id-$i cl-warea-$widget_height $custom fix'>";
 						dynamic_sidebar('sidebar-cl-'.$i);
-						echo "</section>";
+						echo "</section><!-- widget area #cl-warea-id-$i -->\n";
 						wp_reset_postdata();
 					}
 					do_action('suffusion_after_custom_layout_widgets', $post, $i);

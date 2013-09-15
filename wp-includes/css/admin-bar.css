@@ -10,6 +10,13 @@
 	font: normal 13px/28px sans-serif;
 	color: #ccc;
 	text-shadow: #444 0px -1px 0px;
+	-webkit-box-sizing: content-box;
+	-moz-box-sizing:    content-box;
+	box-sizing:         content-box;
+	-webkit-transition: none;
+	-moz-transition:    none;
+	-o-transition:      none;
+	transition:         none;
 }
 
 #wpadminbar ul li:before,
@@ -25,6 +32,20 @@
 	border: none;
 	text-decoration: none;
 	background: none;
+}
+
+#wpadminbar a:focus,
+#wpadminbar a:active,
+#wpadminbar input[type="text"],
+#wpadminbar input[type="password"],
+#wpadminbar input[type="number"],
+#wpadminbar input[type="search"],
+#wpadminbar input[type="email"],
+#wpadminbar input[type="url"],
+#wpadminbar select,
+#wpadminbar textarea,
+#wpadminbar div {
+	outline: none;
 }
 
 #wpadminbar {
@@ -390,10 +411,17 @@
 /*
  * My Sites
  */
-#wpadminbar .quicklinks li img.blavatar {
+#wpadminbar .quicklinks li .blavatar {
 	vertical-align: middle;
 	margin: -3px 4px 0 0;
 	padding: 0;
+}
+
+#wpadminbar .quicklinks li div.blavatar {
+	background: url('../images/wpmini-blue.png') no-repeat;
+	height: 16px;
+	width: 16px;
+	display: inline-block;
 }
 
 /**
@@ -576,14 +604,21 @@
  * Customize support classes
  */
 .no-customize-support .hide-if-no-customize,
-.customize-support .hide-if-customize {
+.customize-support .hide-if-customize,
+.no-customize-support.wp-core-ui .hide-if-no-customize,
+.no-customize-support .wp-core-ui .hide-if-no-customize,
+.customize-support.wp-core-ui .hide-if-customize,
+.customize-support .wp-core-ui .hide-if-customize {
 	display: none;
 }
 
 /**
  * Retina display 2x icons
  */
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+@media print,
+  (-o-min-device-pixel-ratio: 5/4),
+  (-webkit-min-device-pixel-ratio: 1.25),
+  (min-resolution: 120dpi) {
 	#wpadminbar .menupop .menupop > .ab-item,
 	#wpadminbar .ab-top-secondary .menupop .menupop > .ab-item,
 	#wpadminbar #adminbarsearch .adminbar-input,
@@ -593,6 +628,11 @@
 	#wpadminbar #wp-admin-bar-new-content > .ab-item .ab-icon {
 		background-image: url(../images/admin-bar-sprite-2x.png?d=20120830);
 		background-size: 20px 220px;
+	}
+
+	#wpadminbar .quicklinks li div.blavatar {
+		background: url('../images/wpmini-blue-2x.png') no-repeat;
+		background-size: 16px 16px;
 	}
 }
 
@@ -607,24 +647,29 @@
 	overflow: hidden;
 }
 
+#wpadminbar .screen-reader-shortcut {
+	position: absolute;
+	top: -1000em;
+}
+
 #wpadminbar .screen-reader-shortcut:focus {
-	left: 5px;
-	top: 5px;
+	left: 6px;
+	top: 7px;
 	height: auto;
 	width: auto;
 	display: block;
-	padding: 10px 15px;
-	background: #fff;
-	color: #000;
-	border: 2px solid #333;
+	font-size: 14px;
+	font-weight: bold;
+	padding: 15px 23px 14px;
+	background: #f1f1f1;
+	color: #21759b;
+	text-shadow: none;
 	border-radius: 3px;
 	z-index: 100000;
-	text-shadow: none;
 	line-height: normal;
-}
-
-#wpadminbar a.screen-reader-shortcut {
-	text-decoration: underline;
+	-webkit-box-shadow: 0 0 2px 2px rgba(0,0,0,.6);
+	box-shadow: 0 0 2px 2px rgba(0,0,0,.6);
+	text-decoration: none;
 }
 
 /**
