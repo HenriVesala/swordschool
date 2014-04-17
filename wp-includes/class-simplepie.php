@@ -3097,7 +3097,7 @@ class SimplePie
 			$item = null;
 			if ($do_sort)
 			{
-				usort($items, array(get_class($urls[key($urls)]), 'sort_items'));
+				usort($items, array(get_class($urls[0]), 'sort_items'));
 			}
 
 			if ($end === 0)
