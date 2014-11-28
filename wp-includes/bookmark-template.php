@@ -65,7 +65,7 @@ function _walk_bookmarks($bookmarks, $args = '' ) {
 			$bookmark->recently_updated = false;
 		$output .= $before;
 		if ( $show_updated && $bookmark->recently_updated )
-			$output .= get_option('links_recently_updated_prepend');
+			$output .= '<em>';
 
 		$the_link = '#';
 		if ( !empty($bookmark->link_url) )
@@ -116,7 +116,7 @@ function _walk_bookmarks($bookmarks, $args = '' ) {
 		$output .= '</a>';
 
 		if ( $show_updated && $bookmark->recently_updated )
-			$output .= get_option('links_recently_updated_append');
+			$output .= '</em>';
 
 		if ( $show_description && '' != $desc )
 			$output .= $between . $desc;
@@ -215,16 +215,28 @@ function wp_list_bookmarks($args = '') {
 	$output = '';
 
 	if ( $categorize ) {
-		//Split the bookmarks into ul's for each category
-		$cats = get_terms('link_category', array('name__like' => $category_name, 'include' => $category, 'exclude' => $exclude_category, 'orderby' => $category_orderby, 'order' => $category_order, 'hierarchical' => 0));
+		$cats = get_terms( 'link_category', array( 'name__like' => $category_name, 'include' => $category, 'exclude' => $exclude_category, 'orderby' => $category_orderby, 'order' => $category_order, 'hierarchical' => 0 ) );
+		if ( empty( $cats ) )
+			$categorize = false;
+	}
 
+	if ( $categorize ) {
+		// Split the bookmarks into ul's for each category
 		foreach ( (array) $cats as $cat ) {
 			$params = array_merge($r, array('category'=>$cat->term_id));
 			$bookmarks = get_bookmarks($params);
 			if ( empty($bookmarks) )
 				continue;
 			$output .= str_replace(array('%id', '%class'), array("linkcat-$cat->term_id", $class), $category_before);
-			$catname = apply_filters( "link_category", $cat->name );
+			/**
+			 * Filter the bookmarks category name.
+			 *
+			 * @since 2.2.0
+			 *
+			 * @param string $cat_name The category name of bookmarks.
+			 */
+			$catname = apply_filters( 'link_category', $cat->name );
+
 			$output .= "$title_before$catname$title_after\n\t<ul class='xoxo blogroll'>\n";
 			$output .= _walk_bookmarks($bookmarks, $r);
 			$output .= "\n\t</ul>\n$category_after\n";
@@ -245,6 +257,13 @@ function wp_list_bookmarks($args = '') {
 		}
 	}
 
+	/**
+	 * Filter the bookmarks list before it is echoed or returned.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $output The HTML list of bookmarks.
+	 */
 	$output = apply_filters( 'wp_list_bookmarks', $output );
 
 	if ( !$echo )

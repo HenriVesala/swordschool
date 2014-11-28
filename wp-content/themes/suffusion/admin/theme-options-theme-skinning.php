@@ -79,7 +79,7 @@ $suffusion_theme_skinning_options = array(
 		"id" => "suf_little_icons_enabled",
 		"parent" => "icon-sets",
 		"type" => "multi-select",
-		"options" => suffusion_get_formatted_options_array("suf_little_icons_enabled",
+		"options" => suffusion_get_formatted_options_array(
 			array(
 				'author' => 'Post/page author',
 				'date' => 'Post/page date',

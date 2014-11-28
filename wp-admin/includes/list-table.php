@@ -43,8 +43,10 @@ function _get_list_table( $class, $args = array() ) {
 
 		if ( isset( $args['screen'] ) )
 			$args['screen'] = convert_to_screen( $args['screen'] );
-		else
+		elseif ( isset( $GLOBALS['hook_suffix'] ) )
 			$args['screen'] = get_current_screen();
+		else
+			$args['screen'] = null;
 
 		return new $class( $args );
 	}
@@ -93,7 +95,7 @@ class _WP_List_Table_Compat extends WP_List_Table {
 
 		if ( !empty( $columns ) ) {
 			$this->_columns = $columns;
-			add_filter( 'manage_' . $screen->id . '_columns', array( &$this, 'get_columns' ), 0 );
+			add_filter( 'manage_' . $screen->id . '_columns', array( $this, 'get_columns' ), 0 );
 		}
 	}
 

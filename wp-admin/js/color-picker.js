@@ -1,25 +1,29 @@
+/* global wpColorPickerL10n:true */
 ( function( $, undef ){
 
-	// html stuff
-	var _before = '<a tabindex="0" class="wp-color-result" />';
-	var _after = '<div class="wp-picker-holder" />';
-	var _wrap = '<div class="wp-picker-container" />';
-	var _button = '<input type="button" class="button button-tiny hidden" />';
+	var ColorPicker,
+		// html stuff
+		_before = '<a tabindex="0" class="wp-color-result" />',
+		_after = '<div class="wp-picker-holder" />',
+		_wrap = '<div class="wp-picker-container" />',
+		_button = '<input type="button" class="button button-small hidden" />';
 
 	// jQuery UI Widget constructor
-	var ColorPicker = {
+	ColorPicker = {
 		options: {
 			defaultColor: false,
 			change: false,
 			clear: false,
-			hide: true
+			hide: true,
+			palettes: true
 		},
 		_create: function() {
-			// bail early for IE < 8
-			if ( $.browser.msie && parseInt( $.browser.version, 10 ) < 8 )
+			// bail early for unsupported Iris.
+			if ( ! $.support.iris )
 				return;
-			var self = this;
-			var el = self.element;
+			var self = this,
+				el = self.element;
+
 			$.extend( self.options, el.data() );
 
 			self.initialValue = el.val();
@@ -27,7 +31,7 @@
 			// Set up HTML structure, hide things
 			el.addClass( 'wp-color-picker' ).hide().wrap( _wrap );
 			self.wrap = el.parent();
-			self.toggler = $( _before ).insertBefore( el ).css( { backgroundColor: self.initialValue } ).attr( "title", wpColorPickerL10n.pick ).attr( "data-current", wpColorPickerL10n.current );
+			self.toggler = $( _before ).insertBefore( el ).css( { backgroundColor: self.initialValue } ).attr( 'title', wpColorPickerL10n.pick ).attr( 'data-current', wpColorPickerL10n.current );
 			self.pickerContainer = $( _after ).insertAfter( el );
 			self.button = $( _button );
 
@@ -36,11 +40,14 @@
 			else
 				self.button.addClass( 'wp-picker-clear' ).val( wpColorPickerL10n.clear );
 
-			self.button.insertAfter( el );
+			el.wrap('<span class="wp-picker-input-wrap" />').after(self.button);
 
 			el.iris( {
 				target: self.pickerContainer,
 				hide: true,
+				width: 255,
+				mode: 'hsv',
+				palettes: self.options.palettes,
 				change: function( event, ui ) {
 					self.toggler.css( { backgroundColor: ui.color.toString() } );
 					// check for a custom cb
@@ -64,9 +71,9 @@
 
 				// close picker when you click outside it
 				if ( self.toggler.hasClass( 'wp-picker-open' ) )
-					$( "body" ).on( 'click', { wrap: self.wrap, toggler: self.toggler }, self._bodyListener );
+					$( 'body' ).on( 'click', { wrap: self.wrap, toggler: self.toggler }, self._bodyListener );
 				else
-					$( "body" ).off( 'click', self._bodyListener );
+					$( 'body' ).off( 'click', self._bodyListener );
 			});
 
 			self.element.change(function( event ) {
@@ -82,8 +89,8 @@
 			});
 
 			// open a keyboard-focused closed picker with space or enter
-			$( document ).keydown( function( e ) {
-				if ( self.toggler.is( ':focus' ) && ( e.keyCode === 13 || e.keyCode === 32 ) ) {
+			self.toggler.on('keyup', function( e ) {
+				if ( e.keyCode === 13 || e.keyCode === 32 ) {
 					e.preventDefault();
 					self.toggler.trigger('click').next().focus();
 				}
@@ -109,11 +116,19 @@
 		// $("#input").wpColorPicker('color', '#bada55') to set
 		color: function( newColor ) {
 			if ( newColor === undef )
-				return this.element.iris( "option", "color" );
+				return this.element.iris( 'option', 'color' );
 
-			this.element.iris( "option", "color", newColor );
+			this.element.iris( 'option', 'color', newColor );
+		},
+		//$("#input").wpColorPicker('defaultColor') returns the current default color
+		//$("#input").wpColorPicker('defaultColor', newDefaultColor) to set
+		defaultColor: function( newDefaultColor ) {
+			if ( newDefaultColor === undef )
+				return this.options.defaultColor;
+
+			this.options.defaultColor = newDefaultColor;
 		}
-	}
+	};
 
 	$.widget( 'wp.wpColorPicker', ColorPicker );
 }( jQuery ) );

@@ -87,8 +87,8 @@ $fonts = '{
     "700"
    ],
    "subsets": [
-    "latin-ext",
     "greek",
+    "latin-ext",
     "latin"
    ]
   },
@@ -277,6 +277,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Almendra Display",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Almendra SC",
    "variants": [
     "regular"
@@ -332,6 +343,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Anaheim",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Andada",
    "variants": [
     "regular"
@@ -350,8 +372,8 @@ $fonts = '{
    "subsets": [
     "cyrillic-ext",
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -385,11 +407,11 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
     "greek",
-    "greek-ext",
+    "latin-ext",
+    "cyrillic",
     "latin",
-    "cyrillic"
+    "greek-ext"
    ]
   },
   {
@@ -511,7 +533,13 @@ $fonts = '{
     "700italic"
    ],
    "subsets": [
-    "latin"
+    "cyrillic-ext",
+    "greek",
+    "vietnamese",
+    "latin-ext",
+    "cyrillic",
+    "latin",
+    "greek-ext"
    ]
   },
   {
@@ -660,6 +688,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Average Sans",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Averia Gruesa Libre",
    "variants": [
     "regular"
@@ -721,8 +760,8 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -849,6 +888,17 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Bigelow Rules",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -1192,10 +1242,10 @@ $fonts = '{
     "700"
    ],
    "subsets": [
-    "latin-ext",
     "greek",
-    "greek-ext",
-    "latin"
+    "latin-ext",
+    "latin",
+    "greek-ext"
    ]
   },
   {
@@ -1248,10 +1298,10 @@ $fonts = '{
     "700italic"
    ],
    "subsets": [
-    "latin-ext",
     "greek",
-    "greek-ext",
-    "latin"
+    "latin-ext",
+    "latin",
+    "greek-ext"
    ]
   },
   {
@@ -1422,6 +1472,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Clicker Script",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Coda",
    "variants": [
     "regular",
@@ -1474,10 +1535,10 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
     "greek",
-    "latin",
-    "cyrillic"
+    "latin-ext",
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -1668,6 +1729,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Croissant One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Crushed",
    "variants": [
     "regular"
@@ -1687,13 +1759,24 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
    "kind": "webfonts#webfont",
    "family": "Cutive",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Cutive Mono",
    "variants": [
     "regular"
    ],
@@ -1796,6 +1879,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Denk One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Devonshire",
    "variants": [
     "regular"
@@ -1813,11 +1907,11 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
     "greek",
-    "greek-ext",
+    "latin-ext",
+    "cyrillic",
     "latin",
-    "cyrillic"
+    "greek-ext"
    ]
   },
   {
@@ -1834,6 +1928,29 @@ $fonts = '{
   {
    "kind": "webfonts#webfont",
    "family": "Diplomata SC",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Domine",
+   "variants": [
+    "regular",
+    "700"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Donegal One",
    "variants": [
     "regular"
    ],
@@ -1955,10 +2072,10 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
     "vietnamese",
-    "latin",
-    "cyrillic"
+    "latin-ext",
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -2009,6 +2126,30 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Elsie",
+   "variants": [
+    "regular",
+    "900"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Elsie Swash Caps",
+   "variants": [
+    "regular",
+    "900"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Emblema One",
    "variants": [
     "regular"
@@ -2036,6 +2177,17 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Englebert",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -2172,6 +2324,16 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Faster One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Fasthand",
    "variants": [
     "regular"
@@ -2229,6 +2391,17 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Fjalla One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -2294,13 +2467,24 @@ $fonts = '{
    "subsets": [
     "cyrillic-ext",
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
    "kind": "webfonts#webfont",
    "family": "Francois One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Freckle Face",
    "variants": [
     "regular"
    ],
@@ -2362,6 +2546,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Fruktur",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Fugaz One",
    "variants": [
     "regular"
@@ -2391,6 +2586,28 @@ $fonts = '{
    ],
    "subsets": [
     "greek"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Gabriela",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Gafata",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
    ]
   },
   {
@@ -2480,6 +2697,17 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Gilda Display",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -2578,6 +2806,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Grand Hotel",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Gravitas One",
    "variants": [
     "regular"
@@ -2646,6 +2885,28 @@ $fonts = '{
   {
    "kind": "webfonts#webfont",
    "family": "Hammersmith One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Hanalei",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Hanalei Fill",
    "variants": [
     "regular"
    ],
@@ -2952,8 +3213,8 @@ $fonts = '{
    "subsets": [
     "cyrillic-ext",
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -3070,6 +3331,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Joti One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Judson",
    "variants": [
     "regular",
@@ -3122,11 +3394,11 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
     "greek",
-    "greek-ext",
+    "latin-ext",
+    "cyrillic",
     "latin",
-    "cyrillic"
+    "greek-ext"
    ]
   },
   {
@@ -3187,14 +3459,36 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Kavoon",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Keania One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Kelly Slab",
    "variants": [
     "regular"
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -3215,6 +3509,16 @@ $fonts = '{
    ],
    "subsets": [
     "khmer"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Kite One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin"
    ]
   },
   {
@@ -3359,8 +3663,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -3372,6 +3676,7 @@ $fonts = '{
     "700"
    ],
    "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -3387,9 +3692,23 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Libre Baskerville",
+   "variants": [
+    "regular",
+    "italic",
+    "700"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Life Savers",
    "variants": [
-    "regular"
+    "regular",
+    "700"
    ],
    "subsets": [
     "latin-ext",
@@ -3438,8 +3757,8 @@ $fonts = '{
    "subsets": [
     "cyrillic-ext",
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -3652,8 +3971,19 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Margarine",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
    ]
   },
   {
@@ -3674,8 +4004,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -3790,6 +4120,18 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Merienda",
+   "variants": [
+    "regular",
+    "700"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Merienda One",
    "variants": [
     "regular"
@@ -3808,6 +4150,20 @@ $fonts = '{
     "900"
    ],
    "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Merriweather Sans",
+   "variants": [
+    "300",
+    "regular",
+    "700",
+    "800"
+   ],
+   "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -3860,6 +4216,17 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Milonga",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -3931,6 +4298,18 @@ $fonts = '{
    "family": "Molle",
    "variants": [
     "italic"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Monda",
+   "variants": [
+    "regular",
+    "700"
    ],
    "subsets": [
     "latin-ext",
@@ -4054,6 +4433,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Mouse Memoirs",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Mr Bedfort",
    "variants": [
     "regular"
@@ -4138,8 +4528,8 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -4152,6 +4542,17 @@ $fonts = '{
     "italic",
     "700",
     "800"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "New Rocker",
+   "variants": [
+    "regular"
    ],
    "subsets": [
     "latin-ext",
@@ -4257,8 +4658,8 @@ $fonts = '{
     "700italic"
    ],
    "subsets": [
-    "latin-ext",
     "vietnamese",
+    "latin-ext",
     "latin"
    ]
   },
@@ -4377,6 +4778,16 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Offside",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Old Standard TT",
    "variants": [
     "regular",
@@ -4412,6 +4823,18 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Oleo Script Swash Caps",
+   "variants": [
+    "regular",
+    "700"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Open Sans",
    "variants": [
     "300",
@@ -4427,12 +4850,12 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
-    "vietnamese",
     "greek",
-    "greek-ext",
+    "vietnamese",
+    "latin-ext",
+    "cyrillic",
     "latin",
-    "cyrillic"
+    "greek-ext"
    ]
   },
   {
@@ -4445,12 +4868,12 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
-    "vietnamese",
     "greek",
-    "greek-ext",
+    "vietnamese",
+    "latin-ext",
+    "cyrillic",
     "latin",
-    "cyrillic"
+    "greek-ext"
    ]
   },
   {
@@ -4462,8 +4885,8 @@ $fonts = '{
    "subsets": [
     "cyrillic-ext",
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -4576,7 +4999,9 @@ $fonts = '{
    "kind": "webfonts#webfont",
    "family": "Oxygen",
    "variants": [
-    "regular"
+    "300",
+    "regular",
+    "700"
    ],
    "subsets": [
     "latin-ext",
@@ -4603,8 +5028,8 @@ $fonts = '{
    "subsets": [
     "cyrillic-ext",
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -4618,8 +5043,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -4631,8 +5056,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -4644,8 +5069,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -4658,8 +5083,8 @@ $fonts = '{
     "700italic"
    ],
    "subsets": [
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -4670,13 +5095,23 @@ $fonts = '{
     "italic"
    ],
    "subsets": [
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
    "kind": "webfonts#webfont",
    "family": "Pacifico",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Paprika",
    "variants": [
     "regular"
    ],
@@ -4726,6 +5161,19 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
+    "vietnamese",
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Patrick Hand SC",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "vietnamese",
     "latin-ext",
     "latin"
    ]
@@ -4802,8 +5250,8 @@ $fonts = '{
     "700italic"
    ],
    "subsets": [
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -4829,6 +5277,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Pirata One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Plaster",
    "variants": [
     "regular"
@@ -4847,11 +5306,11 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
     "greek",
-    "greek-ext",
+    "latin-ext",
+    "cyrillic",
     "latin",
-    "cyrillic"
+    "greek-ext"
    ]
   },
   {
@@ -4870,10 +5329,32 @@ $fonts = '{
    "family": "Playfair Display",
    "variants": [
     "regular",
-    "italic"
+    "italic",
+    "700",
+    "700italic",
+    "900",
+    "900italic"
    ],
    "subsets": [
     "latin-ext",
+    "cyrillic",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Playfair Display SC",
+   "variants": [
+    "regular",
+    "italic",
+    "700",
+    "700italic",
+    "900",
+    "900italic"
+   ],
+   "subsets": [
+    "latin-ext",
+    "cyrillic",
     "latin"
    ]
   },
@@ -4896,8 +5377,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -4989,10 +5470,10 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
-    "latin-ext",
     "greek",
-    "latin",
-    "cyrillic"
+    "latin-ext",
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -5024,8 +5505,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -5038,6 +5519,17 @@ $fonts = '{
     "700italic"
    ],
    "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Purple Purse",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -5115,6 +5607,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Quintessential",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Qwigley",
    "variants": [
     "regular"
@@ -5170,6 +5673,20 @@ $fonts = '{
    "family": "Raleway Dots",
    "variants": [
     "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Rambla",
+   "variants": [
+    "regular",
+    "italic",
+    "700",
+    "700italic"
    ],
    "subsets": [
     "latin-ext",
@@ -5284,6 +5801,65 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Risque",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Roboto",
+   "variants": [
+    "100",
+    "100italic",
+    "300",
+    "300italic",
+    "regular",
+    "italic",
+    "500",
+    "500italic",
+    "700",
+    "700italic",
+    "900",
+    "900italic"
+   ],
+   "subsets": [
+    "cyrillic-ext",
+    "greek",
+    "vietnamese",
+    "latin-ext",
+    "cyrillic",
+    "latin",
+    "greek-ext"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Roboto Condensed",
+   "variants": [
+    "300",
+    "300italic",
+    "regular",
+    "italic",
+    "700",
+    "700italic"
+   ],
+   "subsets": [
+    "cyrillic-ext",
+    "greek",
+    "vietnamese",
+    "latin-ext",
+    "cyrillic",
+    "latin",
+    "greek-ext"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Rochester",
    "variants": [
     "regular"
@@ -5386,6 +5962,18 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Rufina",
+   "variants": [
+    "regular",
+    "700"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Ruge Boogie",
    "variants": [
     "regular"
@@ -5408,6 +5996,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Rum Raisin",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Ruslan Display",
    "variants": [
     "regular"
@@ -5415,8 +6014,8 @@ $fonts = '{
    "subsets": [
     "cyrillic-ext",
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -5427,8 +6026,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -5455,6 +6054,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Sacramento",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Sail",
    "variants": [
     "regular"
@@ -5470,6 +6080,18 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Sanchez",
+   "variants": [
+    "regular",
+    "italic"
+   ],
+   "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -5526,8 +6148,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -5570,8 +6192,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -5616,6 +6238,26 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Share Tech",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Share Tech Mono",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
     "latin"
    ]
   },
@@ -5696,6 +6338,18 @@ $fonts = '{
     "italic",
     "900",
     "900italic"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Sintony",
+   "variants": [
+    "regular",
+    "700"
    ],
    "subsets": [
     "latin-ext",
@@ -5786,6 +6440,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Snowburst One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Sofadi One",
    "variants": [
     "regular"
@@ -5834,11 +6499,13 @@ $fonts = '{
     "200",
     "300",
     "regular",
+    "500",
     "600",
     "700",
     "900"
    ],
    "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -5917,14 +6584,25 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Stalemate",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Stalinist One",
    "variants": [
     "regular"
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -5969,6 +6647,16 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Strait",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
     "latin"
    ]
   },
@@ -6056,6 +6744,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Tauri",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Telex",
    "variants": [
     "regular"
@@ -6073,8 +6772,19 @@ $fonts = '{
    "subsets": [
     "cyrillic-ext",
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Text Me One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
    ]
   },
   {
@@ -6213,11 +6923,11 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
     "greek",
-    "greek-ext",
+    "latin-ext",
+    "cyrillic",
     "latin",
-    "cyrillic"
+    "greek-ext"
    ]
   },
   {
@@ -6228,11 +6938,11 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
     "greek",
-    "greek-ext",
+    "latin-ext",
+    "cyrillic",
     "latin",
-    "cyrillic"
+    "greek-ext"
    ]
   },
   {
@@ -6246,11 +6956,11 @@ $fonts = '{
    ],
    "subsets": [
     "cyrillic-ext",
-    "latin-ext",
     "greek",
-    "greek-ext",
+    "latin-ext",
+    "cyrillic",
     "latin",
-    "cyrillic"
+    "greek-ext"
    ]
   },
   {
@@ -6281,8 +6991,19 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Unica One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
    ]
   },
   {
@@ -6343,6 +7064,17 @@ $fonts = '{
     "regular"
    ],
    "subsets": [
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
+   "family": "Vampiro One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
     "latin"
    ]
   },
@@ -6509,6 +7241,17 @@ $fonts = '{
   },
   {
    "kind": "webfonts#webfont",
+   "family": "Wendy One",
+   "variants": [
+    "regular"
+   ],
+   "subsets": [
+    "latin-ext",
+    "latin"
+   ]
+  },
+  {
+   "kind": "webfonts#webfont",
    "family": "Wire One",
    "variants": [
     "regular"
@@ -6549,8 +7292,8 @@ $fonts = '{
    ],
    "subsets": [
     "latin-ext",
-    "latin",
-    "cyrillic"
+    "cyrillic",
+    "latin"
    ]
   },
   {
@@ -6575,3 +7318,4 @@ $fonts = '{
   }
  ]
 }';
+?>

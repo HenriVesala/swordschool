@@ -45,7 +45,7 @@ function ms_upload_constants() {
  * @since 3.0.0
  */
 function ms_cookie_constants(  ) {
-	global $current_site;
+	$current_site = get_current_site();
 
 	/**
 	 * @since 1.2.0
@@ -63,7 +63,7 @@ function ms_cookie_constants(  ) {
 	 * @since 2.6.0
 	 */
 	if ( !defined( 'ADMIN_COOKIE_PATH' ) ) {
-		if( !is_subdomain_install() ) {
+		if ( ! is_subdomain_install() || trim( parse_url( get_option( 'siteurl' ), PHP_URL_PATH ), '/' ) ) {
 			define( 'ADMIN_COOKIE_PATH', SITECOOKIEPATH );
 		} else {
 			define( 'ADMIN_COOKIE_PATH', SITECOOKIEPATH . 'wp-admin' );

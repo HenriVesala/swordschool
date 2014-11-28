@@ -177,7 +177,11 @@ class Suffusion_Category_Posts extends WP_Widget {
 					$ret .= "<li class='suf-widget-mosaic'><div class='suf-widget-thumb'><a href='".get_permalink()."' title=\"".esc_attr(get_the_title())."\">".$image."</a></div></li>\n";
 				}
 				else {
-					$ret .= "<li><a href='".get_permalink()."'>".get_the_title()."</a></li>\n";
+					$post_title = get_the_title();
+					if (!$post_title) {
+						$post_title = get_the_ID();
+					}
+					$ret .= "<li><a href='".get_permalink()."'>".$post_title."</a></li>\n";
 				}
 			}
 			wp_reset_query();

@@ -1,8 +1,8 @@
 === Suffusion ===
 Donate link: http://www.aquoid.com/news/themes/suffusion
-Tags: theme-options, green, blue, silver, red, orange, purple, white, black, light, dark, one-column, two-columns, three-columns, left-sidebar, right-sidebar, fixed-width, flexible-width, custom-colors, custom-header, custom-background, custom-menu, threaded-comments, translation-ready, sticky-post, rtl-language-support, microformats
+Tags: theme-options, green, blue, silver, red, orange, purple, white, black, light, dark, one-column, two-columns, three-columns, left-sidebar, right-sidebar, fixed-width, flexible-width, custom-colors, custom-header, custom-background, custom-menu, threaded-comments, sticky-post, rtl-language-support, microformats
 Requires at least: WP 3.1
-Tested up to: WP 3.4.1
+Tested up to: WP 3.5
 Stable tag: trunk
 Contributors: sayontan
 
@@ -10,10 +10,10 @@ A versatile and highly customizable theme.
 
 == Description ==
 
-An elegant, versatile and browser-safe theme with a power-packed set of options. It has 19 widget areas, one-column, two-column and three-column
-fixed-width and flexible-width formats, 10 pre-defined templates, 19 pre-defined color schemes, two customizable multi-level drop-down menus,
+An elegant, responsive, versatile and browser-safe theme with a power-packed set of options. It has 19 widget areas, one-column, two-column and three-column
+responsive, fixed-width and flexible-width formats, 10 pre-defined templates, 19 pre-defined color schemes, two customizable multi-level drop-down menus,
 featured posts, a magazine layout, tabbed sidebars, widgets for Twitter, Social Networks and Google Translator, translations in many languages
-and RTL language support. Native WP Menus are integrated and additional support is provided for Mega Menus. A BuddyPress support pack is available as a
+and RTL language support. Responsive capabilities are turned on by a single click. Native WP Menus are integrated and additional support is provided for Mega Menus. A BuddyPress support pack is available as a
 plugin for smooth BuddyPress integration. Support forum at http://www.aquoid.com/forum.
 
 = Note =
@@ -59,16 +59,24 @@ check out the <a href='http://aquoid.com/news/showcase/'>showcase</a> for exampl
 = Where can I get support for the theme? =
 Support is available at the <a href='http://www.aquoid.com/forum'>theme's support forum</a>.
 
+= The theme says "responsive", but it doesn't resize automatically. Why? =
+You will need to "flip a switch". Go to <em>Suffusion Options &rarr; Layouts &rarr; Responsive Layout</em> and enable it there.
+
 = Does Suffusion work with BuddyPress? =
 Yes. There is a plugin called <a href='http://wordpress.org/extend/plugins/suffusion-buddypress-pack/'>Suffusion BuddyPress Pack</a>,
 more information about which can be found <a href='http://www.aquoid.com/news/plugins/suffusion-buddypress-pack/'>here</a>.
 
 = Does Suffusion work with e-commerce plugins? =
 There is a plugin called <a href='http://wordpress.org/extend/plugins/suffusion-commerce-pack/'>Suffusion Commerce Pack</a>,
-which extends Suffusion support to Jigoshop. Addition plugins are planned for future releases.
+which extends Suffusion support to Jigoshop and WooCommerce. Addition plugins are planned for future releases.
 
 = Does Suffusion work with bbPress? =
-Not at this point. Support will be added in a later release.
+There is a plugin called <a href='http://wordpress.org/extend/plugins/suffusion-bbpress-pack/'>Suffusion bbPress Pack</a>,
+which extends Suffusion support to bbPress.
+
+= What happens to my shortcodes when I switch themes? =
+You are in luck! Suffusion's shortcodes are bundled as a separate plugin called <a href='http://wordpress.org/extend/plugins/suffusion-bbpress-pack/'>Suffusion Shortcodes</a>,
+which will let your shortcodes work seamlessly with any new theme that you decide to use.
 
 = Are translations supported? =
 Translations for the theme are available at http://aquoid.com/news/themes/suffusion/translating-suffusion/. The back-end of the theme is

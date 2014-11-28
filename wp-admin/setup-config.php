@@ -13,8 +13,6 @@
 
 /**
  * We are installing.
- *
- * @package WordPress
  */
 define('WP_INSTALLING', true);
 
@@ -55,6 +53,9 @@ wp_load_translations_early();
 // Turn register_globals off.
 wp_unregister_GLOBALS();
 
+// Standardize $_SERVER variables across setups.
+wp_fix_server_vars();
+
 require_once(ABSPATH . WPINC . '/compat.php');
 require_once(ABSPATH . WPINC . '/class-wp-error.php');
 require_once(ABSPATH . WPINC . '/formatting.php');
@@ -62,10 +63,13 @@ require_once(ABSPATH . WPINC . '/formatting.php');
 // Add magic quotes and set up $_REQUEST ( $_GET + $_POST )
 wp_magic_quotes();
 
-if ( ! file_exists( ABSPATH . 'wp-config-sample.php' ) )
+// Support wp-config-sample.php one level up, for the develop repo.
+if ( file_exists( ABSPATH . 'wp-config-sample.php' ) )
+	$config_file = file( ABSPATH . 'wp-config-sample.php' );
+elseif ( file_exists( dirname( ABSPATH ) . '/wp-config-sample.php' ) )
+	$config_file = file( dirname( ABSPATH ) . '/wp-config-sample.php' );
+else
 	wp_die( __( 'Sorry, I need a wp-config-sample.php file to work from. Please re-upload this file from your WordPress installation.' ) );
-
-$config_file = file(ABSPATH . 'wp-config-sample.php');
 
 // Check if wp-config.php has been created
 if ( file_exists( ABSPATH . 'wp-config.php' ) )
@@ -82,8 +86,6 @@ $step = isset( $_GET['step'] ) ? (int) $_GET['step'] : 0;
  *
  * @ignore
  * @since 2.3.0
- * @package WordPress
- * @subpackage Installer_WP_Config
  */
 function setup_config_display_header() {
 	global $wp_version;
@@ -93,13 +95,15 @@ function setup_config_display_header() {
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"<?php if ( is_rtl() ) echo ' dir="rtl"'; ?>>
 <head>
+<meta name="viewport" content="width=device-width" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title><?php _e( 'WordPress &rsaquo; Setup Configuration File' ); ?></title>
 <link rel="stylesheet" href="css/install.css?ver=<?php echo preg_replace( '/[^0-9a-z\.-]/i', '', $wp_version ); ?>" type="text/css" />
+<link rel="stylesheet" href="../wp-includes/css/buttons.css?ver=<?php echo preg_replace( '/[^0-9a-z\.-]/i', '', $wp_version ); ?>" type="text/css" />
 
 </head>
-<body<?php if ( is_rtl() ) echo ' class="rtl"'; ?>>
-<h1 id="logo"><img alt="WordPress" src="images/wordpress-logo.png?ver=20120216" /></h1>
+<body class="wp-core-ui<?php if ( is_rtl() ) echo ' rtl'; ?>">
+<h1 id="logo"><a href="<?php esc_attr_e( 'https://wordpress.org/' ); ?>"><?php _e( 'WordPress' ); ?></a></h1>
 <?php
 } // end function setup_config_display_header();
 
@@ -119,7 +123,7 @@ switch($step) {
 <p><strong><?php _e( "If for any reason this automatic file creation doesn&#8217;t work, don&#8217;t worry. All this does is fill in the database information to a configuration file. You may also simply open <code>wp-config-sample.php</code> in a text editor, fill in your information, and save it as <code>wp-config.php</code>." ); ?></strong></p>
 <p><?php _e( "In all likelihood, these items were supplied to you by your Web Host. If you do not have this information, then you will need to contact them before you can continue. If you&#8217;re all ready&hellip;" ); ?></p>
 
-<p class="step"><a href="setup-config.php?step=1<?php if ( isset( $_GET['noapi'] ) ) echo '&amp;noapi'; ?>" class="button"><?php _e( 'Let&#8217;s go!' ); ?></a></p>
+<p class="step"><a href="setup-config.php?step=1<?php if ( isset( $_GET['noapi'] ) ) echo '&amp;noapi'; ?>" class="button button-large"><?php _e( 'Let&#8217;s go!' ); ?></a></p>
 <?php
 	break;
 
@@ -156,16 +160,16 @@ switch($step) {
 		</tr>
 	</table>
 	<?php if ( isset( $_GET['noapi'] ) ) { ?><input name="noapi" type="hidden" value="1" /><?php } ?>
-	<p class="step"><input name="submit" type="submit" value="<?php echo htmlspecialchars( __( 'Submit' ), ENT_QUOTES ); ?>" class="button" /></p>
+	<p class="step"><input name="submit" type="submit" value="<?php echo htmlspecialchars( __( 'Submit' ), ENT_QUOTES ); ?>" class="button button-large" /></p>
 </form>
 <?php
 	break;
 
 	case 2:
 	foreach ( array( 'dbname', 'uname', 'pwd', 'dbhost', 'prefix' ) as $key )
-		$$key = trim( stripslashes( $_POST[ $key ] ) );
+		$$key = trim( wp_unslash( $_POST[ $key ] ) );
 
-	$tryagain_link = '</p><p class="step"><a href="setup-config.php?step=1" onclick="javascript:history.go(-1);return false;" class="button">' . __( 'Try again' ) . '</a>';
+	$tryagain_link = '</p><p class="step"><a href="setup-config.php?step=1" onclick="javascript:history.go(-1);return false;" class="button button-large">' . __( 'Try again' ) . '</a>';
 
 	if ( empty( $prefix ) )
 		wp_die( __( '<strong>ERROR</strong>: "Table Prefix" must not be empty.' . $tryagain_link ) );
@@ -194,12 +198,11 @@ switch($step) {
 	if ( ! $no_api ) {
 		require_once( ABSPATH . WPINC . '/class-http.php' );
 		require_once( ABSPATH . WPINC . '/http.php' );
-		wp_fix_server_vars();
 		/**#@+
 		 * @ignore
 		 */
 		function get_bloginfo() {
-			return ( ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . str_replace( $_SERVER['PHP_SELF'], '/wp-admin/setup-config.php', '' ) );
+			return wp_guess_url();
 		}
 		/**#@-*/
 		$secret_keys = wp_remote_get( 'https://api.wordpress.org/secret-key/1.1/salt/' );
@@ -264,7 +267,7 @@ switch($step) {
 		}
 ?></textarea>
 <p><?php _e( 'After you&#8217;ve done that, click &#8220;Run the install.&#8221;' ); ?></p>
-<p class="step"><a href="install.php" class="button"><?php _e( 'Run the install' ); ?></a></p>
+<p class="step"><a href="install.php" class="button button-large"><?php _e( 'Run the install' ); ?></a></p>
 <script>
 (function(){
 var el=document.getElementById('wp-config');
@@ -274,17 +277,24 @@ el.select();
 </script>
 <?php
 	else :
-		$handle = fopen(ABSPATH . 'wp-config.php', 'w');
+		// If this file doesn't exist, then we are using the wp-config-sample.php
+		// file one level up, which is for the develop repo.
+		if ( file_exists( ABSPATH . 'wp-config-sample.php' ) )
+			$path_to_wp_config = ABSPATH . 'wp-config.php';
+		else
+			$path_to_wp_config = dirname( ABSPATH ) . '/wp-config.php';
+
+		$handle = fopen( $path_to_wp_config, 'w' );
 		foreach( $config_file as $line ) {
-			fwrite($handle, $line);
+			fwrite( $handle, $line );
 		}
-		fclose($handle);
-		chmod(ABSPATH . 'wp-config.php', 0666);
+		fclose( $handle );
+		chmod( $path_to_wp_config, 0666 );
 		setup_config_display_header();
 ?>
-<p><?php _e( "All right sparky! You&#8217;ve made it through this part of the installation. WordPress can now communicate with your database. If you are ready, time now to&hellip;" ); ?></p>
+<p><?php _e( "All right, sparky! You&#8217;ve made it through this part of the installation. WordPress can now communicate with your database. If you are ready, time now to&hellip;" ); ?></p>
 
-<p class="step"><a href="install.php" class="button"><?php _e( 'Run the install' ); ?></a></p>
+<p class="step"><a href="install.php" class="button button-large"><?php _e( 'Run the install' ); ?></a></p>
 <?php
 	endif;
 	break;

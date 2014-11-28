@@ -10,10 +10,6 @@ class GCWT_Feed extends SimplePie_GCalendarWT{
 	private $multi_day;
 	private $feed_start;
 
-	function GCWT_Feed(){
-		$this->__construct();
-	}
-
 	function __construct(){
 		parent::__construct();
 		$this->set_cache_class('WP_Feed_Cache');
@@ -42,9 +38,9 @@ class GCWT_Feed extends SimplePie_GCalendarWT{
 		$this->multi_day = $multiple_day;
 	}
 
-	function set_start_date($start_date){
-		$this->feed_start = $start_date;
-		parent::set_start_date($start_date);
+	function set_start_date($value = 0){
+		$this->feed_start = $value;
+		parent::set_start_date($value);
 	}
 
 	//Getters

@@ -43,7 +43,7 @@ $suffusion_blog_features_options = array(
 		"id" => "suf_seo_all_settings",
 		"parent" => "seo-settings",
 		"type" => "multi-select",
-		"options" => suffusion_get_formatted_options_array("suf_seo_all_settings", array('generator' => 'Show WordPress version tags',
+		"options" => suffusion_get_formatted_options_array(array('generator' => 'Show WordPress version tags',
 			'theme' => 'Include Suffusion theme information tags',
 			'robots' => 'Hide page from Google and other search engines',
 			'author' => "Include author information",
@@ -252,7 +252,7 @@ $suffusion_blog_features_options = array(
 		"id" => "suf_uprof_networks",
 		"parent" => "user-profiles",
 		"type" => "multi-select",
-		"options" => suffusion_get_formatted_options_array("suf_uprof_networks", $suffusion_social_networks), "std" => ""),
+		"options" => suffusion_get_formatted_options_array($suffusion_social_networks), "std" => ""),
 
 	array("name" => "Show author information for individual posts and pages",
 		"desc" => "You can add author information to each post. In subsequent options you can specify what you want to put in the author information section.",
@@ -602,6 +602,32 @@ $suffusion_blog_features_options = array(
 		"type" => "text",
 		"hint" => "Enter the feed title here",
 		"std" => ""),
+
+	array("name" => "Modules",
+		"type" => "sub-section-3",
+		"category" => "modules",
+		"parent" => "blog-features"
+	),
+
+	array("name" => "Disable Widgets",
+		"desc" => "Disabling widgets that you are not using keeps your site load lower. You won't see a disabled widget in Appearance &rarr; Widgets",
+		"id" => "suf_module_widgets",
+		"parent" => "modules",
+		"type" => "multi-select",
+		"options" => suffusion_get_formatted_options_array(array(
+				'search' => 'Disable Search',
+				'twitter' => 'Disable Twitter',
+				'flickr' => 'Disable Flickr',
+				'translator' => 'Disable Google Translator',
+				'featured-posts' => 'Disable Featured Posts',
+				'follow-me' => 'Disable Follow Me',
+				'child-pages' => 'Disable Child Pages',
+				'query-posts' => 'Disable Query Posts',
+				'query-users' => 'Disable Query Users',
+			)
+		),
+		"std" => ""
+	),
 
 	array("name" => "Site Optimization",
 		"type" => "sub-section-3",
