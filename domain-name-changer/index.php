@@ -108,7 +108,7 @@ header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
 header('Expires: 0'); // Proxies.
 
-require_once( 'srdb.class.php' );
+require_once('srdb.class.php');
 
 class icit_srdb_ui extends icit_srdb {
 

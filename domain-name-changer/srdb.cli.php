@@ -11,7 +11,7 @@
 date_default_timezone_set( 'Europe/London' );
 
 // include the srdb class
-require_once( 'srdb.class.php' );
+require_once('srdb.class.php');
 
 $opts = array(
 	'h:' => 'host:',

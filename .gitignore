@@ -2,7 +2,7 @@ cache/
 cache/*
 .DS_store
 .htaccess
-wp-*.php
+wp-config.php
 xmlrpc.php
 wp-content/uploads/
 wp-content/blogs.dir/
@@ -16,3 +16,6 @@ sitemap.xml
 sitemap.xml.gz
 readme.html
 license.txt
+.idea/workspace.xml
+*/.DS_Store
+wp-content/.DS_Store
