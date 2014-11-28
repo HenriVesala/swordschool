@@ -517,10 +517,10 @@ if(!class_exists('Google_Calendar_Weekly_Timetable')){
 function gcwt_print_table($feed_ids, $title_text, $max_events, $grouped = false, $week_days_names, $time_format, $sunday_opt, $rowspan, $start, $append, $cache_duration, $thetag, $caption, $lang, $refresh_one){
 	//Create new GCWT_Parser object, passing array of feed id(s)
 	$table = new GCWT_Parser(explode('-', $feed_ids), $title_text, $max_events, $start, $cache_duration, $refresh_one);
-	//If the feed(s) parsed ok, return the table markup, otherwise return an error message
-	if(count($table->get_errors()) == 0){
+    if(count($table->get_errors()) == 0){
 		return '<div class="gcwt-table">' . $table->get_table($grouped, $week_days_names, $time_format, $sunday_opt, $rowspan, $append, $thetag, $caption, $lang) . '</div>';
 	}else{
+
 		return sprintf(__('The following feeds were not parsed successfully: %s. Please check that the feed URLs are correct and that the feeds have public sharing enabled.'), implode(', ', $table->get_errors()));
 	}
 }

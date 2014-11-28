@@ -36,7 +36,9 @@ class GCWT_Parser{
 				$feed_options = $options[$single_feed];
 
 				$feed = new GCWT_Feed();
-
+echo "<pre>";
+                var_dump($feed_options['url']);
+die;
 				$feed->set_feed_id($feed_options['id']);
 				$feed->set_feed_url($feed_options['url']);
 				//$feed->set_max_events($feed_options['max_events']);
@@ -123,6 +125,7 @@ class GCWT_Parser{
 		$errors = array();
 
 		foreach($this->feeds as $feed){
+
 			//Remove '//' on line below to see more error information
 			if($feed->error()) $errors[] = $feed->get_feed_id();
 		}
