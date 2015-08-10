@@ -1,3 +1,7 @@
+/*
+Don't edit this file!
+Use "Custom CSS" in Spreadplugin Options only
+*/
 .spreadplugin-items ul {
 	margin: 0;
 	padding: 0;
@@ -20,7 +24,7 @@
 .spreadplugin-items img {
 	padding: 0!important
 }
-.spreadplugin-article, .spreadplugin-article-detail, .spreadplugin-design {
+.spreadplugin-article, .spreadplugin-article-detail, .spreadplugin-designs {
 	margin-top: 20px;
 	margin-right: 2px;
 	padding: 5px;
@@ -28,7 +32,11 @@
 	min-height: 650px;
 	overflow: hidden;
 	white-space: normal;
-	display:inline-block
+	display: inline-block
+}
+.spreadplugin-designs {
+	min-height: inherit;
+	float: left;
 }
 .spreadplugin-article.list-view {
 	min-height: 450px;
@@ -659,13 +667,13 @@ spreadplugin-items img {
 	padding: 16px!important;
 	z-index: 10;
 	margin: -20px 0 -50px;
-	display:inline-block
+	display: inline-block
 }
 .spreadplugin-article.min-view {
 	padding: 15px!important;
 	position: relative;
 	z-index: 1;
-	float:none
+	float: none
 }
 .spreadplugin-article.min-view .actions {
 	clear: both;

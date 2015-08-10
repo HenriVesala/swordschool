@@ -1,11 +1,11 @@
-=== WP-Spreadplugin ===
+ï»¿=== WP-Spreadplugin ===
 Contributors: Thimo Grauerholz
 Author: Thimo Grauerholz
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EZLKTKW8UR6PQ
 Tags: spreadshirt,wordpress,plugin,shop,store,shirt,t-shirt,integration,online store,online shop
 Requires at least: 3.3
 Tested up to: 4.2
-Stable tag: 3.8.6.5
+Stable tag: 3.8.7.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -198,6 +198,30 @@ Please have a look here: http://themeforest.net/category/wordpress?ref=thimo
 3. Settings page
 
 == Changelog ==
+
+= 3.8.7.8 =
+* Added japanese thanks to schlafcola.de
+
+= 3.8.7.7 =
+* Added spanish, portuguese translation, thanks to schlafcola.de
+
+= 3.8.7.6 =
+* bugfixes
+
+= 3.8.7.4 =
+* Norway bugfix
+
+= 3.8.7.3 =
+* Minor Bugfixes
+
+= 3.8.7 =
+* Switched to tablomat to use with designer shop (premium). Please choose "Show Spreadshirt designs in the designer" in "Apperance" -> "Settings", if you don't want to display Spreadshirt Marketplace designs.
+
+= 3.8.6.7 =
+* Fixed english checkout link
+
+= 3.8.6.6 =
+* Fixed problems with the new checkout of spreadshirt
 
 = 3.8.6.5 =
 * Renamed some CSS
@@ -447,7 +471,7 @@ Edit article now opens in fancybox when set `shop_checkoutiframe="2"`. It opens 
 
 = 2.6.1 =
 * Bugfixes (incl. sorting bug - hopefully ;-))
-* Added short product description e.g. Women’s Classic T-Shirt, Men’s Classic T-Shirt,...
+* Added short product description e.g. Womenï¿½s Classic T-Shirt, Menï¿½s Classic T-Shirt,...
 
 = 2.6 =
 * New social buttons, if you don't like, just replace in the image directory with your own. See FAQ
